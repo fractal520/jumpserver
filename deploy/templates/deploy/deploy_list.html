@@ -1,0 +1,87 @@
+{% extends '_base_list.html' %}
+{% load i18n %}
+{% load static %}
+{% block content_left_head %}<a href="javascript:void(0)" class="btn btn-xs btn-info btn-update">获取Jenkins最新状态</a>{% endblock %}
+{% block table_head %}
+    <thead>
+        <tr>
+            <th>APP Name</th>
+            <th>项目状态</th>
+            <th>构建状态</th>
+            <th>最后一次构建时间</th>
+            <th>上一次发布时间</th>
+            <th>资产</th>
+            <th>操作</th>
+        </tr>
+    </thead>
+{% endblock %}
+{% block table_body %}
+    <tbody>
+      {% for deploy in deploys %}
+        <tr>
+            <td><a href="{% url 'deploy:deploy-update' pk=deploy.id %}">{{deploy.app_name}}</a></td>
+            <td>{{deploy.job_status}}</td>
+            <td>{{deploy.get_build_status_display}}</td>
+            <td>{{deploy.last_build_time}}</td>
+            <td>{{deploy.published_time}}</td>
+            <td>
+                {% for asset in deploy.bound_asset.all %}
+                {{asset.hostname}}
+                {% endfor %}
+            </td>
+            <td id="{{deploy.id}}">
+                {% if deploy.job_status %}
+                <a href="javascript:void(0)" class="btn btn-xs btn-info btn-build">构建</a>
+                {% else %}
+                <a href="javascript:void(0)" class="btn btn-xs btn-info btn-build" disabled="disabled">构建</a>
+                {% endif %}
+                {% if deploy.build_status == "SUCCESS" %}
+                <a href="{% url 'deploy:DeployOptionList' pk=deploy.pk %}" class="btn btn-xs btn-success btn-deploy">发布</a>
+                {% else %}
+                <a href="{% url 'deploy:DeployOptionList' pk=deploy.pk %}" class="btn btn-xs btn-success btn-deploy" disabled="disabled">发布</a>
+                {% endif %}
+                {% if deploy.job_status %}
+                <a href="{% url 'deploy:DeployRollback' pk=deploy.pk %}" class="btn btn-xs btn-danger">回滚</a>
+                {% else %}
+                <a href="{% url 'deploy:DeployRollback' pk=deploy.pk %}" class="btn btn-xs btn-danger" disabled="disabled">回滚</a>
+                {% endif %}
+            </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+{% endblock %}
+{% block custom_foot_js %}
+<script>
+jQuery(document).ready(function(){
+    //flush deploy list
+    $('body').on('click', '.btn-update', function(){
+        $.get("{% url 'api-deploy:get_jenkins_all' %}", {}, function(){});
+        window.location.reload()
+    });
+
+    //build job
+    $('body').on('click', '.btn-build', function(){
+        var id = $(this).parent().attr("id");
+        $.get("{% url 'api-deploy:build_app' %}", {'id':id}, function(result){
+            console.log(result)
+        });
+        $.get("{% url 'api-deploy:get_jenkins_all' %}", {}, function(){});
+        window.location.reload()
+    });
+
+    $('body').on('click', '.btn-deploy', function(){
+      var task_id = $(this).parent().attr("id");
+      var the_url = '{% url "api-assets:admin-user-connective" pk=DEFAULT_PK %}'.replace("{{ DEFAULT_PK }}", task_id);
+      var success = function(){
+        console.log(task_id)
+      };
+      APIUpdateAttr({
+        url: the_url,
+        method: 'GET',
+        success: success,
+        flash_message: false
+      });
+    });
+});
+</script>
+{% endblock %}

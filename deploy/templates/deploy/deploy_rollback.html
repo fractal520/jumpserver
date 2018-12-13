@@ -1,0 +1,193 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block custom_head_css_js %}
+    <link href="{% static 'css/plugins/select2/select2.min.css' %}" rel="stylesheet">
+    <script src="{% static 'js/plugins/select2/select2.full.min.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+    <div class="wrapper wrapper-content animated fadeInRight">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="ibox float-e-margins">
+                    <div class="panel-options">
+                        <ul class="nav nav-tabs">
+                            <li class="active">
+                                <a href="#" class="text-center"><i class="fa fa-laptop"></i> {% trans 'Detail' %} </a>
+                            </li>
+                            <li class="pull-right">
+                                <a class="btn btn-outline btn-default btn-update" href="{% url 'deploy:deploy-update' pk=result.id %}"><i class="fa fa-edit"></i>{% trans 'Update' %}</a>
+                            </li>
+                            <li class="pull-right">
+                                <a class="btn btn-outline btn-danger btn-delete-admin-user">
+                                    <i class="fa fa-trash-o"></i>{% trans 'Delete' %}
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="tab-content">
+                        <div class="col-sm-8" style="padding-left: 0;">
+                            <div class="ibox float-e-margins">
+                                <div class="ibox-title">
+                                    <span class="label"><b>{{ result.app_name }}</b></span>
+                                    <div class="ibox-tools">
+                                        <a class="collapse-link">
+                                            <i class="fa fa-chevron-up"></i>
+                                        </a>
+                                        <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                                            <i class="fa fa-wrench"></i>
+                                        </a>
+                                        <ul class="dropdown-menu dropdown-user">
+                                        </ul>
+                                        <a class="close-link">
+                                            <i class="fa fa-times"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="ibox-content">
+                                    <table class="table">
+                                        <tbody>
+                                        <tr class="no-borders-tr">
+                                            <td>{% trans 'Name' %}:</td>
+                                            <td><b>{{ result.app_name }}</b></td>
+                                            <input type="hidden" class="console" value=""/>
+                                        </tr>
+                                        <tr>
+                                            <td>{% trans 'Date created' %}:</td>
+                                            <td><b>{{ result.create_time }}</b></td>
+                                        </tr>
+                                        <tr>
+                                            <td>最后一推送时间:</td>
+                                            <td><b>{{result.published_time}}</b></td>
+                                        </tr>
+                                        <tr>
+                                            <td>最后一次构建时间:</td>
+                                            <td><b>{{result.last_build_time}}</b></td>
+                                        </tr>
+                                        <tr>
+                                            <td>最后一次构建ID:</td>
+                                            <td><b>{{result.last_build_num}}</b></td>
+                                        </tr>
+                                        <tr>
+                                            <td>最后一次构建状态:</td>
+                                            <td><b>{{result.build_status}}</b></td>
+                                        </tr>
+                                        <tr>
+                                            <td>最后一次发布状态:</td>
+                                            <td><b>{{result.published_status}}</b></td>
+                                        </tr>
+                                        <tr>
+                                            <td>发布文件路径:</td>
+                                            <td><b>{{result.deploy_file_path}}</b></td>
+                                        </tr>
+                                        <tr>
+                                            <td>构建console输出:</td>
+                                            <td><b></b></td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-4" style="padding-left: 0;padding-right: 0">
+                            <div class="panel panel-primary">
+                                <div class="panel-heading">
+                                    <i class="fa fa-info-circle"></i> 操作框
+                                </div>
+                                <div class="panel-body">
+                                    <table class="table group_edit" id="table-clusters">
+                                        <tbody>
+                                        <form class="rollback-form">
+                                            <tr>
+                                                <td colspan="2" class="no-borders">
+                                                    <label>请选择需要回滚的服务器:</label><br>
+                                                    <select name="task_host">
+                                                        {% for asset in result.bound_asset.all %}
+                                                        <option value="{{asset.id}}">{{asset.hostname}}</option>
+                                                        {% endfor %}
+                                                    </select>
+                                                </td>
+                                            <tr>
+                                                <td>
+                                                    <!--<input type="text-center" name="task_host"/>-->
+                                                    <input type="hidden" name="app_name" value="{{ result.app_name }}" />
+                                                    <label>请选择需要回滚的版本:</label><br>
+                                                    {% for v in version %}
+                                                    {% if v.symbol %}
+                                                    <input type="radio" name="version" checked="checked" value="{{v.version}}"/>:{{v.version}} <br>
+                                                    {% else %}
+                                                    <input type="radio" name="version" value="{{v.version}}"/>:{{v.version}} <br>
+                                                    {% endif %}
+                                                    {% endfor %}
+                                                </td>
+                                            </tr>
+                                            </tr>
+                                            <tr>
+                                                <td colspan="2" class="no-borders">
+                                                    <button type="button" class="btn btn-primary btn-sm btn-rollback-per" id="">{% trans 'Confirm' %}</button>
+                                                </td>
+                                            </tr>
+                                            {% csrf_token %}
+                                        </form>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+{% block custom_foot_js %}
+<script>
+    jQuery(document).ready(function(){
+        $('body').on('click', '.btn-rollback-per', function(){
+            var data = $('.rollback-form').serializeArray();
+            console.log(data)
+            swal({
+                title: "{% trans 'Are you sure?' %}",
+                text: "你将进行版本回滚操作",
+                type: "warning",
+                showCancelButton: true,
+                cancelButtonText: "{% trans 'Cancel' %}",
+                confirmButtonColor: "#DD6B55",
+                confirmButtonText: "{% trans 'Confirm' %}",
+                closeOnConfirm: false
+                 },
+                function(){
+                    $.get("{% url 'api-deploy:rollback' %}", data, function(result){
+                        if(result.code==200) {
+                            console.log(result)
+                            swal({
+                                title: "",
+                                text: "回滚完成,请验证。",
+                                type: "success",
+                                confirmButtonText: '确认',
+                                confirmButtonColor: '#4cd964',
+                            },function(){window.location.reload()})
+
+                        }
+
+                        else if(result.code==400) {
+                            console.log(result.error)
+                            swal({
+                                title: "回滚失败！",
+                                text: result.error,
+                                type: "error",
+                                confirmButtonText: '确认',
+                                confirmButtonColor: '#4cd964',
+                            },function(){window.location.reload()})
+                        }
+
+                    });
+                });
+        });
+    });
+
+</script>
+{% endblock %}
