@@ -12,7 +12,7 @@ logger = get_logger('jumpserver')
 class City(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4)
     name = models.CharField(max_length=512)
-    city_code = models.IntegerField(max_length=1024, blank=True)
+    city_code = models.IntegerField(blank=True)
 
     def __str__(self):
         return self.name
