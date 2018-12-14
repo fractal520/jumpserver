@@ -1,0 +1,25 @@
+{% extends '_base_list.html' %}
+{% load i18n %}
+{% load static %}
+{% block content_left_head %}{% endblock %}
+{% block table_head %}
+    <thead>
+        <tr>
+            <th>城市</th>
+            <th>企业ID</th>
+        </tr>
+    </thead>
+{% endblock %}
+{% block table_body %}
+    <tbody>
+    {% for city in citys %}
+        <tr>
+            <td>city.name</td>
+            <td>city.city_code</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+{% endblock %}
+{% block custom_foot_js %}
+
+{% endblock %}

@@ -1,0 +1,27 @@
+{% extends '_base_list.html' %}
+{% load i18n %}
+{% load static %}
+{% block content_left_head %}{% endblock %}
+{% block table_head %}
+    <thead>
+        <tr>
+            <th>城市</th>
+            <th>故障日期</th>
+            <th>恢复时间</th>
+        </tr>
+    </thead>
+{% endblock %}
+{% block table_body %}
+    <tbody>
+    {% for record in records %}
+        <tr>
+            <td>record.city</td>
+            <td>record.risk_date_time</td>
+            <td>record.recovery_date_time</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+{% endblock %}
+{% block custom_foot_js %}
+
+{% endblock %}

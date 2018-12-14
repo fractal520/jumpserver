@@ -1,0 +1,29 @@
+{% extends '_base_list.html' %}
+{% load i18n %}
+{% load static %}
+{% block content_left_head %}{% endblock %}
+{% block table_head %}
+    <thead>
+        <tr>
+            <th>城市</th>
+            <th>月份</th>
+            <th>熔断次数</th>
+            <th>故障时间</th>
+        </tr>
+    </thead>
+{% endblock %}
+{% block table_body %}
+    <tbody>
+    {% for city in city_month %}
+        <tr>
+            <td>city.city</td>
+            <td>city.month</td>
+            <td>city.pause_count</td>
+            <td>city.total_pause_time</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+{% endblock %}
+{% block custom_foot_js %}
+
+{% endblock %}
