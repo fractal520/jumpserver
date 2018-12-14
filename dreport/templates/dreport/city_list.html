@@ -14,7 +14,7 @@
     <tbody>
     {% for city in citys %}
         <tr>
-            <td>{{city.name}}</td>
+            <td><a href="{% url 'dreport:city-update' pk=city.id %}">{{city.name}}</a></td>
             <td>{{city.city_code}}</td>
         </tr>
     {% endfor %}
