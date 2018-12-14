@@ -65,6 +65,7 @@ INSTALLED_APPS = [
     'terminal.apps.TerminalConfig',
     'audits.apps.AuditsConfig',
     'deploy.apps.DeployConfig',
+    'dreport.apps.DreportConfig',
     'rest_framework',
     'rest_framework_swagger',
     'drf_yasg',
