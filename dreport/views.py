@@ -18,7 +18,7 @@ class CityView(AdminUserRequiredMixin, ListView):
 
 class CityUpdateView(AdminUserRequiredMixin, UpdateView):
     model = City
-    template_name = 'dereport/dereport_update.html'
+    template_name = 'dreport/city_update.html'
     form_class = AppUpdateForm
     success_url = reverse_lazy('dreport:city_list')
 
