@@ -5,7 +5,7 @@ from django.utils.translation import gettext_lazy as _
 from common.utils import get_logger
 from orgs.mixins import OrgModelForm
 
-from ..models.city import City
+from ..models.city import City, CityPauseRecord
 
 
 logger = get_logger(__file__)
@@ -31,4 +31,14 @@ class CityCreateForm(OrgModelForm):
         help_texts = {
             'name': '* 请输入规范的城市名',
             'city_code': '* 请输入对应的企业码'
+        }
+
+
+class RecordUpdateForm(OrgModelForm):
+    class Meta:
+        model = CityPauseRecord
+        fields = ['city', 'risk_date_time', 'recovery_date_time']
+        labels = {}
+        help_texts = {
+            'recovery_date_time': '* 请输入熔断恢复时间'
         }
