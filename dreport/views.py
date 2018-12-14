@@ -66,4 +66,4 @@ class CityRecord(AdminUserRequiredMixin, ListView):
     model = CityPauseRecord
     template_name = 'dreport/city_record.html'
     context_object_name = 'records'
-    ordering = '-create_time'
+    ordering = '-risk_date_time'
