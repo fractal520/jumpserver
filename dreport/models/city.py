@@ -18,6 +18,7 @@ class City(models.Model):
         return self.name
 
 
+# 城市月份汇总表
 class CityMonthRecord(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4)
     city = models.ForeignKey(City, on_delete=models.PROTECT, null=True, verbose_name=_("City Name"))
@@ -28,6 +29,7 @@ class CityMonthRecord(models.Model):
     edit_time = models.DateTimeField(auto_now=True)
 
 
+# 城市熔断记录
 class CityPauseRecord(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4)
     city = models.ForeignKey(City, on_delete=models.PROTECT, null=True, verbose_name=_("City Name"))
