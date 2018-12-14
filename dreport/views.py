@@ -10,12 +10,14 @@ from common.permissions import AdminUserRequiredMixin
 # Create your views here.
 
 
+# 城市视图
 class CityView(AdminUserRequiredMixin, ListView):
     model = City
     template_name = 'dreport/city_list.html'
     context_object_name = 'citys'
 
 
+# 城市更新视图
 class CityUpdateView(AdminUserRequiredMixin, UpdateView):
     model = City
     template_name = 'dreport/city_update.html'
@@ -31,6 +33,7 @@ class CityUpdateView(AdminUserRequiredMixin, UpdateView):
         return super().get_context_data(**kwargs)
 
 
+# 城市月度统计视图
 class CityMonthView(AdminUserRequiredMixin, ListView):
     # model = CityMonthRecord
     template_name = 'dreport/city_month.html'
@@ -42,6 +45,7 @@ class CityMonthView(AdminUserRequiredMixin, ListView):
         return queryset
 
 
+# 全国熔断记录视图
 class CityRecord(AdminUserRequiredMixin, ListView):
     model = CityPauseRecord
     template_name = 'dreport/city_record.html'
