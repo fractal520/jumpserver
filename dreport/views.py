@@ -20,7 +20,7 @@ class CityUpdateView(AdminUserRequiredMixin, UpdateView):
     model = City
     template_name = 'dreport/city_update.html'
     form_class = AppUpdateForm
-    success_url = reverse_lazy('dreport:city_list')
+    success_url = reverse_lazy('dreport:CityView')
 
     def get_context_data(self, **kwargs):
         context = {
