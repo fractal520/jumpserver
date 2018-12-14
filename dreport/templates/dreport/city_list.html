@@ -1,7 +1,7 @@
 {% extends '_base_list.html' %}
 {% load i18n %}
 {% load static %}
-{% block content_left_head %}<a class="btn btn-xs btn-success" href="#">创建</a>{% endblock %}
+{% block content_left_head %}<a class="btn btn-xs btn-success" href="{% url 'dreport:city-create' %}">创建</a>{% endblock %}
 {% block table_head %}
     <thead>
         <tr>
@@ -18,7 +18,7 @@
             <td><a href="{% url 'dreport:city-update' pk=city.id %}">{{city.name}}</a></td>
             <td>{{city.city_code}}</td>
             <td>
-                <a class="btn btn-xs btn-default" href="{% url 'dreport:city-update' pk=city.id %}">更新</a>
+                <a class="btn btn-xs btn-primary" href="{% url 'dreport:city-update' pk=city.id %}">更新</a>
                 <a class="btn btn-xs btn-danger" href="#">删除</a>
             </td>
         </tr>

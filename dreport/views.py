@@ -5,7 +5,7 @@ from django.views.generic import ListView, UpdateView, DetailView, CreateView
 from django.urls import reverse_lazy
 from datetime import datetime
 from .models.city import CityMonthRecord, City, CityPauseRecord
-from .forms.dreportapp import AppUpdateForm
+from .forms.dreportapp import CityUpdateForm, CityCreateForm
 from common.permissions import AdminUserRequiredMixin
 # Create your views here.
 
@@ -21,13 +21,29 @@ class CityView(AdminUserRequiredMixin, ListView):
 class CityUpdateView(AdminUserRequiredMixin, UpdateView):
     model = City
     template_name = 'dreport/city_update.html'
-    form_class = AppUpdateForm
+    form_class = CityUpdateForm
     success_url = reverse_lazy('dreport:CityView')
 
     def get_context_data(self, **kwargs):
         context = {
             'app': _('Dreport'),
             'action': _('Update City'),
+        }
+        kwargs.update(context)
+        return super().get_context_data(**kwargs)
+
+
+# 城市创建视图
+class CityCreateView(AdminUserRequiredMixin, CreateView):
+    model = City
+    template_name = 'dreport/city_update.html'
+    form_class = CityCreateForm
+    success_url = reverse_lazy('dreport:CityView')
+
+    def get_context_data(self, **kwargs):
+        context = {
+            'app': _('Dreport'),
+            'action': _('Create City'),
         }
         kwargs.update(context)
         return super().get_context_data(**kwargs)

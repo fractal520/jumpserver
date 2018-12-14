@@ -9,4 +9,5 @@ urlpatterns = [
     path('CityMonthView/', views.CityMonthView.as_view(), name='CityMonthView'),
     path('CityRecord/', views.CityRecord.as_view(), name='CityRecord'),
     path('CityView/<uuid:pk>/update/', views.CityUpdateView.as_view(), name='city-update'),
+    path('CityView/create/', views.CityCreateView.as_view(), name='city-create'),
 ]

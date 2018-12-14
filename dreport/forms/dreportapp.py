@@ -9,10 +9,21 @@ from ..models.city import City
 
 
 logger = get_logger(__file__)
-__all__ = []
+__all__ = ['CityUpdateForm', 'CityCreateForm']
 
 
-class AppUpdateForm(OrgModelForm):
+class CityUpdateForm(OrgModelForm):
+    class Meta:
+        model = City
+        fields = ['name', 'city_code']
+        labels = {}
+        help_texts = {
+            'name': '* 请输入规范的城市名',
+            'city_code': '* 请输入对应的企业码'
+        }
+
+
+class CityCreateForm(OrgModelForm):
     class Meta:
         model = City
         fields = ['name', 'city_code']
