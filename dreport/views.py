@@ -18,9 +18,10 @@ class CityView(AdminUserRequiredMixin, ListView):
 
 
 class CityMonthView(AdminUserRequiredMixin, ListView):
-    model = CityMonthRecord
+    # model = CityMonthRecord
     template_name = 'dreport/city_month.html'
     context_object_name = 'city_month'
+    queryset = CityMonthRecord.objects.filter(month=10)
 
 
 class CityRecord(AdminUserRequiredMixin, ListView):
