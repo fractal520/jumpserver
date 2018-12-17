@@ -79,6 +79,7 @@ class RecordUpdateView(AdminUserRequiredMixin, UpdateView):
         context = {
             'app': _('Dreport'),
             'action': _('Update Record'),
+            'risk_time': self.request.GET.get
         }
         kwargs.update(context)
         return super().get_context_data(**kwargs)

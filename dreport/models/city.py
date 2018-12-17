@@ -37,3 +37,4 @@ class CityPauseRecord(models.Model):
     recovery_date = models.DateField(null=True, blank=True)
     risk_date_time = models.DateTimeField(null=False, editable=False)
     recovery_date_time = models.DateTimeField(null=True, blank=True)
+    risk_date_time_edit = models.DateTimeField(null=False)

@@ -37,7 +37,7 @@ class CityCreateForm(OrgModelForm):
 class RecordUpdateForm(OrgModelForm):
     class Meta:
         model = CityPauseRecord
-        fields = ['city', 'risk_date_time', 'recovery_date_time']
+        fields = ['city', 'risk_date_time_edit', 'recovery_date_time']
         labels = {}
         help_texts = {
             'recovery_date_time': '* 请输入熔断恢复时间'
