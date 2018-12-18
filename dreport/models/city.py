@@ -40,10 +40,14 @@ class CityPauseRecord(models.Model):
     risk_date_time = models.DateTimeField(null=False, editable=False)
     recovery_date_time = models.DateTimeField(null=True, blank=True)
     risk_date_time_edit = models.DateTimeField(null=False, blank=True)
+    log_name = models.CharField(max_length=256, null=False)
 
     def add_record(self, risk_list):
         yestarday = datetime.strftime(datetime.now() - timedelta(days=1), "%Y-%m-%d")
         if risk_list:
+            if risk_list['date'] == yestarday:
+                print('日期相同无需重新记录')
+                return True
             for record in risk_list:
                 record = record.split('\n')
                 risk_time = record[0].split('.')[0]
