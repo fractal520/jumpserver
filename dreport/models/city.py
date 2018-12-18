@@ -3,7 +3,9 @@
 import uuid
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
+from django.core.exceptions import ObjectDoesNotExist
 from common.utils import get_logger
+from datetime import datetime, timedelta
 
 logger = get_logger('jumpserver')
 
@@ -38,3 +40,26 @@ class CityPauseRecord(models.Model):
     risk_date_time = models.DateTimeField(null=False, editable=False)
     recovery_date_time = models.DateTimeField(null=True, blank=True)
     risk_date_time_edit = models.DateTimeField(null=False, blank=True)
+
+    def add_record(self, risk_list):
+        yestarday = datetime.strftime(datetime.now() - timedelta(days=1), "%Y-%m-%d")
+        if risk_list:
+            for record in risk_list:
+                record = record.split('\n')
+                risk_time = record[0].split('.')[0]
+                risk_date = yestarday
+                risk_date_time = risk_date+' '+risk_time
+                try:
+                    city = City.objects.get(name=record[1])
+                except ObjectDoesNotExist as error:
+                    City.objects.create(name=record[1])
+                    city = City.objects.get(name=record[1])
+
+                CityPauseRecord.objects.create(
+                    city=city,
+                    risk_date=risk_date,
+                    risk_date_time=risk_date_time,
+                    risk_date_time_edit=risk_date_time
+                )
+        else:
+            return False

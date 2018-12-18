@@ -5,6 +5,7 @@ import json
 from datetime import datetime, timedelta
 from django.core.management.base import BaseCommand
 from assets.models import Asset
+from dreport.models.city import CityMonthRecord, CityPauseRecord
 from dreport.tasks import collect_risk_manual
 
 
@@ -26,4 +27,5 @@ class Command(BaseCommand):
             data = result[0]['ok'][rcs.hostname]
             for key, value in data.items():
                 stout = json.loads(value.get('stdout'))
+                CityPauseRecord.add_record(stout.get('risk_list'), None)
                 print(stout)
