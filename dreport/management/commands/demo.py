@@ -4,8 +4,9 @@ import os
 import json
 from datetime import datetime, timedelta
 from django.core.management.base import BaseCommand
+from django.core.exceptions import ObjectDoesNotExist
 from assets.models import Asset
-from dreport.models.city import CityMonthRecord, CityPauseRecord
+from dreport.models.city import CityMonthRecord, CityPauseRecord, City
 from dreport.tasks import collect_risk_manual
 
 
@@ -28,7 +29,7 @@ class Command(BaseCommand):
             for key, value in data.items():
                 stout = json.loads(value.get('stdout'))
                 print(stout.get('risk_list'))
-                if CityPauseRecord.add_record(stout.get('risk_list'), None):
+                if CityPauseRecord.add_record(stout.get('risk_list', None)):
                     print('添加成功')
                 print('添加失败')
                 print(stout)
