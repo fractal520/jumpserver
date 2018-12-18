@@ -13,7 +13,7 @@ logger = get_logger('jumpserver')
 # collect city risk from rcs logs
 @shared_task
 def collect_risk_manual(asset, log_path=None, script_path=None):
-    task_name = _("Collect city pause from {} {}.".format(asset.hostname, log_path))
+    task_name = _("Collect city pause from rcs {}.".format(asset.hostname))
     return collect_risk_util(asset, log_path, task_name, script_path)
 
 

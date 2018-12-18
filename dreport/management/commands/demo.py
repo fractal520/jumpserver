@@ -27,5 +27,8 @@ class Command(BaseCommand):
             data = result[0]['ok'][rcs.hostname]
             for key, value in data.items():
                 stout = json.loads(value.get('stdout'))
-                CityPauseRecord.add_record(stout.get('risk_list'), None)
+                print(stout.get('risk_list'))
+                if CityPauseRecord.add_record(stout.get('risk_list'), None):
+                    print('添加成功')
+                print('添加失败')
                 print(stout)
