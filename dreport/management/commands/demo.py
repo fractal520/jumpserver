@@ -29,7 +29,7 @@ class Command(BaseCommand):
             for key, value in data.items():
                 stout = json.loads(value.get('stdout'))
                 print(stout.get('risk_list'))
-                if CityPauseRecord.add_record(risk_list=stout.get('risk_list', None)):
+                if CityPauseRecord().add_record(risk_list=stout.get('risk_list', None)):
                     print('添加成功')
                 print('添加失败')
                 print(stout)
