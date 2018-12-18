@@ -12,17 +12,17 @@ logger = get_logger('jumpserver')
 
 # collect city risk from rcs logs
 @shared_task
-def collect_risk_manual(asset, log_path=None):
+def collect_risk_manual(asset, log_path=None, script_path=None):
     task_name = _("Collect city pause from {} {}.".format(asset.hostname, log_path))
-    return collect_risk_util(asset, log_path, task_name)
+    return collect_risk_util(asset, log_path, task_name, script_path)
 
 
 @shared_task
-def collect_risk_util(asset, log_path, task_name):
+def collect_risk_util(asset, log_path, task_name, script_path):
     from ops.utils import update_or_create_ansible_task
     hosts = [asset.fullname]
     tasks = const.COLLECT_PAUSE_TASKS
-    tasks[0]['action']['args'] = "python /home/zhangwj/RA.py"
+    tasks[0]['action']['args'] = "python {}".format(script_path)
     task, create = update_or_create_ansible_task(
         task_name=task_name,
         hosts=hosts, tasks=tasks,
