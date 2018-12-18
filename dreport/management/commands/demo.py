@@ -10,7 +10,7 @@ from dreport.tasks import collect_risk_manual
 class Command(BaseCommand):
 
     def __init__(self):
-        self.rcs_ip = '192.168.0.127'
+        self.rcs_ip = '10.10.3.46'
         self.rcs_log_dir = '/scss/logs/rcs/'
 
     def handle(self, *args, **options):
