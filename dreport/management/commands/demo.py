@@ -4,6 +4,7 @@ import os
 from datetime import datetime, timedelta
 from django.core.management.base import BaseCommand
 from assets.models import Asset
+from dreport.tasks import collect_risk_manual
 
 
 class Command(BaseCommand):
@@ -17,4 +18,7 @@ class Command(BaseCommand):
         log_path = os.path.join(self.rcs_log_dir, 'rcs.', yestarday, '.log')
         rcs = Asset.objects.get(ip=self.rcs_ip)
         print(rcs.admin_user)
+
+        result = collect_risk_manual(rcs)
+
         print("hello world!")
