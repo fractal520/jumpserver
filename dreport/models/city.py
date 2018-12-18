@@ -49,8 +49,10 @@ class CityPauseRecord(models.Model):
                 risk_time = record[0].split('.')[0]
                 risk_date = yestarday
                 risk_date_time = risk_date+' '+risk_time
+                print(risk_date_time)
                 try:
                     city = City.objects.get(name=record[1])
+                    print('get city')
                 except ObjectDoesNotExist as error:
                     City.objects.create(name=record[1])
                     city = City.objects.get(name=record[1])
