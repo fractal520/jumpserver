@@ -1,6 +1,7 @@
 # !/usr/bin/env python
 # encoding: utf-8
 import os
+import json
 from datetime import datetime, timedelta
 from django.core.management.base import BaseCommand
 from assets.models import Asset
@@ -21,4 +22,8 @@ class Command(BaseCommand):
 
         result = collect_risk_manual(asset=rcs, script_path='/home/jumperserver/RA.py')
         print(result)
-        print("hello world!")
+        if result[0]['ok']:
+            data = result[0]['ok'][rcs.hostname]
+            for key, value in data.items():
+                stout = json.loads(value.get('stdout'))
+                print(stout)
