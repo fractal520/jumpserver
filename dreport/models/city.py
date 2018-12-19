@@ -43,14 +43,14 @@ class CityPauseRecord(models.Model):
     log_name = models.CharField(max_length=256, null=False, default='')
 
     def add_record(self, risk_list):
-        yestarday = datetime.strftime(datetime.now() - timedelta(days=1), "%Y-%m-%d")
+        risk_date = risk_list['date']
+        print(risk_date)
         if risk_list:
-            if CityPauseRecord.objects.filter(risk_date=risk_list['date']):
-                CityPauseRecord.objects.filter(risk_date=risk_list['date']).delete()
+            if CityPauseRecord.objects.filter(risk_date=risk_date):
+                CityPauseRecord.objects.filter(risk_date=risk_date).delete()
             for record in risk_list:
                 record = record.split('\n')
                 risk_time = record[0].split('.')[0]
-                risk_date = yestarday
                 risk_date_time = risk_date+' '+risk_time
                 print(risk_date_time)
                 try:
