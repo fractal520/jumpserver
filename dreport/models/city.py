@@ -40,7 +40,7 @@ class CityPauseRecord(models.Model):
     risk_date_time = models.DateTimeField(null=False, editable=False)
     recovery_date_time = models.DateTimeField(null=True, blank=True)
     risk_date_time_edit = models.DateTimeField(null=False, blank=True)
-    log_name = models.CharField(max_length=256, null=False)
+    log_name = models.CharField(max_length=256, null=False, default='')
 
     def add_record(self, risk_list):
         yestarday = datetime.strftime(datetime.now() - timedelta(days=1), "%Y-%m-%d")
