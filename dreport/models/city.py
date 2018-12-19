@@ -42,8 +42,7 @@ class CityPauseRecord(models.Model):
     risk_date_time_edit = models.DateTimeField(null=False, blank=True)
     log_name = models.CharField(max_length=256, null=False, default='')
 
-    def add_record(self, risk_list):
-        risk_date = risk_list['date']
+    def add_record(self, risk_list, risk_date):
         print(risk_date)
         if risk_list:
             if CityPauseRecord.objects.filter(risk_date=risk_date):
