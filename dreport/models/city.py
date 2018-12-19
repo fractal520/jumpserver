@@ -45,9 +45,8 @@ class CityPauseRecord(models.Model):
     def add_record(self, risk_list):
         yestarday = datetime.strftime(datetime.now() - timedelta(days=1), "%Y-%m-%d")
         if risk_list:
-            if risk_list['date'] == yestarday:
-                print('日期相同无需重新记录')
-                return True
+            if CityPauseRecord.objects.filter(risk_date=risk_list['date']):
+                CityPauseRecord.objects.filter(risk_date=risk_list['date']).delete()
             for record in risk_list:
                 record = record.split('\n')
                 risk_time = record[0].split('.')[0]
