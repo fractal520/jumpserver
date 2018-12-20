@@ -32,6 +32,7 @@
 {% endblock %}
 {% block custom_foot_js %}
     jQuery(document).ready(function(){
+        console.log('month record')
         $('body').on('click', '.btn-template', function(){
             var id = $(this).attr('id');
             console.log('create from template',id)
