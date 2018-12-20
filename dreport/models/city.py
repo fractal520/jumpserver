@@ -26,8 +26,7 @@ class CityMonthRecord(models.Model):
     city = models.ForeignKey(City, on_delete=models.PROTECT, null=True, verbose_name=_("City Name"))
     month = models.IntegerField(null=False)
     pause_count = models.IntegerField(null=True, blank=True, default=0)
-    # total_pause_time = models.IntegerField(null=True, blank=True, default=0)
-    total_pause_time = models.TimeField(null=True, default='')
+    total_pause_time = models.IntegerField(null=True, blank=True, default=0)
     create_time = models.DateTimeField(auto_now_add=True)
     edit_time = models.DateTimeField(auto_now=True)
 
