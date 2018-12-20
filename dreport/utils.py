@@ -8,8 +8,10 @@ from django.core.exceptions import ObjectDoesNotExist
 class MonthRecordFunction(object):
 
     def create(self, city_id, date):
+        print(city_id)
+        print(date)
         try:
-            city = City.objects.get(id=city_id[0])
+            city = City.objects.get(id=city_id)
         except ObjectDoesNotExist as error:
             print(error)
             return False
