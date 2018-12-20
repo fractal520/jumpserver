@@ -65,5 +65,6 @@ class CityPauseRecord(models.Model):
                     risk_date_time=risk_date_time,
                     risk_date_time_edit=risk_date_time
                 )
+            return True
         else:
             return False
