@@ -49,7 +49,7 @@
 {% block custom_foot_js %}
 <script>
 jQuery(document).ready(function(){
-    $('body').on('click', '.btn-create', function{
+    $('body').on('click', '.btn-create', function(){
         $('#dialog-create-record').modal({show:true});
         $('body').on('click', '.btn-record', function{
             $.get("{% url 'api-dreport:create-monthrecord' %}", {}, function(data){
