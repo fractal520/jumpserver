@@ -9,6 +9,7 @@
             <th>月份</th>
             <th>熔断次数</th>
             <th>故障时间</th>
+            <th>操作</th>
         </tr>
     </thead>
 {% endblock %}
@@ -20,6 +21,10 @@
             <td>{{city.month}}</td>
             <td>{{city.pause_count}}</td>
             <td>{{city.total_pause_time}}</td>
+            <td>
+                <a class="btn btn-xs btn-primary" href="#">更新</a>
+                <a class="btn btn-xs btn-danger" href="#">删除</a>
+            </td>
         </tr>
     {% endfor %}
     </tbody>
