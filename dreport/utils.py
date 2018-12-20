@@ -9,7 +9,7 @@ class MonthRecordFunction(object):
 
     def create(self, city_id, date):
         try:
-            city = City.objects.get(id=city_id)
+            city = City.objects.get(id=city_id[0])
         except ObjectDoesNotExist as error:
             print(error)
             return False
