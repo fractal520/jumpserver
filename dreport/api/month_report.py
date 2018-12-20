@@ -8,7 +8,7 @@ from django.http import JsonResponse
 
 
 def create_month_record(request):
-    data = request.POST
+    data = request.GET
 
     print(data.get("id"))
     print(data.get("record-month"))
