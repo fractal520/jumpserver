@@ -31,6 +31,7 @@
     </tbody>
 {% endblock %}
 {% block custom_foot_js %}
+<script>
     jQuery(document).ready(function(){
         console.log('month record')
         $('body').on('click', '.btn-template', function(){
@@ -38,4 +39,5 @@
             console.log('create from template',id)
         });
     });
+</script>
 {% endblock %}
