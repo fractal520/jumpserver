@@ -15,14 +15,15 @@
 {% endblock %}
 {% block table_body %}
     <tbody>
-    {% for city in city_month %}
+    {% for record in city_month %}
         <tr>
-            <td>{{city.city}}</td>
-            <td>{{city.month}}</td>
-            <td>{{city.pause_count}}</td>
-            <td>{{city.total_pause_time}}</td>
+            <td>{{record.city}}</td>
+            <td>{{record.month}}</td>
+            <td>{{record.pause_count}}</td>
+            <td>{{record.total_pause_time}}</td>
             <td>
-                <a class="btn btn-xs btn-primary" href="#">更新</a>
+                <a class="btn btn-xs btn-primary btn-template" href="javascript:void(0)" id="{{record.id}}">生成报告</a>
+                <a class="btn btn-xs btn-primary" href="#">编辑</a>
                 <a class="btn btn-xs btn-danger" href="#">删除</a>
             </td>
         </tr>
@@ -30,5 +31,10 @@
     </tbody>
 {% endblock %}
 {% block custom_foot_js %}
-
+    jQuery(document).ready(function(){
+        $('body').on('click', '.btn-template', function(){
+            var id = $(this).attr('id');
+            console.log('create from template',id)
+        });
+    });
 {% endblock %}
