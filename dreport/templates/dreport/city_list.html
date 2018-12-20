@@ -36,7 +36,12 @@
                 <div class="modal-body">
                     <p>One fine body&hellip;</p>
                     <form class="form-create-month-record">
-                        <input type="month">
+                        <table>
+                            <tr>
+                                <td>月份</td>
+                                <td><input type="month" name="record-month" id="record-month"></td>
+                            </tr>
+                        </table>
                         {% csrf_token %}
                     </form>
                 </div>
