@@ -8,5 +8,6 @@ from django.http import JsonResponse
 
 
 def create_month_record(request):
-    print(request)
-    return JsonResponse(dict(code=200))
+    data = request.GET.get('data', None)
+    print(data)
+    return JsonResponse(dict(code=200, msg=data))
