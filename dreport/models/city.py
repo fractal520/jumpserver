@@ -27,7 +27,7 @@ class CityMonthRecord(models.Model):
     month = models.IntegerField(null=False)
     pause_count = models.IntegerField(null=True, blank=True, default=0)
     # total_pause_time = models.IntegerField(null=True, blank=True, default=0)
-    total_pause_time = models.TimeField(null=True, default=0)
+    total_pause_time = models.TimeField(null=True, default='')
     create_time = models.DateTimeField(auto_now_add=True)
     edit_time = models.DateTimeField(auto_now=True)
 
