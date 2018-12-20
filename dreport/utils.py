@@ -17,4 +17,12 @@ class MonthRecordFunction(object):
         month = date.split('-')[1]
         records = CityPauseRecord.objects.filter(city=city, risk_date__month=month, risk_date__year=year)
         print(records)
-        return True
+        pause_count = 0
+        total_pause_time = 0
+        if records:
+            for record in records:
+                pause_count += 1
+            # CityMonthRecord.create_or_update(city, month, pause_count, total_pause_time)
+            return True
+        else:
+            return False
