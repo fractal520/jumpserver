@@ -51,7 +51,7 @@
 jQuery(document).ready(function(){
     $('body').on('click', '.btn-create', function(){
         $('#dialog-create-record').modal({show:true});
-        $('body').on('click', '.btn-record', function{
+        $('body').on('click', '.btn-record', function(){
             $.get("{% url 'api-dreport:create-monthrecord' %}", {}, function(data){
                 console.log(data)
             });
