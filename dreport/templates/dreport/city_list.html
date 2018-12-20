@@ -37,6 +37,7 @@
                     <p>One fine body&hellip;</p>
                     <form class="form-create-month-record">
                         <input type="month">
+                        {% csrf_token %}
                     </form>
                 </div>
                 <div class="modal-footer">
@@ -58,8 +59,9 @@ jQuery(document).ready(function(){
         $('body').on('click', '.btn-record', function(){
             var data = $('.form-create-month-record').serializeArray();
             data.push({'name': 'id', 'value': id})
-            $.get("{% url 'api-dreport:create-monthrecord' %}", data, function(data){
-                console.log(data)
+            console.log(data)
+            $.post("{% url 'api-dreport:create-monthrecord' %}", data, function(result){
+                console.log(result)
             });
         });
     });
