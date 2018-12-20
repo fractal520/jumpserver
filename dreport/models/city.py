@@ -32,6 +32,20 @@ class CityMonthRecord(models.Model):
 
     @classmethod
     def create_or_update(cls, city, month, pause_count, total_pause_time):
+        try:
+            record = CityMonthRecord.objects.get(city=city, month=month)
+            record.pause_count = pause_count
+            record.total_pause_time = total_pause_time
+            record.save()
+        except ObjectDoesNotExist as error:
+            print(error, 'Record will create by system.')
+            CityMonthRecord.objects.create(
+                city=city,
+                month=month,
+                pause_count=pause_count,
+                total_pause_time=total_pause_time
+            )
+            return True
         return True
 
 

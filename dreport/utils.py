@@ -22,7 +22,11 @@ class MonthRecordFunction(object):
         if records:
             for record in records:
                 pause_count += 1
-            # CityMonthRecord.create_or_update(city, month, pause_count, total_pause_time)
+                if record.recovery_date_time:
+                    total_pause_time += (record.recovery_date_time - record.risk_date_time).seconds
+                else:
+                    total_pause_time += 0
+            CityMonthRecord.create_or_update(city, month, pause_count, total_pause_time)
             return True
         else:
             return False
