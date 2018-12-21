@@ -47,7 +47,6 @@
                                 </h3>
                             </div>
                             <ul class="list-group" id="report">
-                                <input type="" name="" value="">
                             </ul>
                         </div>
                         {% csrf_token %}
@@ -78,7 +77,7 @@
                     console.log(result.data.error_time)
                     console.log(result.data.month)
                     console.log(result.data.total_error)
-                    var html = "<li class='list-group-item'>城市:" + result.data.city + "</li>"+"<li class='list-group-item'>设备总数:" + "<input type='text' name='device' value=''>" + "</li>"
+                    var html = "<li class='list-group-item'>城市:" + result.data.city + "</li>"+"<li class='list-group-item'>设备总数:" + "<input type='text' name='device' value=''>" + "</li>"+"<li class='list-group-item'>备注:" + "<input type='text' name='markdown' value='"+1+"'>" + "</li>"
 
                     $('#report').append(html);
                 }
