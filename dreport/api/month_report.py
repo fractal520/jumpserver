@@ -46,4 +46,7 @@ def make_report(request):
 def download_report(request):
     parma = request.GET
     print(parma)
+    # response = FileResponse(open(file_path, 'rb'))
+    # response['Content-Type'] = 'application/octet-stream'
+    # response['Content-Disposition'] = 'attachment;filename="example.tar.gz"'
     return JsonResponse(dict(code=200, msg=''))
