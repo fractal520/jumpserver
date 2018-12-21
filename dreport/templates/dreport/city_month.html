@@ -70,7 +70,6 @@
             $('#dialog-create-report').modal({show:true});
             //ajax获取城市月份数据填充到表格里面
             $.get("{% url 'api-dreport:get_month_record' %}", {'id':id}, function(result){
-                console.log(result)
                 if(result.code == 200){
                     var html = "城市:" + result.data.city + "<br/>月份:" + result.data.month +"<br/>熔断次数:" + result.data.total_error +"<br/>故障时间(秒):" + result.data.error_time + "<br/>设备总数:" + "<input type='text' name='device' value=''>"+"<br/>备注:" + "<textarea style='width: 200px; height: 100px' name='markdown'></textarea>"
 
@@ -87,6 +86,8 @@
                             contentType: "application/x-www-form-urlencoded",
                             success: function (result){
                                 console.log(result)
+                                var path = result.path
+                                location.href = path
                                 //window.location.reload()
                             }
                         });
