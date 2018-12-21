@@ -30,6 +30,14 @@ class CityMonthRecord(models.Model):
     create_time = models.DateTimeField(auto_now_add=True)
     edit_time = models.DateTimeField(auto_now=True)
     year = models.IntegerField(null=False)
+    report_name = models.CharField(max_length=512, null=True)
+
+    @classmethod
+    def save_report(cls, record_id, filename):
+        record = CityMonthRecord.objects.get(id=record_id)
+        record.report_name = filename
+        record.save()
+        return True
 
     @classmethod
     def get_record(cls, record_id):
