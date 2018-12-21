@@ -29,15 +29,16 @@ class CityMonthRecord(models.Model):
     total_pause_time = models.IntegerField(null=True, blank=True, default=0)
     create_time = models.DateTimeField(auto_now_add=True)
     edit_time = models.DateTimeField(auto_now=True)
+    year = models.IntegerField(null=False)
 
     @classmethod
     def get_record(cls, record_id):
         return CityMonthRecord.objects.get(id=record_id)
 
     @classmethod
-    def create_or_update(cls, city, month, pause_count, total_pause_time):
+    def create_or_update(cls, city, month, pause_count, total_pause_time, year):
         try:
-            record = CityMonthRecord.objects.get(city=city, month=month)
+            record = CityMonthRecord.objects.get(city=city, month=month, year=year)
             record.pause_count = pause_count
             record.total_pause_time = total_pause_time
             record.save()
@@ -47,7 +48,8 @@ class CityMonthRecord(models.Model):
                 city=city,
                 month=month,
                 pause_count=pause_count,
-                total_pause_time=total_pause_time
+                total_pause_time=total_pause_time,
+                year=year
             )
             return True
         return True

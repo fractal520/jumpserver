@@ -31,17 +31,20 @@ class MonthRecordFunction(object):
                     total_pause_time += (record.recovery_date_time - record.risk_date_time).seconds
                 else:
                     total_pause_time += 0
-            CityMonthRecord.create_or_update(city, month, pause_count, total_pause_time)
+            CityMonthRecord.create_or_update(city, month, pause_count, total_pause_time, year)
             return True
         else:
             return False
 
     def report(self, parma):
-
+        risk_list = []
+        year = datetime.strftime(datetime.now(), "%Y")
         print(parma)
         record_id = parma.get('id')
         record = CityMonthRecord.get_record(record_id)
+        CityPauseRecord.objects.filter(city=record.city, risk_date__month=record.month, risk_date__year=year)
         tpl = DocxTemplate(TEMPLATE_DIR)
+
         total_pause_time = int(record.total_pause_time) / 60
         device_avarate = (1-(record.total_pause_time/(30 * 24 * 60 * 60))) * 100
 
@@ -55,6 +58,7 @@ class MonthRecordFunction(object):
             'error_date': '',
             'device_avarate': device_avarate,
             'text': parma.get('markdown', None),
+            'form': risk_list,
         }
 
         tpl.render(context)
