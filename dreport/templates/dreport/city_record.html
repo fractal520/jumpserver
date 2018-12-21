@@ -1,8 +1,9 @@
 {% extends '_base_list.html' %}
-{% load i18n %}
-{% load static %}
+{% load i18n static %}
+{% block table_search %}{% endblock %}
 {% block content_left_head %}{% endblock %}
-{% block table_head %}
+{% block table_container %}
+<table class="table table-striped table-bordered table-hover " id="city_record_table" >
     <thead>
         <tr>
             <th>城市</th>
@@ -11,8 +12,6 @@
             <th>操作</th>
         </tr>
     </thead>
-{% endblock %}
-{% block table_body %}
     <tbody>
     {% for record in records %}
         <tr>
@@ -23,6 +22,7 @@
         </tr>
     {% endfor %}
     </tbody>
+</table>
 {% endblock %}
 {% block custom_foot_js %}
 
