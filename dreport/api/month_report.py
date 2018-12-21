@@ -2,7 +2,7 @@
 #
 
 from ..utils import *
-from django.http import JsonResponse
+from django.http import JsonResponse, FileResponse
 from ..models import CityMonthRecord
 
 
@@ -35,5 +35,5 @@ def make_report(request):
     print(request.POST)
     parma = request.POST
     bot = MonthRecordFunction()
-    bot.report(parma)
-    return JsonResponse(dict(code=200, mgs=''))
+    file = bot.report(parma)
+    return FileResponse(file)
