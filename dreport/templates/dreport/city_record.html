@@ -25,5 +25,7 @@
 </table>
 {% endblock %}
 {% block custom_foot_js %}
-
+    $(document).ready(function(){
+        $('#city_record_table').DataTable();
+    });
 {% endblock %}
