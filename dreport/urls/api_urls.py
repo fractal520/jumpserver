@@ -11,6 +11,6 @@ urlpatterns = [
          api.get_month_record, name='get_month_record'),
     path('CityMonthView/make_report/',
              api.make_report, name='make_report'),
-    path('CityMonthView/download_report/',
+    path('CityMonthView/download_report/<uuid:pk>/',
              api.download_report, name='download_report'),
 ]
