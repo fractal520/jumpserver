@@ -72,6 +72,14 @@
             //ajax获取城市月份数据填充到表格里面
             $.get("{% url 'api-dreport:get_month_record' %}", {'id':id}, function(result){
                 console.log(result)
+                if(result.code == 200){
+                    console.log(result.data.city)
+                    console.log(result.data.error_time)
+                    console.log(result.data.month)
+                    console.log(result.data.total_error)
+                    var html = "<li class='list-group-item'>城市:" + result.data.city + "</li>"
+                    $('#report').append(html);
+                }
             });
 
         });
