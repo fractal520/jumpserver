@@ -32,6 +32,12 @@ class CityMonthRecord(models.Model):
     year = models.IntegerField(null=False)
     report_name = models.CharField(max_length=512, null=True)
 
+
+    @classmethod
+    def get_report(cls, record_id):
+        record = CityMonthRecord.objects.get(id=record_id)
+        return record.report_name
+
     @classmethod
     def save_report(cls, record_id, filename):
         record = CityMonthRecord.objects.get(id=record_id)

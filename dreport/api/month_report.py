@@ -4,6 +4,7 @@
 from ..utils import *
 from django.http import JsonResponse, FileResponse
 from ..models import CityMonthRecord
+from django.conf import settings
 
 
 def create_month_record(request):
@@ -39,9 +40,10 @@ def make_report(request):
 
 
 def download_report(request, pk):
-    parma = request.GET
-    print(parma, pk)
-    # response = FileResponse(open(file_path, 'rb'))
-    # response['Content-Type'] = 'application/octet-stream'
-    # response['Content-Disposition'] = 'attachment;filename="example.tar.gz"'
-    return JsonResponse(dict(code=200, msg=''))
+    file = CityMonthRecord.get_report(pk)
+    file_path = os.path.join(settings.DEVICE_REPORT_DIR, file)
+    print(file_path)
+    response = FileResponse(open(file_path, 'rb'))
+    response['Content-Type'] = 'application/octet-stream'
+    response['Content-Disposition'] = 'attachment;filename="{0}"'.format(file)
+    return response
