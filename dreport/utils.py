@@ -42,7 +42,7 @@ class MonthRecordFunction(object):
         record_id = parma.get('id')
         record = CityMonthRecord.get_record(record_id)
         tpl = DocxTemplate(TEMPLATE_DIR)
-
+        total_pause_time = int(record.total_pause_time) / 60
         device_avarate = (1-(record.total_pause_time/(30 * 24 * 60 * 60))) * 100
 
         context = {
@@ -51,7 +51,7 @@ class MonthRecordFunction(object):
             'month': record.month,
             'device_count': parma.get('device'),
             'total_error': record.pause_count,
-            'error_time': record.total_pause_time,
+            'error_time': total_pause_time,
             'error_date': '',
             'device_avarate': device_avarate,
             'text': parma.get('markdown'),
