@@ -36,25 +36,27 @@ class MonthRecordFunction(object):
         else:
             return False
 
-    def report(self, record_id):
-        print(record_id)
+    def report(self, parma):
+
+        print(parma)
+        record_id = parma.get('id')
         record = CityMonthRecord.get_record(record_id)
-        print(record)
         tpl = DocxTemplate(TEMPLATE_DIR)
 
-        device_avarate = (1-(record.total_pause_time/(30 * 24 * 60))) * 100
+        device_avarate = (1-(record.total_pause_time/(30 * 24 * 60 * 60))) * 100
 
         context = {
             'city': record.city.name,
             'year': datetime.strftime(datetime.now(), "%Y"),
             'month': record.month,
-            'device_count': '',
+            'device_count': parma.get('device'),
             'total_error': record.pause_count,
             'error_time': record.total_pause_time,
             'error_date': '',
             'device_avarate': device_avarate,
-            'text': '',
+            'text': parma.get('markdown'),
         }
 
         tpl.render(context)
         tpl.save(os.path.join(settings.DEVICE_REPORT_DIR, '{}_{}.docx'.format('month', 'city')))
+        return True
