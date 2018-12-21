@@ -46,5 +46,5 @@ def download_report(request, pk):
     response = FileResponse(open(file_path, 'rb'))
     # response['Content-Type'] = 'application/octet-stream'
     response['Content-Type'] = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-    response['Content-Disposition'] = 'attachment;filename={}'.format(file)
+    response['Content-Disposition'] = "attachment;filename*=utf-8''{}".format(file)
     return response
