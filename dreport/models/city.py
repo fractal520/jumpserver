@@ -31,6 +31,10 @@ class CityMonthRecord(models.Model):
     edit_time = models.DateTimeField(auto_now=True)
 
     @classmethod
+    def get_record(cls, record_id):
+        return CityMonthRecord.objects.get(id=record_id)
+
+    @classmethod
     def create_or_update(cls, city, month, pause_count, total_pause_time):
         try:
             record = CityMonthRecord.objects.get(city=city, month=month)

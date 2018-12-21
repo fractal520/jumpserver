@@ -3,6 +3,7 @@
 
 from ..utils import *
 from django.http import JsonResponse
+from ..models import CityMonthRecord
 
 
 def create_month_record(request):
@@ -14,3 +15,25 @@ def create_month_record(request):
         return JsonResponse(dict(code=200, msg=''))
     else:
         return JsonResponse(dict(code=400, error=''))
+
+
+def get_month_record(request):
+    record_id = request.GET.get('id')
+    data = {}
+    if record_id:
+        record = CityMonthRecord.get_record(record_id)
+        data['city'] = record.city.name
+        data['month'] = record.month
+        data['total_error'] = record.pause_count
+        data['error_time'] = record.total_pause_time
+        return JsonResponse(dict(code=200, data=data))
+    else:
+        return JsonResponse(dict(code=400, error='no record'))
+
+
+def make_report(request):
+    print(request.GET)
+    record_id = request.GET.get('id')
+    bot = MonthRecordFunction()
+    bot.report(record_id)
+    return JsonResponse(dict(code=200, mgs=''))

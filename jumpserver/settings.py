@@ -487,3 +487,9 @@ SWAGGER_SETTINGS = {
 JENKINS_URL = CONFIG.JENKINS_URL or 'http://localhost:8082/login?from=%2F'
 JENKINS_USER_NAME = CONFIG.JENKINS_USER_NAME or 'admin'
 JENKINS_USER_PASSWORD = CONFIG.JENKINS_USER_PASSWORD or 'admin'
+
+# 网络运行报告路径
+DEVICE_REPORT_DIR = os.path.join(PROJECT_DIR, 'data', 'report')
+# 如果文件夹不存在则创建
+if not os.path.isdir(DEVICE_REPORT_DIR):
+    os.makedirs(DEVICE_REPORT_DIR)

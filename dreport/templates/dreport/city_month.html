@@ -29,6 +29,37 @@
         </tr>
     {% endfor %}
     </tbody>
+
+    <!-- /.create-report-modal -->
+    <div class="modal fade" tabindex="-1" role="dialog" id="dialog-create-report">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">设备网络运行报告</h4>
+                </div>
+                <div class="modal-body">
+                    <form class="form-create-report">
+                        <div class="panel panel-info">
+                            <div class="panel-heading">
+                                <h3 class="panel-title">
+                                    报告信息
+                                </h3>
+                            </div>
+                            <ul class="list-group" id="report">
+                            </ul>
+                        </div>
+                        {% csrf_token %}
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary btn-report">生成</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+
 {% endblock %}
 {% block custom_foot_js %}
 <script>
@@ -37,6 +68,12 @@
         $('body').on('click', '.btn-template', function(){
             var id = $(this).attr('id');
             console.log('create from template',id)
+            $('#dialog-create-report').modal({show:true});
+            //ajax获取城市月份数据填充到表格里面
+            $.get("{% url 'api-dreport:get_month_record' %}", {'id':id}, function(result){
+                console.log(result)
+            });
+
         });
     });
 </script>

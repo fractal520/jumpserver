@@ -1,8 +1,13 @@
 # -*- coding: utf-8 -*-
 #
-
+import os
 from .models.city import City, CityMonthRecord, CityPauseRecord
 from django.core.exceptions import ObjectDoesNotExist
+from docxtpl import DocxTemplate
+from django.conf import settings
+from datetime import datetime
+
+TEMPLATE_DIR = os.path.join(settings.DEVICE_REPORT_DIR, 'WTSDtmp.docx')
 
 
 class MonthRecordFunction(object):
@@ -30,3 +35,26 @@ class MonthRecordFunction(object):
             return True
         else:
             return False
+
+    def report(self, record_id):
+        print(record_id)
+        record = CityMonthRecord.get_record(record_id)
+        print(record)
+        tpl = DocxTemplate(TEMPLATE_DIR)
+
+        device_avarate = (1-(record.total_pause_time/(30 * 24 * 60))) * 100
+
+        context = {
+            'city': record.city.name,
+            'year': datetime.strftime(datetime.now(), "%Y"),
+            'month': record.month,
+            'device_count': '',
+            'total_error': record.pause_count,
+            'error_time': record.total_pause_time,
+            'error_date': '',
+            'device_avarate': device_avarate,
+            'text': '',
+        }
+
+        tpl.render(context)
+        tpl.save(os.path.join(settings.DEVICE_REPORT_DIR, '{}_{}.docx'.format('month', 'city')))
