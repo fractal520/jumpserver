@@ -67,20 +67,21 @@
         console.log('month record')
         $('body').on('click', '.btn-template', function(){
             var id = $(this).attr('id');
-            console.log('create from template',id)
             $('#dialog-create-report').modal({show:true});
             //ajax获取城市月份数据填充到表格里面
             $.get("{% url 'api-dreport:get_month_record' %}", {'id':id}, function(result){
                 console.log(result)
                 if(result.code == 200){
-                    console.log(result.data.city)
-                    console.log(result.data.error_time)
-                    console.log(result.data.month)
-                    console.log(result.data.total_error)
                     var html = "<li class='list-group-item'>城市:" + result.data.city + "</li>"+"<li class='list-group-item'>月份:" + result.data.month + "</li>"+"<li class='list-group-item'>熔断次数:" + result.data.total_error + "</li>"+"<li class='list-group-item'>故障时间(秒):" + result.data.error_time + "</li>"+"<li class='list-group-item'>设备总数:" + "<input type='text' name='device' value=''>" + "</li>"+"<li class='list-group-item'>备注:" + "<input type='textarea' name='markdown' value=''>" + "</li>"
 
                     $('#report').append(html);
                 }
+            });
+
+            $('body').on('click', '.btn-report', function(){
+                var data = $('.form-create-report').serializeArray();
+                console.log(id)
+                console.log(data)
             });
 
         });
