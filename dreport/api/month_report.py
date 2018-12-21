@@ -32,12 +32,13 @@ def get_month_record(request):
 
 
 def make_report(request):
-    print(request.POST)
     parma = request.POST
     bot = MonthRecordFunction()
     file_path = bot.report(parma)
+    print(file_path)
     file = open(file_path, 'rb')
     response = FileResponse(file)
     response['Content-Type'] = 'application/octet-stream'
     response['Content-Disposition'] = 'attachment;filename="example.tar.gz"'
+    print(response)
     return response
