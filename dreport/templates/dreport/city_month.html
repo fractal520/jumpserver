@@ -84,9 +84,9 @@
                             url: "{% url 'api-dreport:make_report' %}",
                             data: data,
                             contentType: "application/x-www-form-urlencoded",
-                            success: function (result){
-                                console.log(result)
-                                var path = result.path
+                            success: function (response){
+                                console.log(response)
+                                var path = response.path
                                 location.href = path
                                 //window.location.reload()
                             }

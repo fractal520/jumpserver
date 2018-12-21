@@ -36,8 +36,7 @@ def make_report(request):
     bot = MonthRecordFunction()
     file_path = bot.report(parma)
     print(file_path)
-    file = open(file_path, 'rb')
-    response = FileResponse(file)
+    response = FileResponse(open(file_path, 'rb'))
     response['Content-Type'] = 'application/octet-stream'
     response['Content-Disposition'] = 'attachment;filename="example.tar.gz"'
     print(response)

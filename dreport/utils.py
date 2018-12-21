@@ -21,7 +21,6 @@ class MonthRecordFunction(object):
         year = date.split('-')[0]
         month = date.split('-')[1]
         records = CityPauseRecord.objects.filter(city=city, risk_date__month=month, risk_date__year=year)
-        print(records)
         pause_count = 0
         total_pause_time = 0
         if records:
@@ -79,7 +78,6 @@ class MonthRecordFunction(object):
             'text': parma.get('markdown', None),
             'form': risk_list,
         }
-        print(context)
         tpl.render(context)
         report_path = os.path.join(settings.DEVICE_REPORT_DIR, '{}_{}.docx'.format(record.month, record.city.name))
         tpl.save(report_path)
