@@ -38,11 +38,10 @@ class MonthRecordFunction(object):
 
     def report(self, parma):
 
-        year = datetime.strftime(datetime.now(), "%Y")
         # print(parma)
         record_id = parma.get('id')
         record = CityMonthRecord.get_record(record_id)
-
+        year = record.year
         risk_list = []
         risks = CityPauseRecord.objects.filter(city=record.city, risk_date__month=record.month, risk_date__year=year)
         list_num = 1
@@ -58,7 +57,7 @@ class MonthRecordFunction(object):
                 'risk_time': risk.risk_date_time,
                 'recovery_date_time': risk.recovery_date_time,
                 'pause_time': pause_time,
-                'text': ''
+                'text': risk.remark
             }
             list_num += 1
             risk_list.append(risk_dict)
@@ -70,7 +69,7 @@ class MonthRecordFunction(object):
 
         context = {
             'city': record.city.name,
-            'year': datetime.strftime(datetime.now(), "%Y"),
+            'year': year,
             'month': record.month,
             'device_count': parma.get('device', None),
             'total_error': record.pause_count,
