@@ -81,6 +81,6 @@ class MonthRecordFunction(object):
             'form': risk_list,
         }
         print(context)
-        # tpl.render(context)
-        # tpl.save(os.path.join(settings.DEVICE_REPORT_DIR, '{}_{}.docx'.format(record.month, record.city.name)))
+        tpl.render(context)
+        tpl.save(os.path.join(settings.DEVICE_REPORT_DIR, '{}_{}.docx'.format(record.month, record.city.name)))
         return True
