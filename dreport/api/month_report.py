@@ -44,6 +44,6 @@ def download_report(request, pk):
     file_path = os.path.join(settings.DEVICE_REPORT_DIR, file)
     print(file_path)
     response = FileResponse(open(file_path, 'rb'))
-    response['Content-Type'] = 'application/octet-stream'
-    response['Content-Disposition'] = 'attachment;filename="{0}"'.format(file)
+    # response['Content-Type'] = 'application/octet-stream'
+    # response['Content-Disposition'] = 'attachment;filename="{0}"'.format(file)
     return response
