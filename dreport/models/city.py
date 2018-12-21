@@ -65,6 +65,7 @@ class CityPauseRecord(models.Model):
     recovery_date_time = models.DateTimeField(null=True, blank=True)
     risk_date_time_edit = models.DateTimeField(null=False, blank=True)
     log_name = models.CharField(max_length=256, null=False, default='')
+    remark = models.CharField(max_length=256, default='')
 
     def add_record(self, risk_list, risk_date):
         print(risk_date)
