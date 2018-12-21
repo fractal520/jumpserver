@@ -58,5 +58,5 @@ class MonthRecordFunction(object):
         }
 
         tpl.render(context)
-        tpl.save(os.path.join(settings.DEVICE_REPORT_DIR, '{}_{}.docx'.format('month', 'city')))
+        tpl.save(os.path.join(settings.DEVICE_REPORT_DIR, '{}_{}.docx'.format(record.month, record.city.name)))
         return True
