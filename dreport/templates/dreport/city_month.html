@@ -75,8 +75,25 @@
                     $('#report').append(html);
                     $('body').on('click', '.btn-report', function(){
                         var data = $('.form-create-report').serializeArray();
-                        console.log(id)
+                        data.push({'name': 'id', 'value': id})
                         console.log(data)
+
+                        $.ajax({
+                            type: "POST",
+                            dataType: "json",
+                            url: "{% url 'api-dreport:make_report' %}",
+                            data: data,
+                            contentType: "application/x-www-form-urlencoded",
+                            success: function (result){
+                                console.log(result)
+                                if (result.code == 200){
+                                    window.location.reload()
+                                }else{
+                                    alert('error')
+                                }
+                            }
+                        });
+                        
                     });
                 }
             });

@@ -32,8 +32,7 @@ def get_month_record(request):
 
 
 def make_report(request):
-    print(request.GET)
-    record_id = request.GET.get('id')
-    bot = MonthRecordFunction()
-    bot.report(record_id)
+    print(request.POST)
+    # bot = MonthRecordFunction()
+    # bot.report(record_id)
     return JsonResponse(dict(code=200, mgs=''))

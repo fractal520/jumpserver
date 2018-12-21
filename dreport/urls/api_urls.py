@@ -9,4 +9,6 @@ urlpatterns = [
          api.create_month_record, name='create-monthrecord'),
     path('CityMonthView/get_month_record/',
          api.get_month_record, name='get_month_record'),
+    path('CityMonthView/make_report/',
+             api.make_report, name='make_report'),
 ]
