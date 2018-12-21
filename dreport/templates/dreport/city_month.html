@@ -39,15 +39,13 @@
                     <h4 class="modal-title">设备网络运行报告</h4>
                 </div>
                 <div class="modal-body">
-                    <form class="form-create-report">
+                    <form class="form-create-report" id="report">
                         <div class="panel panel-info">
                             <div class="panel-heading">
                                 <h3 class="panel-title">
                                     报告信息
                                 </h3>
                             </div>
-                            <ul class="list-group" id="report">
-                            </ul>
                         </div>
                         {% csrf_token %}
                     </form>
@@ -72,7 +70,7 @@
             $.get("{% url 'api-dreport:get_month_record' %}", {'id':id}, function(result){
                 console.log(result)
                 if(result.code == 200){
-                    var html = "<li class='list-group-item'>城市:" + result.data.city + "</li>"+"<li class='list-group-item'>月份:" + result.data.month + "</li>"+"<li class='list-group-item'>熔断次数:" + result.data.total_error + "</li>"+"<li class='list-group-item'>故障时间(秒):" + result.data.error_time + "</li>"+"<li class='list-group-item'>设备总数:" + "<input type='text' name='device' value=''>" + "</li>"+"<li class='list-group-item'>备注:" + "<input type='textarea' name='markdown' value=''>" + "</li>"
+                    var html = "城市:" + result.data.city + "月份:" + result.data.month +"熔断次数:" + result.data.total_error +"故障时间(秒):" + result.data.error_time + "设备总数:" + "<input type='text' name='device' value=''>"+"备注:" + "<input type='textarea' name='markdown' value=''>"
 
                     $('#report').append(html);
                     $('body').on('click', '.btn-report', function(){
