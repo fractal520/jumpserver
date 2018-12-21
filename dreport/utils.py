@@ -47,13 +47,17 @@ class MonthRecordFunction(object):
         risks = CityPauseRecord.objects.filter(city=record.city, risk_date__month=record.month, risk_date__year=year)
         list_num = 1
         for risk in risks:
+            if not risk.recovery_date_time:
+                pause_time = 0
+            else:
+                pause_time = (risk.recovery_date_time - risk.risk_date_time).seconds
             risk_dict = {
                 'Num': list_num,
                 'city': record.city,
                 'risk_date': risk.risk_date,
                 'risk_time': risk.risk_date_time,
                 'recovery_date_time': risk.recovery_date_time,
-                'pause_time': (risk.recovery_date_time - risk.risk_date_time).seconds,
+                'pause_time': pause_time,
                 'text': ''
             }
             list_num += 1
