@@ -49,12 +49,12 @@ class MonthRecordFunction(object):
             'city': record.city.name,
             'year': datetime.strftime(datetime.now(), "%Y"),
             'month': record.month,
-            'device_count': parma.get('device'),
+            'device_count': parma.get('device', None),
             'total_error': record.pause_count,
             'error_time': total_pause_time,
             'error_date': '',
             'device_avarate': device_avarate,
-            'text': parma.get('markdown'),
+            'text': parma.get('markdown', None),
         }
 
         tpl.render(context)
