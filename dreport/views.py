@@ -3,6 +3,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.utils.translation import ugettext as _
 from django.views.generic import ListView, UpdateView, DetailView, CreateView
 from django.urls import reverse_lazy
+from django.core.exceptions import ObjectDoesNotExist
 from datetime import datetime
 from .models.city import CityMonthRecord, City, CityPauseRecord
 from .forms.dreportapp import CityUpdateForm, CityCreateForm, RecordUpdateForm
@@ -23,16 +24,22 @@ class CityUpdateView(AdminUserRequiredMixin, UpdateView):
     template_name = 'dreport/city_update.html'
     form_class = CityUpdateForm
     success_url = reverse_lazy('dreport:CityView')
+    context_object_name = 'city'
 
     def get_context_data(self, **kwargs):
+        path = self.request.path
+        city_id = path.split('/')[-3]
+        try:
+            city_name = City.objects.get(id=city_id).name
+        except ObjectDoesNotExist as error:
+            city_name = None
+            print(error)
         context = {
             'app': _('Dreport'),
             'action': _('Update City'),
+            'city_name': city_name,
         }
         kwargs.update(context)
-        print(self.request)
-        print(type(self.request))
-        print(self.request.path)
         return super().get_context_data(**kwargs)
 
 
