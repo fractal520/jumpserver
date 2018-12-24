@@ -1,0 +1,119 @@
+{% extends '_base_list.html' %}
+{% load i18n static %}
+{% block table_search %}{% endblock %}
+{% block content_left_head %}{% endblock %}
+{% block table_container %}
+<table class="table table-striped table-bordered table-hover " id="city_month_table" >
+    <thead>
+        <tr>
+            <th>城市</th>
+            <th>年份</th>
+            <th>月份</th>
+            <th>熔断次数</th>
+            <th>故障时间</th>
+            <th>操作</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for record in city_month %}
+        <tr>
+            <td>{{record.city}}</td>
+            <td>{{record.year}}</td>
+            <td>{{record.month}}</td>
+            <td>{{record.pause_count}}</td>
+            <td>{{record.total_pause_time}}</td>
+            <td>
+                <a class="btn btn-xs btn-primary btn-template" href="javascript:void(0)" id="{{record.id}}">生成报告</a>
+                <!--<a class="btn btn-xs btn-primary" href="#">编辑</a>-->
+                <!--<a class="btn btn-danger btn-xs btn-delete" href="javascript:void(0)" id="{{record.id}}">删除</a>-->
+                {% if record.report_name %}
+                <a class="btn btn-xs btn-success" href="{% url 'api-dreport:download_report' pk=record.id %}">下载报告</a>
+                {% else %}
+                <a class="btn btn-xs btn-success" disabled="disabled" href="javascript:void(0)">下载报告</a>
+                {% endif %}
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+    <!-- /.create-report-modal -->
+    <div class="modal fade" tabindex="-1" role="dialog" id="dialog-create-report">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">设备网络运行报告</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="panel panel-info">
+                        <div class="panel-heading">
+                            <h3 class="panel-title">
+                                报告信息
+                            </h3>
+                        </div>
+                        <form class="form-create-report" id="report">
+                            {% csrf_token %}
+                        </form>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default btn-close" data-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary btn-report">生成</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+
+{% endblock %}
+{% block custom_foot_js %}
+<script>
+    jQuery(document).ready(function(){
+        $('#city_month_table').DataTable();
+        console.log('month record')
+        $('body').on('click', '.btn-template', function(){
+            var id = $(this).attr('id');
+            $('#dialog-create-report').modal({show:true});
+            //ajax获取城市月份数据填充到表格里面
+            $.get("{% url 'api-dreport:get_month_record' %}", {'id':id}, function(result){
+                if(result.code == 200){
+                    var html = "<li>城市:" + result.data.city + "</li><br/><li>月份:" + result.data.month +"</li><br/><li>熔断次数:" + result.data.total_error +"</li><br/><li>故障时间(秒):" + result.data.error_time + "</li><br/><li>设备总数:" + "<input type='text' name='device' value=''>"+"</li><br/><li>分析:" + "<textarea style='width: 200px; height: 100px' name='markdown'></textarea></li>"
+
+                    $('#report').append(html);
+                    $('body').on('click', '.btn-report', function(){
+                        var data = $('.form-create-report').serializeArray();
+                        data.push({'name': 'id', 'value': id})
+
+                        $.ajax({
+                            type: "POST",
+                            dataType: "json",
+                            url: "{% url 'api-dreport:make_report' %}",
+                            data: data,
+                            contentType: "application/x-www-form-urlencoded",
+                            success: function (response){
+                                console.log(response)
+                                //window.location.reload()
+                            }
+                        });
+                    });
+                }
+            });
+
+            $('#dialog-create-report').on('hidden.bs.modal', function () {
+              window.location.reload()
+            })
+
+        });
+
+        $('body').on('click', '.btn-close', function(){
+            window.location.reload()
+        });
+
+        $('body').on('click', '.btn-delete', function(){
+            var id = $(this).attr('id');
+            console.log(id)
+        });        
+
+
+    });
+</script>
+{% endblock %}

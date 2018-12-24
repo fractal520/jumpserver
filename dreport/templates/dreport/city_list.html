@@ -1,0 +1,100 @@
+{% extends '_base_list.html' %}
+{% load i18n static %}
+{% block table_search %}{% endblock %}
+{% block content_left_head %}
+<div class="btn-group">
+    <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">功能 
+        <span class="caret"></span>
+    </button>
+    <ul class="dropdown-menu" role="menu">
+        <li><a href="{% url 'dreport:city-create' %}">创建城市</a></li>
+        <li><a href="{% url 'dreport:CityMonthView' %}">月度记录</a></li>
+        <li><a href="{% url 'dreport:CityRecord' %}">熔断记录</a></li>
+        <li class="divider"></li>
+        <li><a href="#">分离的链接</a></li>
+    </ul>
+</div>
+{% endblock %}
+{% block table_container %}
+<table class="table table-striped table-bordered table-hover " id="city_table" >
+    <thead>
+        <tr>
+            <th>城市</th>
+            <th>企业ID</th>
+            <th>操作</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for city in citys %}
+        <tr>
+            <td><a href="{% url 'dreport:city-update' pk=city.id %}">{{city.name}}</a></td>
+            <td>{{city.city_code}}</td>
+            <td>
+                <a class="btn btn-xs btn-primary btn-create" href="javascript:void(0)" city-id="{{city.id}}">生成月份报表</a>
+                <a class="btn btn-xs btn-primary" href="{% url 'dreport:city-update' pk=city.id %}">更新</a>
+                <a class="btn btn-xs btn-danger" href="#">删除</a>
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+    <!-- /.create-record-modal -->
+    <div class="modal fade" tabindex="-1" role="dialog" id="dialog-create-record">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Modal title</h4>
+                </div>
+                <div class="modal-body">
+                    <p>请选择生成月份</p>
+                    <form class="form-create-month-record">
+                        月份:<input type="month" name="record-month" id="record-month">
+                        {% csrf_token %}
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary btn-record">Save changes</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+
+
+{% endblock %}
+{% block custom_foot_js %}
+<script>
+jQuery(document).ready(function(){
+    $('#city_table').DataTable();
+    $('body').on('click', '.btn-create', function(){
+        var id=$(this).attr('city-id');
+        $('#dialog-create-record').modal({show:true});
+        $('body').on('click', '.btn-record', function(){
+            var data = $('.form-create-month-record').serializeArray();
+            data.push({'name': 'id', 'value': id})
+            console.log(data)
+
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: "{% url 'api-dreport:create-monthrecord' %}",
+                data: data,
+                contentType: "application/x-www-form-urlencoded",
+                success: function (result){
+                    console.log(result)
+                    if (result.code == 200){
+                        window.location.reload()
+                    }else{
+                        alert('error')
+                    }
+                }
+            });
+
+        });
+    });
+});
+
+
+</script>
+{% endblock %}
