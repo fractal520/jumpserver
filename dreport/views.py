@@ -58,9 +58,11 @@ class CityMonthView(AdminUserRequiredMixin, ListView):
 
 
 # 城市月度删除视图
+'''
 class CityMonthDeleteView(AdminUserRequiredMixin, DeleteView):
     model = CityMonthRecord
     success_url = reverse_lazy('dreport:CityMonthView')
+'''
 
 
 # 全国熔断记录视图
