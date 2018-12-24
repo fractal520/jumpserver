@@ -148,7 +148,7 @@
 {% block custom_foot_js %}
 <script>
     jQuery(document).ready(function(){
-
+        console.log('detail')
         $('body').on('click', '.btn-deploy-per', function(){
             swal({
                 title: "{% trans 'Are you sure?' %}",

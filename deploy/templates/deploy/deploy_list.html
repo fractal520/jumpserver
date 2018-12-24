@@ -53,6 +53,7 @@
 {% block custom_foot_js %}
 <script>
 jQuery(document).ready(function(){
+    $('#city_record_table').DataTable();
     //flush deploy list
     $('body').on('click', '.btn-update', function(){
         $.get("{% url 'api-deploy:get_jenkins_all' %}", {}, function(){});
