@@ -25,7 +25,7 @@
             <td>
                 <a class="btn btn-xs btn-primary btn-template" href="javascript:void(0)" id="{{record.id}}">生成报告</a>
                 <a class="btn btn-xs btn-primary" href="#">编辑</a>
-                <a class="btn btn-danger btn-xs" href="{% url 'dreport:CityMonthDeleteView' pk=record.id %}">删除</a>
+                <a class="btn btn-danger btn-xs btn-delete" href="javascript:void(0)" id="record.id">删除</a>
                 {% if record.report_name %}
                 <a class="btn btn-xs btn-success" href="{% url 'api-dreport:download_report' pk=record.id %}">下载报告</a>
                 {% else %}
@@ -108,6 +108,22 @@
         $('body').on('click', '.btn-close', function(){
             window.location.reload()
         });
+
+        $('body').on('click', '.btn-delete', function(){
+            var id = $(this).attr('id');
+            console.log(id)
+            $.ajax({
+                type: "GET",
+                dataType: "json",
+                url: "{% url 'dreport:CityMonthDeleteView' pk=DEFAULT %}".replace("{{DEFAULT}}", id),
+                contentType: "application/x-www-form-urlencoded",
+                success: function (response){
+                    console.log(response)
+                    //window.location.reload()
+                }
+            });
+        });
+
     });
 </script>
 {% endblock %}

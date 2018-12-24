@@ -60,7 +60,6 @@ class CityMonthView(AdminUserRequiredMixin, ListView):
 # 城市月度删除视图
 class CityMonthDeleteView(AdminUserRequiredMixin, DeleteView):
     model = CityMonthRecord
-    template_name = 'delete_confirm.html'
     success_url = reverse_lazy('dreport:CityMonthView')
 
 
