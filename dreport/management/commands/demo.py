@@ -13,7 +13,7 @@ from dreport.tasks import collect_risk_manual
 class Command(BaseCommand):
 
     def __init__(self):
-        self.rcs_ip = '192.168.0.127'
+        self.rcs_ip = '10.10.3.46'
         self.rcs_log_dir = '/scss/logs/rcs/'
 
     def handle(self, *args, **options):
@@ -22,7 +22,7 @@ class Command(BaseCommand):
         rcs = Asset.objects.get(ip=self.rcs_ip)
         print(rcs.admin_user)
 
-        result = collect_risk_manual(asset=rcs, script_path='/home/jumperserver/RA.py')
+        result = collect_risk_manual(asset=rcs, script_path='/opt/CronScript/RA.py')
         print(result)
         if result[0]['ok']:
             data = result[0]['ok'][rcs.hostname]
