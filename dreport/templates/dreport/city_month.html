@@ -111,9 +111,11 @@
         $('body').on('click', '.btn-delete', function(){
             var id = $(this).attr('id');
             var url = "{% url 'dreport:CityMonthDeleteView' pk=DEFAULT_pk %}".replace("{{DEFAULT_pk}}", id)
-            $.get(url, {}, function(result){
-                console.log(result)
-            });
+            console.log(id)
+            console.log(url)
+            //$.get(url, {}, function(result){
+            //    console.log(result)
+            //});
         });        
 
 
