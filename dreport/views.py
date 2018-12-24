@@ -32,6 +32,7 @@ class CityUpdateView(AdminUserRequiredMixin, UpdateView):
         kwargs.update(context)
         print(self.request)
         print(type(self.request))
+        print(self.request.GET.keys())
         return super().get_context_data(**kwargs)
 
 
