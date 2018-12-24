@@ -20,7 +20,9 @@
             <td>{{record.risk_date_time}}</td>
             <td>{{record.recovery_date_time}}</td>
             <td>{{record.remark}}</td>
-            <td><a class="btn btn-primary btn-xs" href="{% url 'dreport:record-update' pk=record.id %}">编辑</a></td>
+            <td>
+                <a class="btn btn-primary btn-xs" href="{% url 'dreport:record-update' pk=record.id %}">编辑</a>
+            </td>
         </tr>
     {% endfor %}
     </tbody>
