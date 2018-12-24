@@ -30,7 +30,7 @@ class CityUpdateView(AdminUserRequiredMixin, UpdateView):
             'action': _('Update City'),
         }
         kwargs.update(context)
-        print(self.request.body)
+        print(self.request)
         return super().get_context_data(**kwargs)
 
 
