@@ -18,6 +18,7 @@
     {% endif %}
     {% csrf_token %}
     <h3>{% trans 'Basic' %}</h3>
+    {% form.name %}
     {% bootstrap_field form.name layout="horizontal" %}
     {% bootstrap_field form.city_code layout="horizontal" %}
     <div class="hr-line-dashed"></div>
