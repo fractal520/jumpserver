@@ -57,12 +57,6 @@ class CityMonthView(AdminUserRequiredMixin, ListView):
     context_object_name = 'city_month'
 
 
-# 城市月度删除视图
-class CityMonthDeleteView(AdminUserRequiredMixin, DeleteView):
-    model = CityMonthRecord
-    success_url = reverse_lazy('dreport:CityMonthView')
-
-
 # 全国熔断记录视图
 class CityRecord(AdminUserRequiredMixin, ListView):
     model = CityPauseRecord
