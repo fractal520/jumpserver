@@ -66,7 +66,7 @@
 {% block custom_foot_js %}
 <script>
 jQuery(document).ready(function(){
-    $('#city_record_table').DataTable();
+    $('#city_table').DataTable();
     $('body').on('click', '.btn-create', function(){
         var id=$(this).attr('city-id');
         $('#dialog-create-record').modal({show:true});
