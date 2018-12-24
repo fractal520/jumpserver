@@ -1,7 +1,7 @@
 from django.shortcuts import render, HttpResponse
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.utils.translation import ugettext as _
-from django.views.generic import ListView, UpdateView, DetailView, CreateView
+from django.views.generic import ListView, UpdateView, DetailView, CreateView, DeleteView
 from django.urls import reverse_lazy
 from django.core.exceptions import ObjectDoesNotExist
 from datetime import datetime
@@ -52,14 +52,16 @@ class CityCreateView(AdminUserRequiredMixin, CreateView):
 
 # 城市月度统计视图
 class CityMonthView(AdminUserRequiredMixin, ListView):
-    # model = CityMonthRecord
+    model = CityMonthRecord
     template_name = 'dreport/city_month.html'
     context_object_name = 'city_month'
 
-    def get_queryset(self):
-        month = self.request.GET.get('month') if self.request.GET.get('month') else datetime.strftime(datetime.now(), '%m')
-        queryset = CityMonthRecord.objects.filter(month=month)
-        return queryset
+
+# 城市月度删除视图
+class CityMonthDeleteView(AdminUserRequiredMixin, DeleteView):
+    model = CityMonthRecord
+    template_name = 'delete_confirm.html'
+    success_url = reverse_lazy('dreport:CityMonthView')
 
 
 # 全国熔断记录视图
@@ -80,7 +82,11 @@ class RecordUpdateView(AdminUserRequiredMixin, UpdateView):
     def get_context_data(self, **kwargs):
         path = self.request.path
         record_id = path.split('/')[-3]
-        record = CityPauseRecord.objects.get(id=record_id)
+        try:
+            record = CityPauseRecord.objects.get(id=record_id)
+        except ObjectDoesNotExist as error:
+            record = None
+            print(error)
         context = {
             'app': _('Dreport'),
             'action': _('Update Record'),

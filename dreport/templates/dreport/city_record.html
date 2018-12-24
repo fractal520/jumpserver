@@ -9,6 +9,7 @@
             <th>城市</th>
             <th>故障日期</th>
             <th>恢复时间</th>
+            <th>备注</th>
             <th>操作</th>
         </tr>
     </thead>
@@ -18,6 +19,7 @@
             <td>{{record.city}}</td>
             <td>{{record.risk_date_time}}</td>
             <td>{{record.recovery_date_time}}</td>
+            <td>{{record.remark}}</td>
             <td><a class="btn btn-primary btn-xs" href="{% url 'dreport:record-update' pk=record.id %}">编辑</a></td>
         </tr>
     {% endfor %}
