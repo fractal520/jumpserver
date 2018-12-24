@@ -24,20 +24,11 @@ class CityUpdateView(AdminUserRequiredMixin, UpdateView):
     template_name = 'dreport/city_update.html'
     form_class = CityUpdateForm
     success_url = reverse_lazy('dreport:CityView')
-    context_object_name = 'city'
 
     def get_context_data(self, **kwargs):
-        path = self.request.path
-        city_id = path.split('/')[-3]
-        try:
-            city_name = City.objects.get(id=city_id).name
-        except ObjectDoesNotExist as error:
-            city_name = None
-            print(error)
         context = {
             'app': _('Dreport'),
-            'action': _('Update City'),
-            'city_name': city_name,
+            'action': _('Update City')
         }
         kwargs.update(context)
         return super().get_context_data(**kwargs)
@@ -84,12 +75,17 @@ class RecordUpdateView(AdminUserRequiredMixin, UpdateView):
     template_name = 'dreport/record_update.html'
     form_class = RecordUpdateForm
     success_url = reverse_lazy('dreport:CityRecord')
+    context_object_name = 'record'
 
     def get_context_data(self, **kwargs):
+        path = self.request.path
+        record_id = path.split('/')[-3]
+        record = CityPauseRecord.objects.get(id=record_id)
         context = {
             'app': _('Dreport'),
             'action': _('Update Record'),
-            'risk_time': self.request.GET.get
+            'risk_time': record.risk_date_time,
+            'city_name': record.city.name
         }
         kwargs.update(context)
         return super().get_context_data(**kwargs)

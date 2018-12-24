@@ -18,10 +18,6 @@
     {% endif %}
     {% csrf_token %}
     <h3>{% trans 'Basic' %}</h3>
-    <dl class="dl-horizontal">
-        <dt>城市</dt>
-        <dd><b>{{ city_name }}</b></dd>
-    </dl>
     {% bootstrap_field form.name layout="horizontal" %}
     {% bootstrap_field form.city_code layout="horizontal" %}
     <div class="hr-line-dashed"></div>
