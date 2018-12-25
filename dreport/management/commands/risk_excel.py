@@ -21,7 +21,7 @@ class Command(BaseCommand):
         workbook = xlwt.Workbook(encoding='utf-8')
         worksheet = workbook.add_sheet('records')
         titlestyle = xlwt.easyxf('pattern: pattern solid, fore_colour dark_green_ega;')
-        name_list = ['城市', '', '', '故障日期', '星期', '故障时间', '恢复时间', '故障时长', '备注']
+        name_list = ['城市', '', '故障日期', '星期', '故障时间', '恢复时间', '故障时长', '备注']
 
         colume_count = 0
         row_count = 0
@@ -34,18 +34,21 @@ class Command(BaseCommand):
         for record in records:
             worksheet.write(row_count, 0, record.city.name)
             worksheet.write(row_count, 1, '')
-            worksheet.write(row_count, 2, '')
-            worksheet.write(row_count, 3, datetime.strftime(record.risk_date, "%Y/%m/%d"))
-            worksheet.write(row_count, 4, week_dict.get(datetime.strftime(record.risk_date, "%A")))
+            worksheet.write(row_count, 2, datetime.strftime(record.risk_date, "%Y/%m/%d"))
+            worksheet.write(row_count, 3, week_dict.get(datetime.strftime(record.risk_date, "%A")))
             # worksheet.write(row_count, 4, datetime.strftime(record.risk_date, "%A"))
-            worksheet.write(row_count, 5, datetime.strftime(record.risk_date_time, "%H:%M"))
+            worksheet.write(row_count, 4, datetime.strftime(record.risk_date_time, "%H:%M"))
             if record.recovery_date_time:
-                worksheet.write(row_count, 6, datetime.strftime(record.recovery_date_time, "%H:%M"))
-                worksheet.write(row_count, 7, round((record.recovery_date_time - record.risk_date_time).seconds / 60))
+                worksheet.write(row_count, 5, datetime.strftime(record.recovery_date_time, "%H:%M"))
+                worksheet.write(
+                    row_count,
+                    6,
+                    str(round((record.recovery_date_time - record.risk_date_time).seconds / 60))+'分钟'
+                )
             else:
+                worksheet.write(row_count, 5, None)
                 worksheet.write(row_count, 6, None)
-                worksheet.write(row_count, 7, None)
-            worksheet.write(row_count, 8, record.remark)
+            worksheet.write(row_count, 7, record.remark)
             row_count += 1
 
         workbook.save(os.path.join(save_address, data_month + 'record.xls'))
