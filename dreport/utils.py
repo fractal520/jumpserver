@@ -56,7 +56,7 @@ class MonthRecordFunction(object):
                 'city': record.city,
                 'risk_date': risk.risk_date,
                 'risk_time': datetime.strftime(risk.risk_date_time.astimezone(), "%H:%M:%S"),
-                'recovery_date_time': datetime.strftime(risk.recovery_date_time.astimezone(), "%H:%M:%S"),
+                'recovery_date_time': datetime.strftime(risk.recovery_date_time.astimezone(), "%H:%M:%S") or None,
                 'pause_time': pause_time,
                 'text': risk.remark
             }
