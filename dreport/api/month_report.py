@@ -56,6 +56,7 @@ def get_risk_record(request):
     file = '12record.xls'
     file_path = os.path.join(settings.DEVICE_REPORT_DIR, file)
     response = FileResponse(open(file_path, 'rb'))
-    response['Content-Type'] = 'application/vnd.ms-excel'
+    # response['Content-Type'] = 'application/vnd.ms-excel'
+    response['Content-Type'] = 'application/octet-stream'
     response['Content-Disposition'] = "attachment; filename*=utf-8''{}".format(escape_uri_path(file))
     return response
