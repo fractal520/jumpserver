@@ -81,7 +81,7 @@
         $('.btn-record-model').on('click', function(){
             console.log('btn-record-model')
             $('#dialog-record-download').modal({show:true});
-            $('.body').on('click', '.btn-download', function(){
+            $('.btn-download').on('click', function(){
                 var data = $('.form-record-download').serializeArray();
                 console.log(data)
                 $.get("{% url 'api-dreport:get_risk_record' %}", data, function(result){
