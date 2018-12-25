@@ -6,6 +6,7 @@ from .models.city import City, CityMonthRecord, CityPauseRecord
 from django.core.exceptions import ObjectDoesNotExist
 from docxtpl import DocxTemplate
 from django.conf import settings
+from django.utils import timezone
 from datetime import datetime
 
 TEMPLATE_DIR = os.path.join(settings.DEVICE_REPORT_DIR, 'WTSDtmp.docx')
@@ -48,17 +49,20 @@ class MonthRecordFunction(object):
         for risk in risks:
             if not risk.recovery_date_time:
                 pause_time = 0
+                recovery_date_time = None
             else:
                 pause_time = (risk.recovery_date_time - risk.risk_date_time).seconds
+                recovery_date_time = datetime.strftime(risk.recovery_date_time.astimezone(), "%H:%M:%S")
             risk_dict = {
                 'Num': list_num,
                 'city': record.city,
                 'risk_date': risk.risk_date,
-                'risk_time': risk.risk_date_time,
-                'recovery_date_time': risk.recovery_date_time,
+                'risk_time': datetime.strftime(risk.risk_date_time.astimezone(), "%H:%M:%S"),
+                'recovery_date_time': recovery_date_time,
                 'pause_time': pause_time,
                 'text': risk.remark
             }
+
             list_num += 1
             risk_list.append(risk_dict)
 
@@ -111,7 +115,7 @@ class RiskRecord(object):
             colume_count += 1
 
         row_count += 1
-
+        # datetime.strftime(risk.recovery_date_time.astimezone(), "%H:%M:%S")
         for record in records:
             worksheet.write(row_count, 0, record.city.name)
             worksheet.write(row_count, 1, '')
@@ -119,9 +123,9 @@ class RiskRecord(object):
             worksheet.write(row_count, 3, datetime.strftime(record.risk_date, "%Y/%m/%d"))
             worksheet.write(row_count, 4, week_dict.get(datetime.strftime(record.risk_date, "%A")))
             # worksheet.write(row_count, 4, datetime.strftime(record.risk_date, "%A"))
-            worksheet.write(row_count, 5, datetime.strftime(record.risk_date_time, "%H:%M"))
+            worksheet.write(row_count, 5, datetime.strftime(record.risk_date_time.astimezone(), "%H:%M"))
             if record.recovery_date_time:
-                worksheet.write(row_count, 6, datetime.strftime(record.recovery_date_time, "%H:%M"))
+                worksheet.write(row_count, 6, datetime.strftime(record.recovery_date_time.astimezone(), "%H:%M"))
                 worksheet.write(
                     row_count,
                     7,
