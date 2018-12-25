@@ -11,7 +11,11 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         data_month = input('请输入你要获取的熔断月份: ')
-
+        week_dict = {
+                     'Monday': '星期一', 'Tuesday': '星期二',
+                     'Wednesday': '星期三', 'Thursday': '星期四',
+                     'Friday': '星期五', 'Saturday': '星期六', 'Sunday': '星期天'
+                     }
         save_address = '/scss/jms/jumpserver/data/report/'
         records = CityPauseRecord.objects.filter(risk_date__month=data_month)
         workbook = xlwt.Workbook(encoding='utf-8')
@@ -31,8 +35,9 @@ class Command(BaseCommand):
             worksheet.write(row_count, 0, record.city.name)
             worksheet.write(row_count, 1, '')
             worksheet.write(row_count, 2, '')
-            worksheet.write(row_count, 3, record.risk_date)
-            worksheet.write(row_count, 4, datetime.strftime(record.risk_date, "%A"))
+            worksheet.write(row_count, 3, datetime.strftime(record.risk_date, "%Y/%m/%d"))
+            worksheet.write(row_count, 4, week_dict.get(datetime.strftime(record.risk_date, "%A")))
+            # worksheet.write(row_count, 4, datetime.strftime(record.risk_date, "%A"))
             worksheet.write(row_count, 5, datetime.strftime(record.risk_date_time, "%H:%M"))
             if record.recovery_date_time:
                 worksheet.write(row_count, 6, datetime.strftime(record.recovery_date_time, "%H:%M"))
