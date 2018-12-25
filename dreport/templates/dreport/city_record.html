@@ -85,7 +85,8 @@
                 var data = $('.form-record-download').serializeArray();
                 console.log(data)
                 $.get("{% url 'api-dreport:get_risk_record' %}", data, function(result){
-                    location.href = result
+                    var path = result.path;
+                    location.href = path
                 });
             });
         });
