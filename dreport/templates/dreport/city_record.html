@@ -57,15 +57,15 @@
                         </h3>
                     </div>
                     <p>请选择下载月份</p>
-                    <form class="form-record-download" id="report">
+                    <form action="{% url 'api-dreport:get_risk_record' %}" method="get" class="form-record-download" id="report">
                         月份:<input type="month" name="record-month" id="record-month">
                         {% csrf_token %}
+                        <input class="btn btn-default" type="submit" value="下载" />
                     </form>
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-default btn-close" data-dismiss="modal">取消</button>
-                <button type="button" class="btn btn-primary btn-download">生成</button>
+                <button type="button" class="btn btn-default btn-close" data-dismiss="modal">关闭</button>
             </div>
         </div><!-- /.modal-content -->
     </div><!-- /.modal-dialog -->
@@ -81,14 +81,6 @@
         $('.btn-record-model').on('click', function(){
             console.log('btn-record-model')
             $('#dialog-record-download').modal({show:true});
-            $('.btn-download').on('click', function(){
-                var data = $('.form-record-download').serializeArray();
-                console.log(data)
-                $.get("{% url 'api-dreport:get_risk_record' %}", data, function(result){
-                    var path = result.path;
-                    location.href = path
-                });
-            });
         });
 
     });
