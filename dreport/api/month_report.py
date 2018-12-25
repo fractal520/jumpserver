@@ -52,8 +52,9 @@ def download_report(request, pk):
 
 
 def get_risk_record(request):
-    print(request.GET)
-    file = '12record.xls'
+    print(request.GET.get('record-month'))
+    bot = RiskRecord()
+    file = bot.create(request.GET.get('record-month'))
     file_path = os.path.join(settings.DEVICE_REPORT_DIR, file)
     response = FileResponse(open(file_path, 'rb'))
     # response['Content-Type'] = 'application/vnd.ms-excel'
