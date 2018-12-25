@@ -49,3 +49,13 @@ def download_report(request, pk):
     response['Content-Type'] = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
     response['Content-Disposition'] = "attachment; filename*=utf-8''{}".format(escape_uri_path(file))
     return response
+
+
+def get_risk_record(request):
+    print(request.GET)
+    file = '12record.xls'
+    file_path = os.path.join(settings.DEVICE_REPORT_DIR, file)
+    response = FileResponse(open(file_path, 'rb'))
+    response['Content-Type'] = 'application/vnd.ms-excel'
+    response['Content-Disposition'] = "attachment; filename*=utf-8''{}".format(escape_uri_path(file))
+    return response
