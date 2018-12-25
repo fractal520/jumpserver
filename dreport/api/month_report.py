@@ -36,7 +36,8 @@ def get_month_record(request):
 def make_report(request):
     parma = request.POST
     bot = MonthRecordFunction()
-    bot.report(parma)
+    if not bot.report(parma):
+        return JsonResponse(dict(code=400, error='没有记录'))
     return JsonResponse(dict(code=200, msg=''))
 
 

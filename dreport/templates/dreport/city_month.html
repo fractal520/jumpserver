@@ -104,6 +104,12 @@
                             contentType: "application/x-www-form-urlencoded",
                             success: function (response){
                                 console.log(response)
+                                if(response.code == 200){
+                                    window.location.reload()
+                                }
+                                if(response.code == 400){
+                                    alert(response.error)
+                                }
                                 //window.location.reload()
                             }
                         });
