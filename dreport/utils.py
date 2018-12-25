@@ -64,7 +64,7 @@ class MonthRecordFunction(object):
         tpl = DocxTemplate(TEMPLATE_DIR)
 
         total_pause_time = int(int(record.total_pause_time) / 60)
-        device_avarate = (1-(record.total_pause_time/(30 * 24 * 60 * 60))) * 100
+        device_avarate = (1-(record.total_pause_time/(30 * 17.5 * 60 * 60))) * 100
 
         context = {
             'city': record.city.name,
