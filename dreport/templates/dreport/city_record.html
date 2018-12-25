@@ -1,7 +1,20 @@
 {% extends '_base_list.html' %}
 {% load i18n static %}
 {% block table_search %}{% endblock %}
-{% block content_left_head %}{% endblock %}
+{% block content_left_head %}
+<div class="btn-group">
+    <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">功能 
+        <span class="caret"></span>
+    </button>
+    <ul class="dropdown-menu" role="menu">
+        <li><a href="{% url 'dreport:CityView' %}">城市列表</a></li>
+        <li><a href="{% url 'dreport:CityMonthView' %}">月度记录</a></li>
+        <li class="active"><a href="{% url 'dreport:CityRecord' %}">熔断记录</a></li>
+        <li class="divider"></li>
+        <li><a class="btn-record-model" href="javascript:void(0)">下载熔断记录</a></li>
+    </ul>
+</div>
+{% endblock %}
 {% block table_container %}
 <table class="table table-striped table-bordered table-hover " id="city_record_table" >
     <thead>
@@ -27,11 +40,49 @@
     {% endfor %}
     </tbody>
 </table>
+
+<!-- /.create-report-modal -->
+<div class="modal fade" tabindex="-1" role="dialog" id="dialog-record-download">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">设备网络运行报告</h4>
+            </div>
+            <div class="modal-body">
+                <div class="panel panel-info">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">
+                            下载熔断记录
+                        </h3>
+                    </div>
+                    <p>请选择下载月份</p>
+                    <form action="{% url 'api-dreport:get_risk_record' %}" method="get" class="form-record-download" id="report">
+                        月份:<input type="month" name="record-month" id="record-month">
+                        {% csrf_token %}
+                        <input class="btn btn-default" type="submit" value="下载" />
+                    </form>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default btn-close" data-dismiss="modal">关闭</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
 {% endblock %}
 {% block custom_foot_js %}
 <script>
     $(document).ready(function(){
         $('#city_record_table').DataTable();
+
+
+        $('.btn-record-model').on('click', function(){
+            console.log('btn-record-model')
+            $('#dialog-record-download').modal({show:true});
+        });
+
     });
 </script>
 {% endblock %}

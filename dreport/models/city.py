@@ -81,6 +81,9 @@ class CityPauseRecord(models.Model):
     log_name = models.CharField(max_length=256, null=False, default='')
     remark = models.CharField(max_length=256, default='')
 
+    def __str__(self):
+        return '{0}_{1}'.format(self.city.name, self.risk_date_time)
+
     def add_record(self, risk_list, risk_date):
         print(risk_date)
         if risk_list:

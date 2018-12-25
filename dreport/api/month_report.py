@@ -36,7 +36,8 @@ def get_month_record(request):
 def make_report(request):
     parma = request.POST
     bot = MonthRecordFunction()
-    bot.report(parma)
+    if not bot.report(parma):
+        return JsonResponse(dict(code=400, error='没有记录'))
     return JsonResponse(dict(code=200, msg=''))
 
 
@@ -47,5 +48,17 @@ def download_report(request, pk):
     response = FileResponse(open(file_path, 'rb'))
     # response['Content-Type'] = 'application/octet-stream'
     response['Content-Type'] = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    response['Content-Disposition'] = "attachment; filename*=utf-8''{}".format(escape_uri_path(file))
+    return response
+
+
+def get_risk_record(request):
+    print(request.GET.get('record-month'))
+    bot = RiskRecord()
+    file = bot.create(request.GET.get('record-month'))
+    file_path = os.path.join(settings.DEVICE_REPORT_DIR, file)
+    response = FileResponse(open(file_path, 'rb'))
+    # response['Content-Type'] = 'application/vnd.ms-excel'
+    response['Content-Type'] = 'application/octet-stream'
     response['Content-Disposition'] = "attachment; filename*=utf-8''{}".format(escape_uri_path(file))
     return response
