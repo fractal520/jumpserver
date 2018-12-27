@@ -54,6 +54,8 @@ def download_report(request, pk):
 
 def get_risk_record(request):
     print(request.GET.get('record-month'))
+    if not request.GET.get('record-month'):
+        return JsonResponse(dict(code=400, error='请选择日期'))
     bot = RiskRecord()
     file = bot.create(request.GET.get('record-month'))
     file_path = os.path.join(settings.DEVICE_REPORT_DIR, file)
