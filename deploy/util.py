@@ -14,7 +14,7 @@ def pack_up_deploy_file(app_name, only_jar=True):
     if only_jar:
         exclude_names = [conf_dir, lib_dir]
     else:
-        exclude_names = []
+        exclude_names = [conf_dir]
 
     t = tarfile.open(os.path.join(DeployList.DEPLOY_FILE_DIR, app_name, 'app', app_version+'.tar.gz'), "w:gz")
     try:
