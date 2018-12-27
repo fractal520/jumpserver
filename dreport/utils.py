@@ -51,7 +51,7 @@ class MonthRecordFunction(object):
                 pause_time = 0
                 recovery_date_time = None
             else:
-                pause_time = (risk.recovery_date_time - risk.risk_date_time).seconds
+                pause_time = (risk.recovery_date_time - risk.risk_date_time).seconds/60
                 recovery_date_time = datetime.strftime(risk.recovery_date_time.astimezone(), "%H:%M:%S")
             risk_dict = {
                 'Num': list_num,
@@ -59,7 +59,7 @@ class MonthRecordFunction(object):
                 'risk_date': risk.risk_date,
                 'risk_time': datetime.strftime(risk.risk_date_time.astimezone(), "%H:%M:%S"),
                 'recovery_date_time': recovery_date_time,
-                'pause_time': pause_time,
+                'pause_time': round(pause_time),
                 'text': risk.remark
             }
 
@@ -70,7 +70,7 @@ class MonthRecordFunction(object):
 
         total_pause_time = int(int(record.total_pause_time) / 60)
         device_avarate = (1-(record.total_pause_time/(30 * 17.5 * 60 * 60))) * 100
-
+        default_markdown = "{0}后台网络波动，导致充值熔断".format(record.city.name)
         context = {
             'city': record.city.name,
             'year': year,
@@ -79,8 +79,8 @@ class MonthRecordFunction(object):
             'total_error': record.pause_count,
             'error_time': total_pause_time,
             'error_date': '',
-            'device_avarate': device_avarate,
-            'text': parma.get('markdown', None),
+            'device_avarate': round(device_avarate, 2),
+            'text': parma.get('markdown', default_markdown),
             'form': risk_list,
         }
         tpl.render(context)
