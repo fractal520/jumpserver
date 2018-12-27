@@ -80,7 +80,7 @@ class MonthRecordFunction(object):
             'error_time': total_pause_time,
             'error_date': '',
             'device_avarate': round(device_avarate, 2),
-            'text': parma.get('markdown', default_markdown),
+            'text': parma.get('markdown') if parma.get('markdown') else default_markdown,
             'form': risk_list,
         }
         tpl.render(context)
