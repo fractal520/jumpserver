@@ -27,8 +27,8 @@ class MonthRecordFunction(object):
         total_pause_time = 0
         if records:
             for record in records:
-                pause_count += 1
                 if record.recovery_date_time:
+                    pause_count += 1
                     total_pause_time += (record.recovery_date_time - record.risk_date_time).seconds
                 else:
                     total_pause_time += 0
@@ -51,18 +51,18 @@ class MonthRecordFunction(object):
                 pause_time = 0
                 recovery_date_time = None
             else:
-                pause_time = (risk.recovery_date_time - risk.risk_date_time).seconds
+                pause_time = (risk.recovery_date_time - risk.risk_date_time).seconds/60
                 recovery_date_time = datetime.strftime(risk.recovery_date_time.astimezone(), "%H:%M:%S")
+
             risk_dict = {
                 'Num': list_num,
                 'city': record.city,
                 'risk_date': risk.risk_date,
                 'risk_time': datetime.strftime(risk.risk_date_time.astimezone(), "%H:%M:%S"),
                 'recovery_date_time': recovery_date_time,
-                'pause_time': pause_time,
+                'pause_time': round(pause_time),
                 'text': risk.remark
             }
-
             list_num += 1
             risk_list.append(risk_dict)
 
@@ -70,7 +70,7 @@ class MonthRecordFunction(object):
 
         total_pause_time = int(int(record.total_pause_time) / 60)
         device_avarate = (1-(record.total_pause_time/(30 * 17.5 * 60 * 60))) * 100
-
+        default_markdown = "{0}后台网络波动，导致充值熔断".format(record.city.name)
         context = {
             'city': record.city.name,
             'year': year,
@@ -79,8 +79,8 @@ class MonthRecordFunction(object):
             'total_error': record.pause_count,
             'error_time': total_pause_time,
             'error_date': '',
-            'device_avarate': device_avarate,
-            'text': parma.get('markdown', None),
+            'device_avarate': round(device_avarate, 2),
+            'text': parma.get('markdown') if parma.get('markdown') else default_markdown,
             'form': risk_list,
         }
         tpl.render(context)
@@ -103,10 +103,11 @@ class RiskRecord(object):
                      }
         save_address = settings.DEVICE_REPORT_DIR
         records = CityPauseRecord.objects.filter(risk_date__month=month, risk_date__year=year)
+        records = records.order_by('-risk_date_time')
         workbook = xlwt.Workbook(encoding='utf-8')
         worksheet = workbook.add_sheet('records')
         titlestyle = xlwt.easyxf('pattern: pattern solid, fore_colour dark_green_ega;')
-        name_list = ['城市', 'IP', '月 周', '故障日期', '星期', '故障时间', '恢复时间', '故障时长', '备注']
+        name_list = ['编号', '城市', 'IP', '月 周', '故障日期', '星期', '故障时间', '恢复时间', '故障时长', '备注']
 
         colume_count = 0
         row_count = 0
@@ -115,26 +116,29 @@ class RiskRecord(object):
             colume_count += 1
 
         row_count += 1
+        count = 1
         # datetime.strftime(risk.recovery_date_time.astimezone(), "%H:%M:%S")
         for record in records:
-            worksheet.write(row_count, 0, record.city.name)
-            worksheet.write(row_count, 1, '')
+            worksheet.write(row_count, 0, count)
+            count += 1
+            worksheet.write(row_count, 1, record.city.name)
             worksheet.write(row_count, 2, '')
-            worksheet.write(row_count, 3, datetime.strftime(record.risk_date, "%Y/%m/%d"))
-            worksheet.write(row_count, 4, week_dict.get(datetime.strftime(record.risk_date, "%A")))
+            worksheet.write(row_count, 3, '')
+            worksheet.write(row_count, 4, datetime.strftime(record.risk_date, "%Y/%m/%d"))
+            worksheet.write(row_count, 5, week_dict.get(datetime.strftime(record.risk_date, "%A")))
             # worksheet.write(row_count, 4, datetime.strftime(record.risk_date, "%A"))
-            worksheet.write(row_count, 5, datetime.strftime(record.risk_date_time.astimezone(), "%H:%M"))
+            worksheet.write(row_count, 6, datetime.strftime(record.risk_date_time.astimezone(), "%H:%M"))
             if record.recovery_date_time:
-                worksheet.write(row_count, 6, datetime.strftime(record.recovery_date_time.astimezone(), "%H:%M"))
+                worksheet.write(row_count, 7, datetime.strftime(record.recovery_date_time.astimezone(), "%H:%M"))
                 worksheet.write(
                     row_count,
-                    7,
+                    8,
                     str(round((record.recovery_date_time - record.risk_date_time).seconds / 60))+'分钟'
                 )
             else:
-                worksheet.write(row_count, 6, None)
                 worksheet.write(row_count, 7, None)
-            worksheet.write(row_count, 8, record.remark)
+                worksheet.write(row_count, 8, None)
+            worksheet.write(row_count, 9, record.remark)
             row_count += 1
 
         workbook.save(os.path.join(save_address, parm + 'record.xls'))

@@ -65,8 +65,8 @@ v1_api_patterns = [
     path('audits/v1/', include('audits.urls.api_urls', namespace='api-audits')),
     path('orgs/v1/', include('orgs.urls.api_urls', namespace='api-orgs')),
     path('common/v1/', include('common.urls.api_urls', namespace='api-common')),
-    path('deploy/v1/', include('deploy.urls.api_urls', namespace='api-deploy')),
-    path('dreport/v1/', include('dreport.urls.api_urls', namespace='api-dreport')),
+    path('devops/deploy/v1/', include('deploy.urls.api_urls', namespace='api-deploy')),
+    path('devops/dreport/v1/', include('dreport.urls.api_urls', namespace='api-dreport')),
 ]
 
 app_view_patterns = [
@@ -77,8 +77,8 @@ app_view_patterns = [
     path('ops/', include('ops.urls.view_urls', namespace='ops')),
     path('audits/', include('audits.urls.view_urls', namespace='audits')),
     path('orgs/', include('orgs.urls.views_urls', namespace='orgs')),
-    path('deploy/', include('deploy.urls.views_urls', namespace='deploy')),
-    path('dreport/', include('dreport.urls.views_urls', namespace='dreport')),
+    path('devops/deploy/', include('deploy.urls.views_urls', namespace='deploy')),
+    path('devops/dreport/', include('dreport.urls.views_urls', namespace='dreport')),
 ]
 
 if settings.XPACK_ENABLED:

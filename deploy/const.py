@@ -36,6 +36,13 @@ ROLLBACK_TASK = [
             "module": "file",
             "args": "",
         }
+    },
+    {
+        "name": "shell script change owner.",
+        "action": {
+            "module": "script",
+            "args": "",
+        }
     }
 
 ]
