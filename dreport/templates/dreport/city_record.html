@@ -75,7 +75,9 @@
 {% block custom_foot_js %}
 <script>
     $(document).ready(function(){
-        $('#city_record_table').DataTable();
+        $('#city_record_table').DataTable({
+            "order": [[ 0, "desc" ]]
+        });
 
 
         $('.btn-record-model').on('click', function(){
