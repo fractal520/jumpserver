@@ -17,3 +17,5 @@ if [ -d /data/${app_name}/lib ];then
     rm -rf /data/${app_name}/lib
 fi
 cp -rf ${backup_directory}/data/${app_name}/lib /data/${app_name}/
+
+chown -R admin:admin /data/${app_name}
