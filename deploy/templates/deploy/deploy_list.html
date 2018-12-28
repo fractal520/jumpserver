@@ -1,8 +1,9 @@
 {% extends '_base_list.html' %}
-{% load i18n %}
-{% load static %}
+{% load i18n static %}
+{% block table_search %}{% endblock %}
 {% block content_left_head %}<a href="javascript:void(0)" class="btn btn-xs btn-info btn-update">获取Jenkins最新状态</a>{% endblock %}
-{% block table_head %}
+{% block table_container %}
+<table class="table table-striped table-bordered table-hover " id="deploy_table" >
     <thead>
         <tr>
             <th>APP Name</th>
@@ -14,8 +15,6 @@
             <th>操作</th>
         </tr>
     </thead>
-{% endblock %}
-{% block table_body %}
     <tbody>
       {% for deploy in deploys %}
         <tr>
@@ -49,11 +48,12 @@
         </tr>
       {% endfor %}
     </tbody>
+</table>
 {% endblock %}
 {% block custom_foot_js %}
 <script>
 jQuery(document).ready(function(){
-    $('#city_record_table').DataTable();
+    $('#deploy_table').DataTable();
     //flush deploy list
     $('body').on('click', '.btn-update', function(){
         $.get("{% url 'api-deploy:get_jenkins_all' %}", {}, function(){});
