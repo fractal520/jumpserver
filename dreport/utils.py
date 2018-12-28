@@ -103,6 +103,7 @@ class RiskRecord(object):
                      }
         save_address = settings.DEVICE_REPORT_DIR
         records = CityPauseRecord.objects.filter(risk_date__month=month, risk_date__year=year)
+        records = records.order_by('-risk_date_time')
         workbook = xlwt.Workbook(encoding='utf-8')
         worksheet = workbook.add_sheet('records')
         titlestyle = xlwt.easyxf('pattern: pattern solid, fore_colour dark_green_ega;')
