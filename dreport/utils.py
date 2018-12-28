@@ -53,6 +53,7 @@ class MonthRecordFunction(object):
             else:
                 pause_time = (risk.recovery_date_time - risk.risk_date_time).seconds/60
                 recovery_date_time = datetime.strftime(risk.recovery_date_time.astimezone(), "%H:%M:%S")
+                list_num += 1
             risk_dict = {
                 'Num': list_num,
                 'city': record.city,
@@ -63,7 +64,6 @@ class MonthRecordFunction(object):
                 'text': risk.remark
             }
 
-            list_num += 1
             risk_list.append(risk_dict)
 
         tpl = DocxTemplate(TEMPLATE_DIR)

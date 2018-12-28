@@ -20,8 +20,7 @@
     <thead>
         <tr>
             <th>城市</th>
-            <th>年份</th>
-            <th>月份</th>
+            <th>年月</th>
             <th>熔断次数</th>
             <th>故障时间</th>
             <th>操作</th>
@@ -31,8 +30,7 @@
     {% for record in city_month %}
         <tr>
             <td>{{record.city}}</td>
-            <td>{{record.year}}</td>
-            <td>{{record.month}}</td>
+            <td>{{record.year}}/{{record.month}}</td>
             <td>{{record.pause_count}}</td>
             <td>{{record.total_pause_time}}</td>
             <td>
@@ -81,7 +79,9 @@
 {% block custom_foot_js %}
 <script>
     jQuery(document).ready(function(){
-        $('#city_month_table').DataTable();
+        $('#city_month_table').DataTable({
+            "order": [[ 1, "desc" ]]
+        });
         console.log('month record')
         $('body').on('click', '.btn-template', function(){
             var id = $(this).attr('id');
