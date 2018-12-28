@@ -27,8 +27,8 @@ class MonthRecordFunction(object):
         total_pause_time = 0
         if records:
             for record in records:
-                pause_count += 1
                 if record.recovery_date_time:
+                    pause_count += 1
                     total_pause_time += (record.recovery_date_time - record.risk_date_time).seconds
                 else:
                     total_pause_time += 0
@@ -53,7 +53,7 @@ class MonthRecordFunction(object):
             else:
                 pause_time = (risk.recovery_date_time - risk.risk_date_time).seconds/60
                 recovery_date_time = datetime.strftime(risk.recovery_date_time.astimezone(), "%H:%M:%S")
-                list_num += 1
+
             risk_dict = {
                 'Num': list_num,
                 'city': record.city,
@@ -63,7 +63,7 @@ class MonthRecordFunction(object):
                 'pause_time': round(pause_time),
                 'text': risk.remark
             }
-
+            list_num += 1
             risk_list.append(risk_dict)
 
         tpl = DocxTemplate(TEMPLATE_DIR)

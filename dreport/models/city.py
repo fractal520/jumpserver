@@ -79,7 +79,7 @@ class CityPauseRecord(models.Model):
     recovery_date_time = models.DateTimeField(null=True, blank=True)
     risk_date_time_edit = models.DateTimeField(null=False, blank=True)
     log_name = models.CharField(max_length=256, null=False, default='')
-    remark = models.CharField(max_length=256, default='')
+    remark = models.CharField(max_length=256, default='', blank=True)
 
     def __str__(self):
         return '{0}_{1}'.format(self.city.name, self.risk_date_time)
