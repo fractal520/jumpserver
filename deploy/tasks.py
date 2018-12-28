@@ -177,6 +177,11 @@ def rollback_asset_app_version_util(asset, task_name, app_name, version):
         get_remote_data_path(app_name)
     )
 
+    tasks[3]['action']['args'] = "{0} {1}".format(
+        CHOWN_SCRIPT_DIR,
+        app_name
+    )
+
     task, create = update_or_create_ansible_task(
         task_name=task_name,
         hosts=hosts, tasks=tasks,
