@@ -19,7 +19,13 @@
       {% for deploy in deploys %}
         <tr>
             <td><a href="{% url 'deploy:deploy-update' pk=deploy.id %}">{{deploy.app_name}}</a></td>
-            <td>{{deploy.job_status}}</td>
+            <td>
+                {% if deploy.job_status %}
+                    <i class="fa fa-check text-navy"></i>
+                {% else %}
+                    <i class="fa fa-times text-danger"></i>
+                {% endif %}
+            </td>
             <td>{{deploy.get_build_status_display}}</td>
             <td>{{deploy.last_build_time}}</td>
             <td>{{deploy.published_time}}</td>
