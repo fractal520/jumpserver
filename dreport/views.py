@@ -4,6 +4,7 @@ from django.utils.translation import ugettext as _
 from django.views.generic import ListView, UpdateView, DetailView, CreateView, DeleteView
 from django.urls import reverse_lazy
 from django.core.exceptions import ObjectDoesNotExist
+from django.utils import timezone
 from datetime import datetime
 from .models.city import CityMonthRecord, City, CityPauseRecord
 from .forms.dreportapp import CityUpdateForm, CityCreateForm, RecordUpdateForm
@@ -63,6 +64,28 @@ class CityRecord(AdminUserRequiredMixin, ListView):
     template_name = 'dreport/city_record.html'
     context_object_name = 'records'
     ordering = '-risk_date_time'
+
+    def get_queryset(self):
+        """
+        Return the list of items for this view.
+
+        The return value must be an iterable and may be an instance of
+        `QuerySet` in which case `QuerySet` specific behavior will be enabled.
+        """
+        d = timezone.datetime.now()
+        if d.month == 1:
+            last_month = d.replace(year=d.year-1, month=12)
+        else:
+            last_month = timezone.datetime.strftime(d.replace(month=d.month-1), "%Y-%m-%d")
+
+        queryset = CityPauseRecord.objects.filter(risk_date__gte=last_month)
+        ordering = self.get_ordering()
+        if ordering:
+            if isinstance(ordering, str):
+                ordering = (ordering,)
+            queryset = queryset.order_by(*ordering)
+
+        return queryset
 
 
 class RecordUpdateView(AdminUserRequiredMixin, UpdateView):
