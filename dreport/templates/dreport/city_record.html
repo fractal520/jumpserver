@@ -21,6 +21,7 @@
         <tr>
             <th>故障日期</th>
             <th>城市</th>
+            <th>故障时间</th>
             <th>恢复时间</th>
             <th>备注</th>
             <th>操作</th>
@@ -29,8 +30,9 @@
     <tbody>
     {% for record in records %}
         <tr>
-            <td>{{record.risk_date_time}}</td>
+            <td>{{record.risk_date}}</td>
             <td>{{record.city}}</td>
+            <td>{{record.risk_date_time}}</td>
             <td>{{record.recovery_date_time}}</td>
             <td>{{record.remark}}</td>
             <td>
@@ -76,7 +78,10 @@
 <script>
     $(document).ready(function(){
         $('#city_record_table').DataTable({
-            "order": [[ 0, "desc" ]]
+            //"order": [[ 0, "desc" ]]
+            "columnDefs": [
+                { "type": "date", "targets": 0 }
+              ]
         });
 
 
