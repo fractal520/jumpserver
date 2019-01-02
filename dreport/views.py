@@ -120,8 +120,8 @@ class RecordUpdateView(AdminUserRequiredMixin, UpdateView):
         # edit post start here
         recovery_date_time = request.POST.get('recovery_date_time', None)
         if recovery_date_time:
-            recovery_date_time = datetime.strptime(request.POST.get('recovery_date_time'), "%Y-%m-%d %H:%M:%S")
-            request.POST['recovery_date'] = datetime.strftime(recovery_date_time, "%Y-%m-%d")
+            recovery_date_time = datetime.strptime(request.POST.get('recovery_date_time'), "%Y/%m/%d %H:%M:%S")
+            request.POST['recovery_date'] = datetime.strftime(recovery_date_time, "%Y/%m/%d")
         request.POST._mutable = _mutable
         return super().post(request, *args, **kwargs)
 
@@ -144,12 +144,12 @@ class RecordCreateView(AdminUserRequiredMixin, CreateView):
     def post(self, request, *args, **kwargs):
         self.object = None
         _mutable = request.POST._mutable
-        risk_date_time_edit = datetime.strptime(request.POST.get('risk_date_time'), "%Y-%m-%d %H:%M:%S")
-        recovery_date_time = datetime.strptime(request.POST.get('recovery_date_time'), "%Y-%m-%d %H:%M:%S")
+        risk_date_time_edit = datetime.strptime(request.POST.get('risk_date_time'), "%Y/%m/%d %H:%M:%S")
+        recovery_date_time = datetime.strptime(request.POST.get('recovery_date_time'), "%Y/%m/%d %H:%M:%S")
         request.POST._mutable = True
         request.POST['risk_date_time_edit'] = request.POST.get('risk_date_time')
         request.POST['risk_time'] = datetime.strftime(risk_date_time_edit, "%H:%M:%S")
-        request.POST['risk_date'] = datetime.strftime(risk_date_time_edit, "%Y-%m-%d")
-        request.POST['recovery_date'] = datetime.strftime(recovery_date_time, "%Y-%m-%d")
+        request.POST['risk_date'] = datetime.strftime(risk_date_time_edit, "%Y/%m/%d")
+        request.POST['recovery_date'] = datetime.strftime(recovery_date_time, "%Y/%m/%d")
         request.POST._mutable = _mutable
         return super().post(request, *args, **kwargs)
