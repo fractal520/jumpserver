@@ -50,6 +50,12 @@ class CityCreateView(AdminUserRequiredMixin, CreateView):
         kwargs.update(context)
         return super().get_context_data(**kwargs)
 
+    def post(self, request, *args, **kwargs):
+        print(request.POST)
+        print(self.fields)
+        self.object = None
+        return super().post(request, *args, **kwargs)
+
 
 # 城市月度统计视图
 class CityMonthView(AdminUserRequiredMixin, ListView):
