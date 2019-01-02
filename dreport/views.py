@@ -142,4 +142,5 @@ class RecordCreateView(AdminUserRequiredMixin, CreateView):
         request.POST._mutable = _mutable
         print(request.POST)
         print(args)
+        print(kwargs)
         return super().post(request, *args, **kwargs)
