@@ -130,7 +130,6 @@ class RecordCreateView(AdminUserRequiredMixin, CreateView):
         return super().get_context_data(**kwargs)
 
     def post(self, request, *args, **kwargs):
-        print(request.POST)
         self.object = None
         _mutable = request.POST._mutable
         risk_date_time_edit = datetime.strptime(request.POST.get('risk_date_time'), "%Y-%m-%d %H:%M:%S")
@@ -142,4 +141,5 @@ class RecordCreateView(AdminUserRequiredMixin, CreateView):
         request.POST.__setitem__('recovery_date', datetime.strftime(recovery_date_time, "%Y-%m-%d"))
         request.POST._mutable = _mutable
         print(request.POST)
+        print(*args)
         return super().post(request, *args, **kwargs)
