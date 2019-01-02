@@ -101,7 +101,7 @@ class RiskRecord(object):
         else:
             print(parm)
             print(time_quantum)
-            filename = parm.get('start-date')+'-'+parm.get('end-date')
+            filename = parm.get('start-date')+'to'+parm.get('end-date')
             records = CityPauseRecord.objects.filter(
                 risk_date__gte=parm.get('start-date'),
                 risk_date__lte=parm.get('end-date')

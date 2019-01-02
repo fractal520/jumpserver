@@ -72,12 +72,12 @@ def get_risk_record_from_time_quantum(request):
     print(request.GET.get('end-date'))
     if not request.GET.get('start-date') or not request.GET.get('end-date'):
         return JsonResponse(dict(code=400, error='请选择日期'))
-    # bot = RiskRecord()
-    # file = bot.create(request.GET, time_quantum=True)
-    # file_path = os.path.join(settings.DEVICE_REPORT_DIR, file)
-    # response = FileResponse(open(file_path, 'rb'))
-    # response['Content-Type'] = 'application/vnd.ms-excel'
-    # response['Content-Type'] = 'application/octet-stream'
-    # response['Content-Disposition'] = "attachment; filename*=utf-8''{}".format(escape_uri_path(file))
-    # return response
-    return JsonResponse(dict(code=200, msg=''))
+    bot = RiskRecord()
+    file = bot.create(request.GET, time_quantum=True)
+    file_path = os.path.join(settings.DEVICE_REPORT_DIR, file)
+    response = FileResponse(open(file_path, 'rb'))
+    response['Content-Type'] = 'application/vnd.ms-excel'
+    response['Content-Type'] = 'application/octet-stream'
+    response['Content-Disposition'] = "attachment; filename*=utf-8''{}".format(escape_uri_path(file))
+    return response
+
