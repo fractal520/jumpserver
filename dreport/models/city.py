@@ -72,14 +72,15 @@ class CityMonthRecord(models.Model):
 # 城市熔断记录
 class CityPauseRecord(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4)
-    city = models.ForeignKey(City, on_delete=models.PROTECT, null=True, verbose_name=_("City Name"))
-    risk_date = models.DateField(null=False, editable=False)
+    city = models.ForeignKey(City, on_delete=models.PROTECT, null=False, verbose_name=_("City Name"))
+    risk_date = models.DateField(null=True)
     recovery_date = models.DateField(null=True, blank=True)
-    risk_date_time = models.DateTimeField(null=False, editable=False)
+    risk_date_time = models.DateTimeField(null=False)
     recovery_date_time = models.DateTimeField(null=True, blank=True)
-    risk_date_time_edit = models.DateTimeField(null=False, blank=True)
+    risk_date_time_edit = models.DateTimeField(null=True, blank=True)
     log_name = models.CharField(max_length=256, null=False, default='')
     remark = models.CharField(max_length=256, default='', blank=True)
+    risk_time = models.TimeField(null=True)
 
     def __str__(self):
         return '{0}_{1}'.format(self.city.name, self.risk_date_time)
@@ -105,7 +106,8 @@ class CityPauseRecord(models.Model):
                     city=city,
                     risk_date=risk_date,
                     risk_date_time=risk_date_time,
-                    risk_date_time_edit=risk_date_time
+                    risk_date_time_edit=risk_date_time,
+                    risk_time=risk_time
                 )
             return True
         else:

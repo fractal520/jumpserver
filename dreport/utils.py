@@ -45,14 +45,14 @@ class MonthRecordFunction(object):
         year = record.year
         risk_list = []
         risks = CityPauseRecord.objects.filter(city=record.city, risk_date__month=record.month, risk_date__year=year)
+        risks = risks.order_by('-risk_date_time')
         list_num = 1
         for risk in risks:
             if not risk.recovery_date_time:
-                pause_time = 0
-                recovery_date_time = None
-            else:
-                pause_time = (risk.recovery_date_time - risk.risk_date_time).seconds/60
-                recovery_date_time = datetime.strftime(risk.recovery_date_time.astimezone(), "%H:%M:%S")
+                continue
+
+            pause_time = (risk.recovery_date_time - risk.risk_date_time).seconds/60
+            recovery_date_time = datetime.strftime(risk.recovery_date_time.astimezone(), "%H:%M:%S")
 
             risk_dict = {
                 'Num': list_num,
@@ -119,6 +119,8 @@ class RiskRecord(object):
         count = 1
         # datetime.strftime(risk.recovery_date_time.astimezone(), "%H:%M:%S")
         for record in records:
+            if not record.recovery_date_time:
+                continue
             worksheet.write(row_count, 0, count)
             count += 1
             worksheet.write(row_count, 1, record.city.name)
@@ -126,18 +128,13 @@ class RiskRecord(object):
             worksheet.write(row_count, 3, '')
             worksheet.write(row_count, 4, datetime.strftime(record.risk_date, "%Y/%m/%d"))
             worksheet.write(row_count, 5, week_dict.get(datetime.strftime(record.risk_date, "%A")))
-            # worksheet.write(row_count, 4, datetime.strftime(record.risk_date, "%A"))
             worksheet.write(row_count, 6, datetime.strftime(record.risk_date_time.astimezone(), "%H:%M"))
-            if record.recovery_date_time:
-                worksheet.write(row_count, 7, datetime.strftime(record.recovery_date_time.astimezone(), "%H:%M"))
-                worksheet.write(
-                    row_count,
-                    8,
-                    str(round((record.recovery_date_time - record.risk_date_time).seconds / 60))+'分钟'
-                )
-            else:
-                worksheet.write(row_count, 7, None)
-                worksheet.write(row_count, 8, None)
+            worksheet.write(row_count, 7, datetime.strftime(record.recovery_date_time.astimezone(), "%H:%M"))
+            worksheet.write(
+                row_count,
+                8,
+                str(round((record.recovery_date_time - record.risk_date_time).seconds / 60))+'分钟'
+            )
             worksheet.write(row_count, 9, record.remark)
             row_count += 1
 
