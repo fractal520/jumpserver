@@ -11,4 +11,5 @@ urlpatterns = [
     path('CityMonthView/', views.CityMonthView.as_view(), name='CityMonthView'),
     path('CityRecord/', views.CityRecord.as_view(), name='CityRecord'),
     path('CityRecord/<uuid:pk>/update/', views.RecordUpdateView.as_view(), name='record-update'),
+    path('CityRecord/create/', views.RecordCreateView.as_view(), name='RecordCreateView'),
 ]
