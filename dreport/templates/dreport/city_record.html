@@ -78,14 +78,7 @@
 <script>
     $(document).ready(function(){
         $('#city_record_table').DataTable({
-            //"order": [[ 0, "desc" ]]
-            "columnDefs": [
-                { "type": "date", "targets": 1 }，
-                {
-                    "targets": [ 1 ],
-                    "orderData": [ 1, 2 ]
-                }
-              ]
+             'ordering':false,
         });
 
 
