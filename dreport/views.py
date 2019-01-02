@@ -120,7 +120,7 @@ class RecordUpdateView(AdminUserRequiredMixin, UpdateView):
         # edit post start here
         recovery_date_time = request.POST.get('recovery_date_time', None)
         if recovery_date_time:
-            recovery_date_time = datetime.strptime(request.POST.get('recovery_date_time'), "%Y/%m/%d %H:%M:%S")
+            recovery_date_time = datetime.strptime(request.POST.get('recovery_date_time'), "%Y/%m/%d %H:%M")
             request.POST['recovery_date'] = datetime.strftime(recovery_date_time, "%Y/%m/%d")
         request.POST._mutable = _mutable
         return super().post(request, *args, **kwargs)
