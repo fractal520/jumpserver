@@ -9,7 +9,7 @@ from ..models.city import City, CityPauseRecord
 
 
 logger = get_logger(__file__)
-__all__ = ['CityUpdateForm', 'CityCreateForm']
+__all__ = ['CityUpdateForm', 'CityCreateForm', 'RecordUpdateForm', 'CityRecordCreateForm']
 
 
 class CityUpdateForm(OrgModelForm):
