@@ -92,9 +92,20 @@ class MonthRecordFunction(object):
 
 class RiskRecord(object):
 
-    def create(self, parm):
-        year = parm.split('-')[0]
-        month = parm.split('-')[1]
+    def create(self, parm, time_quantum=False):
+        if not time_quantum:
+            year = parm.split('-')[0]
+            month = parm.split('-')[1]
+            records = CityPauseRecord.objects.filter(risk_date__month=month, risk_date__year=year)
+            filename = month
+        else:
+            print(parm)
+            print(time_quantum)
+            filename = parm.get('start-date')+'-'+parm.get('end-date')
+            records = CityPauseRecord.objects.filter(
+                risk_date__gte=parm.get('start-date'),
+                risk_date__lte=parm.get('end-date')
+            )
 
         week_dict = {
                      'Monday': '星期一', 'Tuesday': '星期二',
@@ -102,7 +113,7 @@ class RiskRecord(object):
                      'Friday': '星期五', 'Saturday': '星期六', 'Sunday': '星期天'
                      }
         save_address = settings.DEVICE_REPORT_DIR
-        records = CityPauseRecord.objects.filter(risk_date__month=month, risk_date__year=year)
+
         records = records.order_by('-risk_date_time')
         workbook = xlwt.Workbook(encoding='utf-8')
         worksheet = workbook.add_sheet('records')
@@ -138,5 +149,5 @@ class RiskRecord(object):
             worksheet.write(row_count, 9, record.remark)
             row_count += 1
 
-        workbook.save(os.path.join(save_address, parm + 'record.xls'))
-        return parm + 'record.xls'
+        workbook.save(os.path.join(save_address, filename + 'record.xls'))
+        return filename + 'record.xls'
