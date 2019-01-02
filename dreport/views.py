@@ -113,6 +113,18 @@ class RecordUpdateView(AdminUserRequiredMixin, UpdateView):
         kwargs.update(context)
         return super().get_context_data(**kwargs)
 
+    def post(self, request, *args, **kwargs):
+        self.object = None
+        _mutable = request.POST._mutable
+        request.POST._mutable = True
+        # edit post start here
+        recovery_date_time = request.POST.get('recovery_date_time', None)
+        if recovery_date_time:
+            recovery_date_time = datetime.strptime(request.POST.get('recovery_date_time'), "%Y-%m-%d %H:%M:%S")
+            request.POST['recovery_date'] = datetime.strftime(recovery_date_time, "%Y-%m-%d")
+        request.POST._mutable = _mutable
+        return super().post(request, *args, **kwargs)
+
 
 # 熔断记录创建视图
 class RecordCreateView(AdminUserRequiredMixin, CreateView):
@@ -131,23 +143,13 @@ class RecordCreateView(AdminUserRequiredMixin, CreateView):
 
     def post(self, request, *args, **kwargs):
         self.object = None
-        print(request.POST)
         _mutable = request.POST._mutable
         risk_date_time_edit = datetime.strptime(request.POST.get('risk_date_time'), "%Y-%m-%d %H:%M:%S")
         recovery_date_time = datetime.strptime(request.POST.get('recovery_date_time'), "%Y-%m-%d %H:%M:%S")
         request.POST._mutable = True
-        '''
-        request.POST.__setitem__('risk_date_time_edit', request.POST.get('risk_date_time'))
-        request.POST.__setitem__('risk_time', datetime.strftime(risk_date_time_edit, "%H:%M:%S"))
-        request.POST.__setitem__('risk_date', datetime.strftime(risk_date_time_edit, "%Y-%m-%d"))
-        request.POST.__setitem__('recovery_date', datetime.strftime(recovery_date_time, "%Y-%m-%d"))
-        '''
         request.POST['risk_date_time_edit'] = request.POST.get('risk_date_time')
         request.POST['risk_time'] = datetime.strftime(risk_date_time_edit, "%H:%M:%S")
         request.POST['risk_date'] = datetime.strftime(risk_date_time_edit, "%Y-%m-%d")
         request.POST['recovery_date'] = datetime.strftime(recovery_date_time, "%Y-%m-%d")
         request.POST._mutable = _mutable
-        print(request.POST)
-        print(args)
-        print(kwargs)
         return super().post(request, *args, **kwargs)
