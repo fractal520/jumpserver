@@ -141,11 +141,5 @@ class RecordCreateView(AdminUserRequiredMixin, CreateView):
         request.POST.__setitem__('recovery_date', datetime.strftime(recovery_date_time, "%Y-%m-%d"))
         request.POST._mutable = _mutable
         print(request.POST)
-        print(*args)
+        print(args)
         return super().post(request, *args, **kwargs)
-
-    def form_valid(self, form):
-        """If the form is valid, save the associated model."""
-        print(form)
-        self.object = form.save()
-        return super().form_valid(form)
