@@ -51,8 +51,8 @@ class CityCreateView(AdminUserRequiredMixin, CreateView):
         return super().get_context_data(**kwargs)
 
     def post(self, request, *args, **kwargs):
+        request.POST['city_code'] = '123'
         print(request.POST)
-        print(self.fields)
         self.object = None
         return super().post(request, *args, **kwargs)
 
