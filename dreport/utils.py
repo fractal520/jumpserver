@@ -45,6 +45,7 @@ class MonthRecordFunction(object):
         year = record.year
         risk_list = []
         risks = CityPauseRecord.objects.filter(city=record.city, risk_date__month=record.month, risk_date__year=year)
+        risks = risks.order_by('-risk_date_time')
         list_num = 1
         for risk in risks:
             if not risk.recovery_date_time:
