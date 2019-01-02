@@ -43,3 +43,16 @@ class RecordUpdateForm(OrgModelForm):
             'recovery_date_time': '* 请输入熔断恢复时间',
             'remark': '在此请输入备注'
         }
+
+
+class CityRecordCreateForm(OrgModelForm):
+    class Meta:
+        model = CityPauseRecord
+        fields = ['city', 'risk_date_time', 'recovery_date_time', 'remark']
+        labels = {}
+        help_texts = {
+            'city': '* 请输入规范的城市名',
+            'risk_date_time': '* 请输入规范的日期格式 YYYY-mm-dd HH:MM:SS',
+            'recovery_date_time': '*请输入规范的日期格式 YYYY-mm-dd HH:MM:SS',
+            'remark': '请输入备注'
+        }
