@@ -93,7 +93,7 @@
 jQuery(document).ready(function(){
     $('#city_table').DataTable();
 
-    $('#btn-batch-model').on('click', function(){
+    $('.btn-batch-model').on('click', function(){
         $('#dialog-batch-create-record').modal({show:true});
         $('body').on('click', '.btn-batch', function(){
             var data = $('.form-batch-create-month-record').serializeArray();
