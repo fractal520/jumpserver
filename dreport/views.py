@@ -135,6 +135,7 @@ class RecordCreateView(AdminUserRequiredMixin, CreateView):
         request.POST._mutable = True
         request.POST['risk_date_time_edit'] = request.POST.risk_date_time
         request.POST['risk_time'] = datetime.strftime(request.POST.risk_date_time, "%H:%M:%S")
+        request.POST['risk_date'] = datetime.strftime(request.POST.risk_date_time, "%Y-%m-%d")
         request.POST['recovery_date'] = datetime.strftime(request.POST.recovery_date_time, "%Y-%m-%d")
         request.POST._mutable = _mutable
         print(request.POST)
