@@ -12,6 +12,7 @@
         <li><a href="{% url 'dreport:CityRecord' %}">熔断记录</a></li>
         <li class="divider"></li>
         <li><a href="{% url 'dreport:city-create' %}">创建城市</a></li>
+        <li><a href="javascript:void(0)" class="btn-batch-model">批量创建月份报表</a></li>
         <!--<li><a class="btn-record-model" href="javascript:void(0)">下载熔断记录</a></li>-->
     </ul>
 </div>
@@ -45,7 +46,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title">Modal title</h4>
+                <h4 class="modal-title">月份报表</h4>
             </div>
             <div class="modal-body">
                 <p>请选择生成月份</p>
@@ -62,12 +63,44 @@
     </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
 
+<!-- /.batch-create-record-modal -->
+<div class="modal fade" tabindex="-1" role="dialog" id="dialog-batch-create-record">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">月份报表</h4>
+            </div>
+            <div class="modal-body">
+                <p>请选择生成月份</p>
+                <form class="form-batch-create-month-record">
+                    月份:<input type="month" name="record-month" id="record-month">
+                    {% csrf_token %}
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary btn-batch">Save changes</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
 
 {% endblock %}
 {% block custom_foot_js %}
 <script>
 jQuery(document).ready(function(){
     $('#city_table').DataTable();
+
+    $('#btn-batch-model').on('click', function(){
+        $('#dialog-batch-create-record').modal({show:true});
+        $('body').on('click', '.btn-batch', function(){
+            var data = $('.form-batch-create-month-record').serializeArray();
+            console.log(data)
+        });
+    });
+
     $('body').on('click', '.btn-create', function(){
         var id=$(this).attr('city-id');
         $('#dialog-create-record').modal({show:true});

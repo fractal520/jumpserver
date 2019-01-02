@@ -5,6 +5,8 @@ from .. import api
 app_name = 'dreport'
 
 urlpatterns = [
+    path('CityMonthView/batch_create/',
+         api.batch_create_month_record, name='batch-create-month-record'),
     path('CityMonthView/create/',
          api.create_month_record, name='create-monthrecord'),
     path('CityMonthView/get_month_record/',

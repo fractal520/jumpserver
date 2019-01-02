@@ -14,6 +14,28 @@ TEMPLATE_DIR = os.path.join(settings.DEVICE_REPORT_DIR, 'WTSDtmp.docx')
 
 class MonthRecordFunction(object):
 
+    def batch_create(self, date):
+        citys = City.objects.all()
+        year = date.split('-')[0]
+        month = date.split('-')[1]
+
+        for city in citys:
+            records = CityPauseRecord.objects.filter(city=city, risk_date__month=month, risk_date__year=year)
+            pause_count = 0
+            total_pause_time = 0
+            if records:
+                for record in records:
+                    if record.recovery_date_time:
+                        pause_count += 1
+                        total_pause_time += (record.recovery_date_time - record.risk_date_time).seconds
+                    else:
+                        total_pause_time += 0
+                CityMonthRecord.create_or_update(city, month, pause_count, total_pause_time, year)
+                return True
+            else:
+                print('该城市当月没有熔断记录')
+                continue
+
     def create(self, city_id, date):
         try:
             city = City.objects.get(id=city_id)
@@ -98,6 +120,7 @@ class RiskRecord(object):
             month = parm.split('-')[1]
             records = CityPauseRecord.objects.filter(risk_date__month=month, risk_date__year=year)
             filename = month
+            ordering = '-risk_date_time'
         else:
             print(parm)
             print(time_quantum)
@@ -106,6 +129,7 @@ class RiskRecord(object):
                 risk_date__gte=parm.get('start-date'),
                 risk_date__lte=parm.get('end-date')
             )
+            ordering = '-risk_date_time'
 
         week_dict = {
                      'Monday': '星期一', 'Tuesday': '星期二',
@@ -114,7 +138,7 @@ class RiskRecord(object):
                      }
         save_address = settings.DEVICE_REPORT_DIR
 
-        records = records.order_by('-risk_date_time')
+        records = records.order_by(ordering)
         workbook = xlwt.Workbook(encoding='utf-8')
         worksheet = workbook.add_sheet('records')
         titlestyle = xlwt.easyxf('pattern: pattern solid, fore_colour dark_green_ega;')
