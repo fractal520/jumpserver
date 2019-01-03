@@ -16,8 +16,12 @@ class MonthRecordFunction(object):
 
     def batch_create(self, date):
         citys = City.objects.all()
-        year = date.split('-')[0]
-        month = date.split('-')[1]
+        try:
+            year = date.split('-')[0]
+            month = date.split('-')[1]
+        except BaseException as error:
+            print(error)
+            return False, str(error)
 
         for city in citys:
             records = CityPauseRecord.objects.filter(city=city, risk_date__month=month, risk_date__year=year)
@@ -31,10 +35,10 @@ class MonthRecordFunction(object):
                     else:
                         total_pause_time += 0
                 CityMonthRecord.create_or_update(city, month, pause_count, total_pause_time, year)
-                return True
             else:
                 print('该城市当月没有熔断记录')
                 continue
+        return True, 'success'
 
     def create(self, city_id, date):
         try:

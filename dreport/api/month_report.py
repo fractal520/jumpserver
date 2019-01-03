@@ -25,10 +25,11 @@ def batch_create_month_record(request):
         return JsonResponse(dict(code=400, error='请选择时间'))
     date = request.POST.get("record-month", None)
     bot = MonthRecordFunction()
-    if bot.batch_create(date=date):
-        return JsonResponse(dict(code=200, msg=''))
+    result, msg = bot.batch_create(date=date)
+    if result:
+        return JsonResponse(dict(code=200, msg=msg))
     else:
-        return JsonResponse(dict(code=400, error=''))
+        return JsonResponse(dict(code=400, error=msg))
 
 
 def get_month_record(request):
