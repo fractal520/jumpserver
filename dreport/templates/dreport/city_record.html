@@ -67,14 +67,9 @@
                     </form>
                     <p>根据时间段下载</p>
                     <form id="search_form" method="get" action="{% url 'api-dreport:get_risk_record_from_time_quantum' %}" class="pull-right form-inline">
-                        <div class="form-group" id="date">
-                            <div class="input-daterange input-group" id="datepicker">
-                                <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
-                                <input type="text" class="input-sm form-control" style="width: 100px;" name="start-date" value="{{ date_from|date:'Y-m-d'}}">
-                                <span class="input-group-addon">to</span>
-                                <input type="text" class="input-sm form-control" style="width: 100px;" name="end-date" value="{{ date_to|date:'Y-m-d'}}">
-                            </div>
-                        </div>
+                        {% csrf_token %}
+                        开始:<input type="month" name="start-date" id="record-month"><br/>
+                        结束:<input type="month" name="end-date" id="record-month"><br/>
                         <div class="input-group">
                             <div class="input-group-btn">
                                 <button id='search_btn' type="submit" class="btn btn-sm btn-primary">
