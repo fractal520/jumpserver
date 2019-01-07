@@ -12,9 +12,21 @@ logger = get_logger('jumpserver')
 
 # 城市表，记录城市名称和企业代码
 class City(models.Model):
+
+    CORPORATION = "CORPORATION"
+    SERVER = "SERVER"
+    OTHER = "OTHER"
+
+    TYPE_CHOICES = (
+        (CORPORATION, CORPORATION),
+        (SERVER, SERVER),
+        (OTHER, OTHER)
+    )
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4)
     name = models.CharField(max_length=512)
     city_code = models.IntegerField(null=True, blank=True)
+    city_type = models.CharField(max_length=256, choices=TYPE_CHOICES, default="CORPORATION")
 
     def __str__(self):
         return self.name

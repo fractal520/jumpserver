@@ -15,7 +15,12 @@ __all__ = ['CityUpdateForm', 'CityCreateForm', 'RecordUpdateForm', 'CityRecordCr
 class CityUpdateForm(OrgModelForm):
     class Meta:
         model = City
-        fields = ['name', 'city_code']
+        fields = ['name', 'city_code', 'city_type']
+        widgets = {
+            'city_type': forms.Select(attrs={
+                'class': 'select2', 'data-placeholder': _('city_type')
+            })
+        }
         labels = {}
         help_texts = {
             'name': '* 请输入规范的城市名',
@@ -26,7 +31,12 @@ class CityUpdateForm(OrgModelForm):
 class CityCreateForm(OrgModelForm):
     class Meta:
         model = City
-        fields = ['name', 'city_code']
+        fields = ['name', 'city_code', 'city_type']
+        widgets = {
+            'city_type': forms.Select(attrs={
+                'class': 'select2', 'data-placeholder': _('city_type')
+            })
+        }
         labels = {}
         help_texts = {
             'name': '* 请输入规范的城市名',
