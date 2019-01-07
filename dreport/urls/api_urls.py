@@ -25,4 +25,6 @@ urlpatterns = [
          api.get_week_record, name='get_week_record'),
     path('CityWeekRecord/create_week_report/',
          api.create_week_report, name='create_week_report'),
+    path('CityWeekRecord/download_week_report/<uuid:pk>/',
+         api.download_week_report, name='download_week_report'),
 ]

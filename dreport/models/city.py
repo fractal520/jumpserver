@@ -186,3 +186,8 @@ class CityWeekRecord(models.Model):
         record.report_name = filename
         record.save()
         return True
+
+    @classmethod
+    def get_report(cls, record_id):
+        record = CityWeekRecord.objects.get(id=record_id)
+        return record.report_name

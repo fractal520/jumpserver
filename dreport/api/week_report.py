@@ -47,3 +47,14 @@ def get_week_record(request):
         return JsonResponse(dict(code=200, data=data))
     else:
         return JsonResponse(dict(code=400, error='no record'))
+
+
+def download_week_report(request, pk):
+    file = CityWeekRecord.get_report(pk)
+    file_path = os.path.join(settings.DEVICE_REPORT_DIR, file)
+    print(escape_uri_path(file_path))
+    response = FileResponse(open(file_path, 'rb'))
+    # response['Content-Type'] = 'application/octet-stream'
+    response['Content-Type'] = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    response['Content-Disposition'] = "attachment; filename*=utf-8''{}".format(escape_uri_path(file))
+    return response
