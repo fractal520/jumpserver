@@ -27,9 +27,9 @@ def create_week_record(request):
 
 def create_week_report(request):
     parm = request.POST
-    if not parm.get('record-id', None):
+    if not parm.get('id', None):
         return JsonResponse(dict(code=400, error='记录获取失败'))
-    record_id = parm.get('record-id')
+    record_id = parm.get('id')
     bot = WeekRecord()
     result = bot.report(record_id=record_id, parma=parm)
     return JsonResponse(dict(code=200, msg=result))
