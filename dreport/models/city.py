@@ -148,7 +148,7 @@ class CityWeekRecord(models.Model):
         else:
             start = date - timedelta(days=date.weekday())
             end = date + timedelta(days=6-date.weekday())
-
+        print(start, end)
         for city in citys:
             records = CityPauseRecord.objects.filter(city=city, risk_date__gte=start, risk_date__lte=end)
             pause_count = 0
@@ -169,6 +169,7 @@ class CityWeekRecord(models.Model):
                 )
             else:
                 print('该城市本周没有熔断记录')
+                print(records)
                 continue
 
         return True
