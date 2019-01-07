@@ -245,7 +245,7 @@ class WeekRecord(object):
             'form': risk_list,
         }
         tpl.render(context)
-        report_path = os.path.join(settings.DEVICE_REPORT_DIR, '{}_{}.docx'.format(record.month, record.city.name))
+        report_path = os.path.join(settings.DEVICE_REPORT_DIR, '{}_{}.docx'.format(record.week_of_report, record.city.name))
         tpl.save(report_path)
         CityWeekRecord.save_report(record.id, '{}_{}.docx'.format(record.week_of_report, record.city.name))
         return report_path
