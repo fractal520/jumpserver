@@ -21,7 +21,8 @@
     <thead>
         <tr>
             <th>城市</th>
-            <th>年月</th>
+            <th>年份</th>
+            <th>周数</th>
             <th>熔断次数</th>
             <th>故障时间(单位:秒)</th>
             <th>操作</th>
@@ -31,6 +32,7 @@
     {% for record in city_week %}
         <tr>
             <td>{{record.city}}</td>
+            <td>{{record.select_year}}</td>
             <td>第{{record.week_of_report}}周</td>
             <td>{{record.pause_count}}</td>
             <td>{{record.total_pause_time}}</td>

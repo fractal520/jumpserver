@@ -135,6 +135,7 @@ class CityWeekRecord(models.Model):
     report_name = models.CharField(max_length=512, null=True)
     week_of_report = models.IntegerField(null=False)
     select_date = models.DateField(null=False)
+    select_year = select_date.year
 
     def create_record(self, date, week, citys=City.objects.all()):
         print(date, week)
