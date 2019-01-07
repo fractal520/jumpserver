@@ -62,15 +62,15 @@
                     </div>
                     <p>根据月份下载</p>
                     <form action="{% url 'api-dreport:get_risk_record' %}" method="get" class="form-record-download" id="record">
-                        月份:&nbsp;<input type="month" name="record-month" id="">&nbsp;&nbsp;
+                        月份:&nbsp;<input class="input-sm record-month" type="month" name="record-month">&nbsp;&nbsp;
                         {% csrf_token %}
                         <input class="btn btn-primary" type="submit" value="下载" /><br/>
                     </form>
                     <p>根据时间段下载</p>
                     <form action="{% url 'api-dreport:get_risk_record_from_time_quantum' %}" method="get" class="form-record-download" id="record">
                         {% csrf_token %}
-                        开始:&nbsp;<input class="input-sm record-month" type="text" name="start-date" id="record-month">&nbsp; to 
-                        结束:&nbsp;<input class="input-sm record-month" type="text" name="end-date" id="record-month">&nbsp;&nbsp;
+                        开始:&nbsp;<input class="input-sm record-quantum" type="text" name="start-date" id="record-month">&nbsp; to 
+                        结束:&nbsp;<input class="input-sm record-quantum" type="text" name="end-date" id="record-month">&nbsp;&nbsp;
                         <input class="btn btn-primary" type="submit" value="下载" />
                     </form>
                 </div>
@@ -98,12 +98,23 @@
             $('#dialog-record-download').modal({show:true});
         });
 
-        $('.record-month').datepicker({
+        $('.record-quantum').datepicker({
             format: "yyyy-mm-dd",
             todayBtn: "linked",
             keyboardNavigation: false,
             forceParse: false,
             calendarWeeks: true,
+            autoclose: true,
+            language: "zh-CN"
+        });
+
+        $('.record-month').datepicker({
+            format: "yyyy-mm",
+            startView: 1,
+            minViewMode: 1,
+            language: "zh-CN",
+            todayBtn: "linked",
+            keyboardNavigation: false,
             autoclose: true
         });
 
