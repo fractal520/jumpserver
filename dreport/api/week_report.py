@@ -23,3 +23,27 @@ def create_week_record(request):
         return JsonResponse(dict(code=200, msg=""))
     bot.create(date=date, week=week, city=None)
     return JsonResponse(dict(code=200, msg=""))
+
+
+def create_week_report(request):
+    parm = request.POST
+    if not parm.get('record-id', None):
+        return JsonResponse(dict(code=400, error='记录获取失败'))
+    record_id = parm.get('record-id')
+    bot = WeekRecord()
+    result = bot.report(record_id=record_id, parma=parm)
+    return JsonResponse(dict(code=200, msg=result))
+
+
+def get_week_record(request):
+    record_id = request.GET.get('id')
+    data = {}
+    if record_id:
+        record = CityWeekRecord.objects.get(id=record_id)
+        data['city'] = record.city.name
+        data['week_of_report'] = record.week_of_report
+        data['total_error'] = record.pause_count
+        data['error_time'] = record.total_pause_time
+        return JsonResponse(dict(code=200, data=data))
+    else:
+        return JsonResponse(dict(code=400, error='no record'))

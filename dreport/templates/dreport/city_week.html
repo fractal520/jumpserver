@@ -65,7 +65,7 @@
                                 报告信息
                             </h3>
                         </div>
-                        <form class="form-create-report" id="report">
+                        <form class="form-create-week-report" id="report">
                             {% csrf_token %}
                         </form>
                     </div>
@@ -85,6 +85,49 @@
         $('#city_week_table').DataTable({
             "order": [[ 1, "desc" ]]
         });
+
+
+        $('body').on('click', '.btn-template', function(){
+            var id = $(this).attr('id');
+            $('#dialog-create-report').modal({show:true});
+            //ajax获取城市月份数据填充到表格里面
+            $.get("{% url 'api-dreport:get_week_record' %}", {'id':id}, function(result){
+                if(result.code == 200){
+                    var html = "<li>城市:" + result.data.city + "</li><br/><li>周数:第" + result.data.week_of_report +"周</li><br/><li>熔断次数:" + result.data.total_error +"</li><br/><li>故障时间(秒):" + result.data.error_time + "</li><br/><li>设备总数:" + "<input type='text' name='device' value=''>"+"</li><br/><li>分析:" + "<textarea style='width: 200px; height: 100px' name='markdown'></textarea></li>"
+
+                    $('#report').append(html);
+                    $('body').on('click', '.btn-report', function(){
+                        var data = $('.form-create-week-report').serializeArray();
+                        data.push({'name': 'id', 'value': id})
+
+                        $.ajax({
+                            type: "POST",
+                            dataType: "json",
+                            url: "{% url 'api-dreport:create_week_report' %}",
+                            data: data,
+                            contentType: "application/x-www-form-urlencoded",
+                            success: function (response){
+                                console.log(response)
+                                if(response.code == 200){
+                                    window.location.reload()
+                                }
+                                if(response.code == 400){
+                                    alert(response.error)
+                                }
+                                //window.location.reload()
+                            }
+                        });
+                    });
+                }
+            });
+
+            $('#dialog-create-report').on('hidden.bs.modal', function () {
+              window.location.reload()
+            })
+
+        });
+
+
     });
 </script>
 {% endblock %}

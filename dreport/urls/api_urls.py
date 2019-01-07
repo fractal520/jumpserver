@@ -21,4 +21,8 @@ urlpatterns = [
          api.get_risk_record_from_time_quantum, name='get_risk_record_from_time_quantum'),
     path('CityWeekRecord/batch_create/',
          api.create_week_record, name='batch-create-week-record'),
+    path('CityWeekRecord/get_week_record/',
+         api.get_week_record, name='get_week_record'),
+    path('CityWeekRecord/create_week_report/',
+         api.create_week_report, name='create_week_report'),
 ]

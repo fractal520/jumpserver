@@ -196,3 +196,57 @@ class WeekRecord(object):
             return True
         week_record.create_record(date, week)
         return True
+
+    def report(self, record_id, parma):
+        record = CityWeekRecord.objects.get(id=record_id)
+        risks = CityPauseRecord.objects.filter(
+            city=record.city,
+            risk_date__gte=record.start_date,
+            risk_date__lte=record.end_date
+        )
+        risks = risks.order_by('-risk_date_time')
+        risk_list = []
+        list_num = 1
+
+        for risk in risks:
+            if not risk.recovery_date_time:
+                continue
+
+            pause_time = (risk.recovery_date_time - risk.risk_date_time).seconds / 60
+            recovery_date_time = datetime.strftime(risk.recovery_date_time.astimezone(), "%H:%M:%S")
+
+            risk_dict = {
+                'Num': list_num,
+                'city': record.city,
+                'risk_date': risk.risk_date,
+                'risk_time': datetime.strftime(risk.risk_date_time.astimezone(), "%H:%M:%S"),
+                'recovery_date_time': recovery_date_time,
+                'pause_time': round(pause_time),
+                'text': risk.remark
+            }
+            list_num += 1
+            risk_list.append(risk_dict)
+
+        tpl = DocxTemplate(WEEK_TEMPLATE_DIR)
+
+        total_pause_time = int(int(record.total_pause_time) / 60)
+        device_avarate = (1 - (record.total_pause_time / (30 * 17.5 * 60 * 60))) * 100
+        default_markdown = "{0}后台网络波动，导致充值熔断".format(record.city.name)
+        context = {
+            'city': record.city.name,
+            'year': record.select_year,
+            'week': record.week_of_report,
+            'device_count': parma.get('device', None),
+            'total_error': record.pause_count,
+            'error_time': total_pause_time,
+            'error_date': '',
+            'device_avarate': round(device_avarate, 2),
+            'text': parma.get('markdown') if parma.get('markdown') else default_markdown,
+            'form': risk_list,
+        }
+        tpl.render(context)
+        report_path = os.path.join(settings.DEVICE_REPORT_DIR, '{}_{}.docx'.format(record.month, record.city.name))
+        tpl.save(report_path)
+        CityWeekRecord.save_report(record.id, '{}_{}.docx'.format(record.week_of_report, record.city.name))
+        return report_path
+

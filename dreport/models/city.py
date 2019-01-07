@@ -179,3 +179,10 @@ class CityWeekRecord(models.Model):
                 continue
 
         return True
+
+    @classmethod
+    def save_report(cls, record_id, filename):
+        record = CityWeekRecord.objects.get(id=record_id)
+        record.report_name = filename
+        record.save()
+        return True
