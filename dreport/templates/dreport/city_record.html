@@ -60,20 +60,24 @@
                             下载熔断记录
                         </h3>
                     </div>
-                    <p>根据月份下载</p>
+                    <p><b>根据月份下载</b></p>
                     <form action="{% url 'api-dreport:get_risk_record' %}" method="get" class="form-record-download" id="record">
                         <div class="form-group">
                             <label for="record-month">月份:</label>
                             {% csrf_token %}
-                            <input class="input-sm record-month" type="text" name="record-month" id="record-month">
+                            <input class="input-sm record-month form-control" type="text" name="record-month" id="record-month">
                         </div>
                         <button class="btn btn-info" type="submit">下载</button>
                     </form>
-                    <p>根据时间段下载</p>
+                    <p><b>根据时间段下载</b></p>
                     <form action="{% url 'api-dreport:get_risk_record_from_time_quantum' %}" method="get" class="form-record-download" id="record">
-                        {% csrf_token %}
-                        开始:&nbsp;<input class="input-sm record-quantum" type="text" name="start-date" id="">&nbsp; to 
-                        结束:&nbsp;<input class="input-sm record-quantum" type="text" name="end-date" id="">&nbsp;&nbsp;
+                        <div class="form-group">
+                            {% csrf_token %}
+                            <label>开始:</label>
+                            <input class="input-sm record-quantum form-control" type="text" name="start-date" id=""> to 
+                            <label>结束:</label>
+                            <input class="input-sm record-quantum form-control" type="text" name="end-date" id="">
+                        </div>
                         <button class="btn btn-info" type="submit">下载</button>
                     </form>
                 </div>
