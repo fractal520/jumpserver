@@ -62,7 +62,7 @@
                     </div>
                     <p>根据月份下载</p>
                     <form action="{% url 'api-dreport:get_risk_record' %}" method="get" class="form-record-download" id="record">
-                        月份:&nbsp;<input class="input-sm record-month" type="month" name="record-month">&nbsp;&nbsp;
+                        月份:&nbsp;<input class="input-sm record-month" type="text" name="record-month">&nbsp;&nbsp;
                         {% csrf_token %}
                         <input class="btn btn-primary" type="submit" value="下载" /><br/>
                     </form>
@@ -97,6 +97,16 @@
             console.log('btn-record-model')
             $('#dialog-record-download').modal({show:true});
         });
+
+        $.fn.datepicker.dates['zh-CN'] = {
+            days: ["周日", "周一", "周二", "周三", "周四", "周五", "周六", "周日"],
+            daysShort: ["日", "一", "二", "三", "四", "五", "六", "七"],
+            daysMin: ["日", "一", "二", "三", "四", "五", "六", "七"],
+            months: ["一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"],
+            monthsShort: ["一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"],
+            today: "今天",
+            clear: "清除"
+        };
 
         $('.record-quantum').datepicker({
             format: "yyyy-mm-dd",
