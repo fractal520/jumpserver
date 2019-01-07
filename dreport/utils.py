@@ -6,7 +6,6 @@ from .models.city import City, CityMonthRecord, CityPauseRecord
 from django.core.exceptions import ObjectDoesNotExist
 from docxtpl import DocxTemplate
 from django.conf import settings
-from django.utils import timezone
 from datetime import datetime
 
 TEMPLATE_DIR = os.path.join(settings.DEVICE_REPORT_DIR, 'WTSDtmp.docx')
