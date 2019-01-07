@@ -9,6 +9,7 @@ from django.conf import settings
 from datetime import datetime
 
 TEMPLATE_DIR = os.path.join(settings.DEVICE_REPORT_DIR, 'WTSDtmp.docx')
+WEEK_TEMPLATE_DIR = os.path.join(settings.DEVICE_REPORT_DIR, 'WTSDtmp_week.docx')
 
 
 class MonthRecordFunction(object):
