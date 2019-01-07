@@ -44,7 +44,6 @@ class CityMonthRecord(models.Model):
     year = models.IntegerField(null=False)
     report_name = models.CharField(max_length=512, null=True)
 
-
     @classmethod
     def get_report(cls, record_id):
         record = CityMonthRecord.objects.get(id=record_id)
@@ -124,3 +123,15 @@ class CityPauseRecord(models.Model):
             return True
         else:
             return False
+
+
+class CityWeekRecord(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4)
+    city = models.ForeignKey(City, on_delete=models.PROTECT, null=False, verbose_name=_("City Name"))
+    pause_count = models.IntegerField(null=True, blank=True, default=0)
+    total_pause_time = models.IntegerField(null=True, blank=True, default=0)
+    create_time = models.DateTimeField(auto_now_add=True)
+    edit_time = models.DateTimeField(auto_now=True)
+    report_name = models.CharField(max_length=512, null=True)
+    week_of_report = models.IntegerField(null=False)
+    select_date = models.DateField(null=False)
