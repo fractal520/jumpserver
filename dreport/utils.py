@@ -188,7 +188,7 @@ class RiskRecord(object):
 class WeekRecord(object):
 
     def create(self, date, week, city):
-        date = datetime.strptime(date, "%Y-%m-%d")
+        # date = datetime.strptime(date, "%Y-%m-%d")
         week_record = CityWeekRecord()
         if city:
             week_record.create_record(date, week, citys=city)
