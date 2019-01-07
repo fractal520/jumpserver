@@ -122,7 +122,11 @@ class RiskRecord(object):
         if not time_quantum:
             year = parm.split('-')[0]
             month = parm.split('-')[1]
-            records = CityPauseRecord.objects.filter(risk_date__month=month, risk_date__year=year)
+            records = CityPauseRecord.objects.filter(
+                risk_date__month=month,
+                risk_date__year=year,
+                city__city_type__exact="CORPORATION"
+            )
             filename = month
             ordering = '-risk_date_time'
         else:
@@ -131,7 +135,8 @@ class RiskRecord(object):
             filename = parm.get('start-date')+'to'+parm.get('end-date')
             records = CityPauseRecord.objects.filter(
                 risk_date__gte=parm.get('start-date'),
-                risk_date__lte=parm.get('end-date')
+                risk_date__lte=parm.get('end-date'),
+                city__city_type__exact="CORPORATION"
             )
             ordering = '-risk_date_time'
 
