@@ -61,15 +61,15 @@
                     </div>
                     <p>根据月份下载</p>
                     <form action="{% url 'api-dreport:get_risk_record' %}" method="get" class="form-record-download" id="record">
-                        月份:<input type="month" name="record-month" id="record-month"><br/>
+                        月份:<input type="month" name="record-month" id="record-month">&nbsp;&nbsp;
                         {% csrf_token %}
                         <input class="btn btn-default" type="submit" value="下载" />
                     </form>
                     <p>根据时间段下载</p>
                     <form action="{% url 'api-dreport:get_risk_record_from_time_quantum' %}" method="get" class="form-record-download" id="record">
                         {% csrf_token %}
-                        开始:<input type="date" name="start-date" id="record-month"><br/>
-                        结束:<input type="date" name="end-date" id="record-month"><br/>
+                        开始:<input type="date" name="start-date" id="record-month">&nbsp; to 
+                        结束:<input type="date" name="end-date" id="record-month">&nbsp;&nbsp;
                         <div class="input-group">
                             <div class="input-group-btn">
                                 <button id='search_btn' type="submit" class="btn btn-sm btn-primary">
@@ -99,15 +99,6 @@
         $('.btn-record-model').on('click', function(){
             console.log('btn-record-model')
             $('#dialog-record-download').modal({show:true});
-        });
-
-        $('#date .input-daterange').datepicker({
-            format: "yyyy-mm-dd",
-            todayBtn: "linked",
-            keyboardNavigation: false,
-            forceParse: false,
-            calendarWeeks: true,
-            autoclose: true
         });
 
     });
