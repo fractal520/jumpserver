@@ -66,10 +66,10 @@
                         <input class="btn btn-default" type="submit" value="下载" />
                     </form>
                     <p>根据时间段下载</p>
-                    <form id="search_form" method="get" action="{% url 'api-dreport:get_risk_record_from_time_quantum' %}" class="pull-right form-inline">
+                    <form action="{% url 'api-dreport:get_risk_record_from_time_quantum' %}" method="get" class="form-record-download" id="record">
                         {% csrf_token %}
-                        开始:<input type="month" name="start-date" id="record-month"><br/>
-                        结束:<input type="month" name="end-date" id="record-month"><br/>
+                        开始:<input type="date" name="start-date" id="record-month"><br/>
+                        结束:<input type="date" name="end-date" id="record-month"><br/>
                         <div class="input-group">
                             <div class="input-group-btn">
                                 <button id='search_btn' type="submit" class="btn btn-sm btn-primary">
