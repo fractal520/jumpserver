@@ -135,7 +135,7 @@ class CityWeekRecord(models.Model):
     report_name = models.CharField(max_length=512, null=True)
     week_of_report = models.IntegerField(null=False)
     select_date = models.DateField(null=False)
-    select_year = select_date.year
+    select_year = models.IntegerField(null=False)
 
     def create_record(self, date, week, citys=City.objects.all()):
         print(date, week)
@@ -166,7 +166,8 @@ class CityWeekRecord(models.Model):
                     pause_count=pause_count,
                     total_pause_time=total_pause_time,
                     week_of_report=week,
-                    select_date=date
+                    select_date=date,
+                    select_year=datetime.strftime(date, "%Y")
                 )
             else:
                 print('该城市本周没有熔断记录')
