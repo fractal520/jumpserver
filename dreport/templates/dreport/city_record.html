@@ -63,14 +63,14 @@
                     <form action="{% url 'api-dreport:get_risk_record' %}" method="get" class="form-record-download" id="record">
                         月份:<input type="month" name="record-month" id="record-month">&nbsp;&nbsp;
                         {% csrf_token %}
-                        <input class="btn btn-default" type="submit" value="下载" />
+                        <input class="btn btn-primary" type="submit" value="下载" />
                     </form>
                     <p>根据时间段下载</p>
                     <form action="{% url 'api-dreport:get_risk_record_from_time_quantum' %}" method="get" class="form-record-download" id="record">
                         {% csrf_token %}
                         开始:<input type="date" name="start-date" id="record-month">&nbsp; to 
                         结束:<input type="date" name="end-date" id="record-month">&nbsp;&nbsp;
-                        <input class="btn btn-default" type="submit" value="下载" />
+                        <input class="btn btn-primary" type="submit" value="下载" />
                     </form>
                 </div>
             </div>
