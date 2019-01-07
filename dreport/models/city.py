@@ -143,8 +143,8 @@ class CityWeekRecord(models.Model):
             end = date
             start = date + timedelta(days=-6)
         elif date.weekday() == 0:
-            start = date + timedelta(days=6)
-            end = date
+            start = date
+            end = date + timedelta(days=6)
         else:
             start = date - timedelta(days=date.weekday())
             end = date + timedelta(days=6-date.weekday())
