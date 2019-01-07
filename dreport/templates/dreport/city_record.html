@@ -59,11 +59,18 @@
                             下载熔断记录
                         </h3>
                     </div>
-                    <p>请选择下载月份</p>
-                    <form action="{% url 'api-dreport:get_risk_record' %}" method="get" class="form-record-download" id="report">
-                        月份:<input type="month" name="record-month" id="record-month">
+                    <p>根据月份下载</p>
+                    <form action="{% url 'api-dreport:get_risk_record' %}" method="get" class="form-record-download" id="record">
+                        月份:&nbsp;<input type="month" name="record-month" id="record-month">&nbsp;&nbsp;
                         {% csrf_token %}
-                        <input class="btn btn-default" type="submit" value="下载" />
+                        <input class="btn btn-primary" type="submit" value="下载" /><br/>
+                    </form>
+                    <p>根据时间段下载</p>
+                    <form action="{% url 'api-dreport:get_risk_record_from_time_quantum' %}" method="get" class="form-record-download" id="record">
+                        {% csrf_token %}
+                        开始:&nbsp;<input type="date" name="start-date" id="record-month">&nbsp; to 
+                        结束:&nbsp;<input type="date" name="end-date" id="record-month">&nbsp;&nbsp;
+                        <input class="btn btn-primary" type="submit" value="下载" />
                     </form>
                 </div>
             </div>
