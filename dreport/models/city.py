@@ -135,3 +135,40 @@ class CityWeekRecord(models.Model):
     report_name = models.CharField(max_length=512, null=True)
     week_of_report = models.IntegerField(null=False)
     select_date = models.DateField(null=False)
+
+    def create_record(self, date, week, citys=City.objects.all()):
+        print(date, week)
+
+        if date.weekday() == 6:
+            end = date
+            start = date + timedelta(days=-6)
+        elif date.weekday() == 0:
+            start = date + timedelta(days=6)
+            end = date
+        else:
+            start = date - timedelta(days=date.weekday())
+            end = date + timedelta(days=6-date.weekday())
+
+        for city in citys:
+            records = CityPauseRecord.objects.filter(city=city, risk_date__gte=start, risk_date__lte=end)
+            pause_count = 0
+            total_pause_time = 0
+            if records:
+                for record in records:
+                    if record.recovery_date_time:
+                        pause_count += 1
+                        total_pause_time += (record.recovery_date_time - record.risk_date_time).seconds
+                    else:
+                        total_pause_time += 0
+                CityWeekRecord.objects.create(
+                    city=city,
+                    pause_count=pause_count,
+                    total_pause_time=total_pause_time,
+                    week_of_report=week,
+                    select_date=date
+                )
+            else:
+                print('该城市本周没有熔断记录')
+                continue
+
+        return True

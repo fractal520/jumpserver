@@ -196,6 +196,23 @@ jQuery(document).ready(function(){
         $('body').on('click', '.btn-week', function(){
             var data = $('.form-batch-week-month-record').serializeArray();
             console.log(data)
+
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: "{%url 'api-dreport:batch-create-week-record' %}",
+                data: data,
+                contentType: "application/x-www-form-urlencoded",
+                success: function (result){
+                    console.log(result)
+                    if (result.code == 200){
+                        window.location.reload()
+                    }else{
+                        alert(result.error)
+                    }
+                }
+            });
+
         });
     });
 

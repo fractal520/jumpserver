@@ -2,7 +2,7 @@
 #
 import os
 import xlwt
-from .models.city import City, CityMonthRecord, CityPauseRecord
+from .models.city import City, CityMonthRecord, CityPauseRecord, CityWeekRecord
 from django.core.exceptions import ObjectDoesNotExist
 from docxtpl import DocxTemplate
 from django.conf import settings
@@ -183,3 +183,15 @@ class RiskRecord(object):
 
         workbook.save(os.path.join(save_address, filename + 'record.xls'))
         return filename + 'record.xls'
+
+
+class WeekRecord(object):
+
+    def create(self, date, week, city):
+        date = datetime.strptime(date, "%Y-%m-%d")
+        week_record = CityWeekRecord()
+        if city:
+            week_record.create_record(date, week, citys=city)
+            return True
+        week_record.create_record(date, week)
+        return True
