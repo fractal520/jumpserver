@@ -3,10 +3,13 @@
 import os
 import xlwt
 from .models.city import City, CityMonthRecord, CityPauseRecord, CityWeekRecord
+from common.utils import get_logger
 from django.core.exceptions import ObjectDoesNotExist
 from docxtpl import DocxTemplate
 from django.conf import settings
 from datetime import datetime
+
+logger = get_logger('jumpserver')
 
 TEMPLATE_DIR = os.path.join(settings.DEVICE_REPORT_DIR, 'WTSDtmp.docx')
 WEEK_TEMPLATE_DIR = os.path.join(settings.DEVICE_REPORT_DIR, 'WTSDtmp_week.docx')
@@ -16,11 +19,12 @@ class MonthRecordFunction(object):
 
     def batch_create(self, date):
         citys = City.objects.all()
+        logger.info('Batch create month record.')
         try:
             year = date.split('-')[0]
             month = date.split('-')[1]
         except BaseException as error:
-            print(error)
+            logger.error(error)
             return False, str(error)
 
         for city in citys:
@@ -36,15 +40,16 @@ class MonthRecordFunction(object):
                         total_pause_time += 0
                 CityMonthRecord.create_or_update(city, month, pause_count, total_pause_time, year)
             else:
-                print('该城市当月没有熔断记录')
+                logger.info('City {} was no risk record in this {}month'.format(city.name, month))
                 continue
         return True, 'success'
 
     def create(self, city_id, date):
+        logger.info('Start create month record.')
         try:
             city = City.objects.get(id=city_id)
         except ObjectDoesNotExist as error:
-            print(error)
+            logger.error(error)
             return False
         year = date.split('-')[0]
         month = date.split('-')[1]
@@ -61,6 +66,7 @@ class MonthRecordFunction(object):
             CityMonthRecord.create_or_update(city, month, pause_count, total_pause_time, year)
             return True
         else:
+            logger.error('City {} has no record on {}'.format(city.name, date))
             return False
 
     def report(self, parma):
@@ -113,12 +119,14 @@ class MonthRecordFunction(object):
         report_path = os.path.join(settings.DEVICE_REPORT_DIR, '{}_{}.docx'.format(record.month, record.city.name))
         tpl.save(report_path)
         CityMonthRecord.save_report(record.id, '{}_{}.docx'.format(record.month, record.city.name))
+        logger.info('Month report {}_{}.docx has create successful.'.format(record.month, record.city.name))
         return report_path
 
 
 class RiskRecord(object):
 
     def create(self, parm, time_quantum=False):
+        logger.info('Starting create target date risk record Excel.')
         if not time_quantum:
             year = parm.split('-')[0]
             month = parm.split('-')[1]
@@ -183,6 +191,7 @@ class RiskRecord(object):
             row_count += 1
 
         workbook.save(os.path.join(save_address, filename + 'record.xls'))
+        logger.info('File {}record.xls create successful.'.format(filename))
         return filename + 'record.xls'
 
 
@@ -192,8 +201,10 @@ class WeekRecord(object):
         # date = datetime.strptime(date, "%Y-%m-%d")
         week_record = CityWeekRecord()
         if city:
+            logger.info('Starting create week record.')
             week_record.create_record(date, week, citys=city)
             return True
+        logger.info('Starting batch create week record.')
         week_record.create_record(date, week)
         return True
 
@@ -248,5 +259,5 @@ class WeekRecord(object):
         report_path = os.path.join(settings.DEVICE_REPORT_DIR, '{}_{}.docx'.format(record.week_of_report, record.city.name))
         tpl.save(report_path)
         CityWeekRecord.save_report(record.id, '{}_{}.docx'.format(record.week_of_report, record.city.name))
+        logger.info('Week report {}_{}.docx has create successful.'.format(record.week_of_report, record.city.name))
         return report_path
-

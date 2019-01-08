@@ -67,8 +67,9 @@ class CityMonthRecord(models.Model):
             record.pause_count = pause_count
             record.total_pause_time = total_pause_time
             record.save()
+            logger.info('Month record update successful.')
         except ObjectDoesNotExist as error:
-            print(error, 'Record will create by system.')
+            logger.info(error, 'Month record will create by system.')
             CityMonthRecord.objects.create(
                 city=city,
                 month=month,
@@ -97,19 +98,19 @@ class CityPauseRecord(models.Model):
         return '{0}_{1}'.format(self.city.name, self.risk_date_time)
 
     def add_record(self, risk_list, risk_date):
-        print(risk_date)
         if risk_list:
             if CityPauseRecord.objects.filter(risk_date=risk_date):
                 CityPauseRecord.objects.filter(risk_date=risk_date).delete()
+                logger.info('{} risk record is already exist, system will delete it first.'.format(risk_date))
             for record in risk_list:
                 record = record.split('\n')
                 risk_time = record[0].split('.')[0]
                 risk_date_time = risk_date+' '+risk_time
-                print(risk_date_time)
                 try:
                     city = City.objects.get(name=record[1])
-                    print('get city')
+                    logger.info('Get city {}.'.format(city.name))
                 except ObjectDoesNotExist as error:
+                    logger.info('city not exist, system will create it.')
                     City.objects.create(name=record[1])
                     city = City.objects.get(name=record[1])
 
@@ -120,6 +121,7 @@ class CityPauseRecord(models.Model):
                     risk_date_time_edit=risk_date_time,
                     risk_time=risk_time
                 )
+                logger.info('Risk record {} create successful.'.format(record))
             return True
         else:
             return False
@@ -141,7 +143,7 @@ class CityWeekRecord(models.Model):
 
     def create_record(self, date, week, citys=City.objects.all()):
         print(date, week)
-
+        logger.info("Add {} of {} record.".format(week, date.year))
         if date.weekday() == 6:
             end = date
             start = date + timedelta(days=-6)
@@ -151,7 +153,7 @@ class CityWeekRecord(models.Model):
         else:
             start = date - timedelta(days=date.weekday())
             end = date + timedelta(days=6-date.weekday())
-        print(start, end)
+        # print(start, end)
         for city in citys:
             records = CityPauseRecord.objects.filter(city=city, risk_date__gte=start, risk_date__lte=end)
             pause_count = 0
@@ -173,9 +175,9 @@ class CityWeekRecord(models.Model):
                     start_date=start,
                     end_date=end
                 )
+                logger.info('City {} week record in {}week create successful.'.format(city.name, week))
             else:
-                print('该城市本周没有熔断记录')
-                print(records)
+                logger.info('City {} was no risk record in this {}week'.format(city.name, week))
                 continue
 
         return True
@@ -185,9 +187,11 @@ class CityWeekRecord(models.Model):
         record = CityWeekRecord.objects.get(id=record_id)
         record.report_name = filename
         record.save()
+        logger.info('Report name {} save in databases.'.format(filename))
         return True
 
     @classmethod
     def get_report(cls, record_id):
         record = CityWeekRecord.objects.get(id=record_id)
+        logger.info('Get report {}.'.format(record.report_name))
         return record.report_name

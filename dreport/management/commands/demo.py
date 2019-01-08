@@ -5,9 +5,12 @@ import json
 from datetime import datetime, timedelta
 from django.core.management.base import BaseCommand
 from django.core.exceptions import ObjectDoesNotExist
+from common.utils import get_logger
 from assets.models import Asset
 from dreport.models.city import CityMonthRecord, CityPauseRecord, City
 from dreport.tasks import collect_risk_manual
+
+logger = get_logger('jumpserver')
 
 
 class Command(BaseCommand):
@@ -19,21 +22,24 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         yestarday = datetime.strftime(datetime.now() - timedelta(days=1), "%Y-%m-%d")
         log_path = os.path.join(self.rcs_log_dir, 'rcs.', yestarday, '.log')
-        rcs = Asset.objects.get(ip=self.rcs_ip)
-        print(rcs.admin_user)
+        logger.info('获取风控服务器信息')
+        try:
+            rcs = Asset.objects.get(ip=self.rcs_ip)
+        except ObjectDoesNotExist as error:
+            logger.error(error)
 
+        logger.info('开始从{}获取{}熔断信息'.format(rcs.hostname, yestarday))
         result = collect_risk_manual(asset=rcs, script_path='/opt/CronScript/RA.py')
-        print(result)
         if result[0]['ok']:
             data = result[0]['ok'][rcs.hostname]
             for key, value in data.items():
                 stout = json.loads(value.get('stdout'))
-                print(stout.get('risk_list'))
                 if CityPauseRecord().add_record(
                         risk_list=stout.get('risk_list', None),
                         risk_date=stout.get('date', None)
                 ):
-                    print('添加成功')
+                    logger.info('添加成功')
+                    logger.info(stout)
                 else:
-                    print('添加失败')
-                print(stout)
+                    logger.error('添加失败')
+                    logger.error(stout)
