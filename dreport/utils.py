@@ -135,7 +135,7 @@ class RiskRecord(object):
                 risk_date__year=year,
                 city__city_type__exact="CORPORATION"
             )
-            filename = month
+            filename = '{}年{}月熔断记录'.format(year, month)
             ordering = '-risk_date_time'
         else:
             print(parm)
@@ -192,7 +192,7 @@ class RiskRecord(object):
 
         workbook.save(os.path.join(save_address, filename + 'record.xls'))
         logger.info('File {}record.xls create successful.'.format(filename))
-        return filename + 'record.xls'
+        return filename + '.xls'
 
 
 class WeekRecord(object):
