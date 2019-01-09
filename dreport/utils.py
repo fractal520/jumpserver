@@ -256,16 +256,13 @@ class WeekRecord(object):
             'form': risk_list,
         }
         tpl.render(context)
-        report_path = os.path.join(settings.DEVICE_REPORT_DIR, '{}_{}.docx'.format(record.week_of_report, record.city.name))
+        file_name = '{}_{}年第{}周.docx'.format(
+            record.city.name,
+            record.select_year,
+            record.week_of_report,
+        )
+        report_path = os.path.join(settings.DEVICE_REPORT_DIR, file_name)
         tpl.save(report_path)
-        CityWeekRecord.save_report(record.id, '{}_{}年第{}周.docx'.format(
-            record.city.name,
-            record.select_year,
-            record.week_of_report,
-        ))
-        logger.info('Week report {}_{}年第{}周.docx has create successful.'.format(
-            record.city.name,
-            record.select_year,
-            record.week_of_report,
-        ))
+        CityWeekRecord.save_report(record.id, file_name)
+        logger.info('Week report {} has create successful.'.format(file_name))
         return report_path
