@@ -258,6 +258,14 @@ class WeekRecord(object):
         tpl.render(context)
         report_path = os.path.join(settings.DEVICE_REPORT_DIR, '{}_{}.docx'.format(record.week_of_report, record.city.name))
         tpl.save(report_path)
-        CityWeekRecord.save_report(record.id, '{}_{}.docx'.format(record.week_of_report, record.city.name))
-        logger.info('Week report {}_{}.docx has create successful.'.format(record.week_of_report, record.city.name))
+        CityWeekRecord.save_report(record.id, '{}_{}年第{}周.docx'.format(
+            record.city.name,
+            record.select_year,
+            record.week_of_report,
+        ))
+        logger.info('Week report {}_{}年第{}周.docx has create successful.'.format(
+            record.city.name,
+            record.select_year,
+            record.week_of_report,
+        ))
         return report_path
