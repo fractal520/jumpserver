@@ -100,7 +100,7 @@ class MonthRecordFunction(object):
 
         tpl = DocxTemplate(TEMPLATE_DIR)
 
-        total_pause_time = int(int(record.total_pause_time) / 60)
+        total_pause_time = round(int(record.total_pause_time) / 60, 2)
         device_avarate = (1-(record.total_pause_time/(30 * 17.5 * 60 * 60))) * 100
         default_markdown = "{0}后台网络波动，导致充值熔断".format(record.city.name)
         context = {
@@ -240,7 +240,7 @@ class WeekRecord(object):
 
         tpl = DocxTemplate(WEEK_TEMPLATE_DIR)
 
-        total_pause_time = int(int(record.total_pause_time) / 60)
+        total_pause_time = round(int(record.total_pause_time) / 60, 2)
         device_avarate = (1 - (record.total_pause_time / (30 * 17.5 * 60 * 60))) * 100
         default_markdown = "{0}后台网络波动，导致充值熔断".format(record.city.name)
         context = {
