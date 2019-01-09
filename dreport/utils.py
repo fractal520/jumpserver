@@ -190,7 +190,7 @@ class RiskRecord(object):
             worksheet.write(row_count, 9, record.remark)
             row_count += 1
 
-        workbook.save(os.path.join(save_address, filename + 'record.xls'))
+        workbook.save(os.path.join(save_address, filename + '.xls'))
         logger.info('File {}record.xls create successful.'.format(filename))
         return filename + '.xls'
 
