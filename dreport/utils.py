@@ -79,11 +79,13 @@ class MonthRecordFunction(object):
         risks = CityPauseRecord.objects.filter(city=record.city, risk_date__month=record.month, risk_date__year=year)
         risks = risks.order_by('-risk_date_time')
         list_num = 1
+        total_pause_time = 0
         for risk in risks:
             if not risk.recovery_date_time:
                 continue
 
             pause_time = (risk.recovery_date_time - risk.risk_date_time).seconds/60
+            total_pause_time += pause_time
             recovery_date_time = datetime.strftime(risk.recovery_date_time.astimezone(), "%H:%M:%S")
 
             risk_dict = {
@@ -100,7 +102,7 @@ class MonthRecordFunction(object):
 
         tpl = DocxTemplate(TEMPLATE_DIR)
 
-        total_pause_time = round(int(record.total_pause_time) / 60, 2)
+        # total_pause_time = round(int(record.total_pause_time) / 60, 2)
         device_avarate = (1-(record.total_pause_time/(30 * 17.5 * 60 * 60))) * 100
         default_markdown = "{0}后台网络波动，导致充值熔断".format(record.city.name)
         context = {
@@ -218,12 +220,13 @@ class WeekRecord(object):
         risks = risks.order_by('-risk_date_time')
         risk_list = []
         list_num = 1
-
+        total_pause_time = 0
         for risk in risks:
             if not risk.recovery_date_time:
                 continue
 
             pause_time = (risk.recovery_date_time - risk.risk_date_time).seconds / 60
+            total_pause_time += pause_time
             recovery_date_time = datetime.strftime(risk.recovery_date_time.astimezone(), "%H:%M:%S")
 
             risk_dict = {
@@ -240,7 +243,7 @@ class WeekRecord(object):
 
         tpl = DocxTemplate(WEEK_TEMPLATE_DIR)
 
-        total_pause_time = round(int(record.total_pause_time) / 60, 2)
+        # total_pause_time = round(int(record.total_pause_time) / 60, 2)
         device_avarate = (1 - (record.total_pause_time / (30 * 17.5 * 60 * 60))) * 100
         default_markdown = "{0}后台网络波动，导致充值熔断".format(record.city.name)
         context = {
