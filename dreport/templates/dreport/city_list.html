@@ -2,6 +2,7 @@
 {% load i18n static %}
 {% block table_search %}{% endblock %}
 {% block content_left_head %}
+<link href="{% static 'css/plugins/datepicker/datepicker3.css' %}" rel="stylesheet">
 <div class="btn-group">
     <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">功能 
         <span class="caret"></span>
@@ -9,10 +10,12 @@
     <ul class="dropdown-menu" role="menu">
         <li class="active"><a href="{% url 'dreport:CityView' %}">城市列表</a></li>
         <li><a href="{% url 'dreport:CityMonthView' %}">月度记录</a></li>
+        <li><a href="{% url 'dreport:CityWeekView' %}">周记录</a></li>
         <li><a href="{% url 'dreport:CityRecord' %}">熔断记录</a></li>
         <li class="divider"></li>
         <li><a href="{% url 'dreport:city-create' %}">创建城市</a></li>
         <li><a href="javascript:void(0)" class="btn-batch-model">批量创建月份报表</a></li>
+        <li><a href="javascript:void(0)" class="btn-week-model">批量创建周报表</a></li>
         <!--<li><a class="btn-record-model" href="javascript:void(0)">下载熔断记录</a></li>-->
     </ul>
 </div>
@@ -86,12 +89,56 @@
     </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
 
+<!-- /.batch-week-record-modal -->
+<div class="modal fade" tabindex="-1" role="dialog" id="dialog-batch-week-record">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">周报表</h4>
+            </div>
+            <div class="modal-body">
+                <p>请选择生成日期</p>
+                <form class="form-batch-week-month-record">
+                    <input class="record-week" type="text" name="record-week" id="record-week">
+                    {% csrf_token %}
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary btn-week">Save changes</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
 
 {% endblock %}
 {% block custom_foot_js %}
+<script src="{% static 'js/plugins/datepicker/bootstrap-datepicker.js' %}"></script>
 <script>
 jQuery(document).ready(function(){
     $('#city_table').DataTable();
+
+    $.fn.datepicker.dates['zh-CN'] = {
+    days: ["周日", "周一", "周二", "周三", "周四", "周五", "周六", "周日"],
+    daysShort: ["日", "一", "二", "三", "四", "五", "六", "七"],
+    daysMin: ["日", "一", "二", "三", "四", "五", "六", "七"],
+    months: ["一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"],
+    monthsShort: ["一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"],
+    today: "今天",
+    clear: "清除"
+    };
+
+    $('.record-week').datepicker({
+        weekStart: 1,
+        format: "yyyy-mm-dd",
+        todayBtn: "linked",
+        keyboardNavigation: true,
+        forceParse: false,
+        calendarWeeks: true,
+        autoclose: true,
+        language: "zh-CN"
+    });
 
     $('.btn-batch-model').on('click', function(){
         $('#dialog-batch-create-record').modal({show:true});
@@ -144,6 +191,32 @@ jQuery(document).ready(function(){
 
         });
     });
+
+    $('.btn-week-model').on('click', function(){
+        $('#dialog-batch-week-record').modal({show:true});
+        $('body').on('click', '.btn-week', function(){
+            var data = $('.form-batch-week-month-record').serializeArray();
+            console.log(data)
+
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: "{%url 'api-dreport:batch-create-week-record' %}",
+                data: data,
+                contentType: "application/x-www-form-urlencoded",
+                success: function (result){
+                    console.log(result)
+                    if (result.code == 200){
+                        window.location.reload()
+                    }else{
+                        alert(result.error)
+                    }
+                }
+            });
+
+        });
+    });
+
 });
 
 

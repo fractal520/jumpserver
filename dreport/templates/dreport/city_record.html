@@ -2,6 +2,7 @@
 {% load i18n static %}
 {% block table_search %}{% endblock %}
 {% block content_left_head %}
+<link href="{% static 'css/plugins/datepicker/datepicker3.css' %}" rel="stylesheet">
 <div class="btn-group">
     <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">功能 
         <span class="caret"></span>
@@ -9,6 +10,7 @@
     <ul class="dropdown-menu" role="menu">
         <li><a href="{% url 'dreport:CityView' %}">城市列表</a></li>
         <li><a href="{% url 'dreport:CityMonthView' %}">月度记录</a></li>
+        <li><a href="{% url 'dreport:CityWeekView' %}">周记录</a></li>
         <li class="active"><a href="{% url 'dreport:CityRecord' %}">熔断记录</a></li>
         <li class="divider"></li>
         <li><a class="btn-record-model" href="javascript:void(0)">下载熔断记录</a></li>
@@ -59,18 +61,25 @@
                             下载熔断记录
                         </h3>
                     </div>
-                    <p>根据月份下载</p>
+                    <p><b>根据月份下载</b></p>
                     <form action="{% url 'api-dreport:get_risk_record' %}" method="get" class="form-record-download" id="record">
-                        月份:&nbsp;<input type="month" name="record-month" id="record-month">&nbsp;&nbsp;
-                        {% csrf_token %}
-                        <input class="btn btn-primary" type="submit" value="下载" /><br/>
+                        <div class="form-group">
+                            <label for="record-month">月份:</label>
+                            {% csrf_token %}
+                            <input class="input-sm record-month" type="text" name="record-month" id="record-month">
+                        </div>
+                        <button class="btn btn-info" type="submit">下载</button>
                     </form>
-                    <p>根据时间段下载</p>
+                    <p><b>根据时间段下载</b></p>
                     <form action="{% url 'api-dreport:get_risk_record_from_time_quantum' %}" method="get" class="form-record-download" id="record">
-                        {% csrf_token %}
-                        开始:&nbsp;<input type="date" name="start-date" id="record-month">&nbsp; to 
-                        结束:&nbsp;<input type="date" name="end-date" id="record-month">&nbsp;&nbsp;
-                        <input class="btn btn-primary" type="submit" value="下载" />
+                        <div class="form-group">
+                            {% csrf_token %}
+                            <label>开始:</label>
+                            <input class="input-sm record-quantum" type="text" name="start-date" id=""> to 
+                            <label>结束:</label>
+                            <input class="input-sm record-quantum" type="text" name="end-date" id="">
+                        </div>
+                        <button class="btn btn-info" type="submit">下载</button>
                     </form>
                 </div>
             </div>
@@ -83,7 +92,9 @@
 
 {% endblock %}
 {% block custom_foot_js %}
+<script src="{% static 'js/plugins/datepicker/bootstrap-datepicker.js' %}"></script>
 <script>
+
     $(document).ready(function(){
         $('#city_record_table').DataTable({
              'ordering':false,
@@ -93,6 +104,38 @@
         $('.btn-record-model').on('click', function(){
             console.log('btn-record-model')
             $('#dialog-record-download').modal({show:true});
+        });
+
+        $.fn.datepicker.dates['zh-CN'] = {
+            days: ["周日", "周一", "周二", "周三", "周四", "周五", "周六", "周日"],
+            daysShort: ["日", "一", "二", "三", "四", "五", "六", "七"],
+            daysMin: ["日", "一", "二", "三", "四", "五", "六", "七"],
+            months: ["一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"],
+            monthsShort: ["一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"],
+            today: "今天",
+            clear: "清除"
+        };
+
+        $('.record-quantum').datepicker({
+            weekStart: 1,
+            format: "yyyy-mm-dd",
+            todayBtn: "linked",
+            keyboardNavigation: false,
+            forceParse: false,
+            calendarWeeks: true,
+            autoclose: true,
+            language: "zh-CN"
+        });
+
+        $('.record-month').datepicker({
+            weekStart: 1,
+            format: "yyyy-mm",
+            startView: 1,
+            minViewMode: 1,
+            language: "zh-CN",
+            todayBtn: "linked",
+            keyboardNavigation: false,
+            autoclose: true
         });
 
     });

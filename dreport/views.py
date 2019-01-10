@@ -6,7 +6,7 @@ from django.urls import reverse_lazy
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils import timezone
 from datetime import datetime
-from .models.city import CityMonthRecord, City, CityPauseRecord
+from .models.city import CityMonthRecord, City, CityPauseRecord, CityWeekRecord
 from .forms import CityUpdateForm, CityCreateForm, RecordUpdateForm, CityRecordCreateForm
 from common.permissions import AdminUserRequiredMixin
 # Create your views here.
@@ -153,3 +153,9 @@ class RecordCreateView(AdminUserRequiredMixin, CreateView):
         request.POST['recovery_date'] = datetime.strftime(recovery_date_time, "%Y/%m/%d")
         request.POST._mutable = _mutable
         return super().post(request, *args, **kwargs)
+
+
+class CityWeekView(AdminUserRequiredMixin, ListView):
+    model = CityWeekRecord
+    template_name = 'dreport/city_week.html'
+    context_object_name = 'city_week'

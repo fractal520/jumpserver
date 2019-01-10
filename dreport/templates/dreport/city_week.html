@@ -3,13 +3,13 @@
 {% block table_search %}{% endblock %}
 {% block content_left_head %}
 <div class="btn-group">
-    <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">功能 
+    <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">功能
         <span class="caret"></span>
     </button>
     <ul class="dropdown-menu" role="menu">
         <li><a href="{% url 'dreport:CityView' %}">城市列表</a></li>
-        <li class="active"><a href="{% url 'dreport:CityMonthView' %}">月度记录</a></li>
-        <li><a href="{% url 'dreport:CityWeekView' %}">周记录</a></li>
+        <li><a href="{% url 'dreport:CityMonthView' %}">月度记录</a></li>
+        <li class="active"><a href="{% url 'dreport:CityWeekView' %}">周记录</a></li>
         <li><a href="{% url 'dreport:CityRecord' %}">熔断记录</a></li>
         <!--<li class="divider"></li>-->
         <!--<li><a class="btn-record-model" href="javascript:void(0)">下载熔断记录</a></li>-->
@@ -17,21 +17,23 @@
 </div>
 {% endblock %}
 {% block table_container %}
-<table class="table table-striped table-bordered table-hover " id="city_month_table" >
+<table class="table table-striped table-bordered table-hover " id="city_week_table" >
     <thead>
         <tr>
             <th>城市</th>
-            <th>年月</th>
+            <th>年份</th>
+            <th>周数</th>
             <th>熔断次数</th>
             <th>故障时间(单位:秒)</th>
             <th>操作</th>
         </tr>
     </thead>
     <tbody>
-    {% for record in city_month %}
+    {% for record in city_week %}
         <tr>
             <td>{{record.city}}</td>
-            <td>{{record.year}}/{{record.month}}</td>
+            <td>{{record.select_year}}</td>
+            <td>第{{record.week_of_report}}周</td>
             <td>{{record.pause_count}}</td>
             <td>{{record.total_pause_time}}</td>
             <td>
@@ -39,7 +41,7 @@
                 <!--<a class="btn btn-xs btn-primary" href="#">编辑</a>-->
                 <!--<a class="btn btn-danger btn-xs btn-delete" href="javascript:void(0)" id="{{record.id}}">删除</a>-->
                 {% if record.report_name %}
-                <a class="btn btn-xs btn-success" href="{% url 'api-dreport:download_report' pk=record.id %}">下载报告</a>
+                <a class="btn btn-xs btn-success" href="{% url 'api-dreport:download_week_report' pk=record.id %}">下载报告</a>
                 {% else %}
                 <a class="btn btn-xs btn-success" disabled="disabled" href="javascript:void(0)">下载报告</a>
                 {% endif %}
@@ -63,7 +65,7 @@
                                 报告信息
                             </h3>
                         </div>
-                        <form class="form-create-report" id="report">
+                        <form class="form-create-week-report" id="report">
                             {% csrf_token %}
                         </form>
                     </div>
@@ -80,27 +82,28 @@
 {% block custom_foot_js %}
 <script>
     jQuery(document).ready(function(){
-        $('#city_month_table').DataTable({
+        $('#city_week_table').DataTable({
             "order": [[ 1, "desc" ]]
         });
-        console.log('month record')
+
+
         $('body').on('click', '.btn-template', function(){
             var id = $(this).attr('id');
             $('#dialog-create-report').modal({show:true});
             //ajax获取城市月份数据填充到表格里面
-            $.get("{% url 'api-dreport:get_month_record' %}", {'id':id}, function(result){
+            $.get("{% url 'api-dreport:get_week_record' %}", {'id':id}, function(result){
                 if(result.code == 200){
-                    var html = "<li>城市:" + result.data.city + "</li><br/><li>月份:" + result.data.month +"</li><br/><li>熔断次数:" + result.data.total_error +"</li><br/><li>故障时间(秒):" + result.data.error_time + "</li><br/><li>设备总数:" + "<input type='text' name='device' value=''>"+"</li><br/><li>分析:" + "<textarea style='width: 200px; height: 100px' name='markdown'></textarea></li>"
+                    var html = "<li>城市:" + result.data.city + "</li><br/><li>周数:第" + result.data.week_of_report +"周</li><br/><li>熔断次数:" + result.data.total_error +"</li><br/><li>故障时间(秒):" + result.data.error_time + "</li><br/><li>设备总数:" + "<input type='text' name='device' value=''>"+"</li><br/><li>分析:" + "<textarea style='width: 200px; height: 100px' name='markdown'></textarea></li>"
 
                     $('#report').append(html);
                     $('body').on('click', '.btn-report', function(){
-                        var data = $('.form-create-report').serializeArray();
+                        var data = $('.form-create-week-report').serializeArray();
                         data.push({'name': 'id', 'value': id})
 
                         $.ajax({
                             type: "POST",
                             dataType: "json",
-                            url: "{% url 'api-dreport:make_report' %}",
+                            url: "{% url 'api-dreport:create_week_report' %}",
                             data: data,
                             contentType: "application/x-www-form-urlencoded",
                             success: function (response){
@@ -123,15 +126,6 @@
             })
 
         });
-
-        $('body').on('click', '.btn-close', function(){
-            window.location.reload()
-        });
-
-        $('body').on('click', '.btn-delete', function(){
-            var id = $(this).attr('id');
-            console.log(id)
-        });        
 
 
     });
