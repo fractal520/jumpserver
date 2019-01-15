@@ -154,7 +154,7 @@
          * @param {Object} args
          */
         function showLoading(args){
-            var args = '.sweet-alert';
+            var args = '.sa-warning';
             if(args){
                 var container = args;
                 if(container){
@@ -169,7 +169,7 @@
          * @param {Object} args
          */
         function hideLoading(args){
-            var args = '.sweet-alert';
+            var args = '.sa-warning';
             if(args){
                 var container = args;
                 if(container){
@@ -192,7 +192,7 @@
                  }, function(){
                     var loadShowTime = 600;
                     var data = $('.deploy-form').serializeArray();
-                    showLoading('.sweet-alert')
+                    showLoading('.sa-warning')
                     $.ajax({
                         type: "GET",
                         dataType: "json",
@@ -201,7 +201,7 @@
                         data: data,
                         success: function (result){
                             if(result.code==200) {
-                                hideLoading('.sweet-alert');
+                                hideLoading('.sa-warning');
                                 console.log(result.task)
                                 swal({
                                     title: "",
@@ -212,7 +212,7 @@
                                 },function(){window.location.reload()})
                             }
                             else if(result.code==400) {
-                                hideLoading('.sweet-alert');
+                                hideLoading('.sa-warning');
                                 console.log(result.error)
                                 swal({
                                     title: "",
