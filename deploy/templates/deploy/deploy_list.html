@@ -63,7 +63,9 @@ jQuery(document).ready(function(){
     //flush deploy list
     $('body').on('click', '.btn-update', function(){
         //$.get("{% url 'api-deploy:get_jenkins_all' %}", {}, function(){});
-
+            var loadShowTime = 600;
+            var args = null;
+            args = showLoading(args);
             $.ajax({
                 type: "GET",
                 dataType: "json",
@@ -72,15 +74,47 @@ jQuery(document).ready(function(){
                 success: function (result){
                     console.log(result)
                     if (result.code == 200){
-                        window.location.reload()
+                        hideLoading(args);
+                        setTimeout(function(){window.location.reload()},loadShowTime);
                     }else{
                         alert('error')
+                        window.location.reload()
                     }
                 }
             });
 
         //setTimeout(function(){window.location.reload()},2000);
     });
+
+    /**
+     * 显示加载loading
+     * @param {Object} args
+     */
+    showLoading:function(args){
+        args = !args?{}:args;
+        args.timestamp = new Date().getTime();
+        if(args.loadingId){
+            var container = $(args.loadingId);
+            if(container){
+                container.css({"position":"relative"});
+                container.append('<div class="loading" style="width:60px; height:24px; position:absolute;left:50%;top:50%;margin-left:-30px;margin-top:-12px;"><img src="img/loading-0.gif"/></div>');
+            }
+        }
+        return args;
+    };
+
+    /**
+     * 隐藏加载loading
+     * @param {Object} args
+     */
+    hideLoading:function(args){
+        if(args.loadingId){
+            var container = $(args.loadingId);
+            if(container){
+                container.find('.loading').remove();
+            }
+        }
+    };
 
     //build job
     $('body').on('click', '.btn-build', function(){
