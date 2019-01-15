@@ -73,7 +73,9 @@ jQuery(document).ready(function(){
             console.log(result)
         });
         $.get("{% url 'api-deploy:get_jenkins_all' %}", {}, function(){});
-        window.location.reload()
+        setTimeout(function(){
+          window.location.reload()
+        },2000);
     });
 
     $('body').on('click', '.btn-deploy', function(){
