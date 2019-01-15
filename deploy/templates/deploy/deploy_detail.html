@@ -160,7 +160,8 @@
                 if(container){
                     $(container).css({"position":"relative"});
                     $(container).append('<div class="loading" style="width:60px; height:24px; position:absolute;left:50%;top:50%;margin-left:-30px;margin-top:-12px;"><img src="{% static "img/loading-0.gif" %}"/></div>');
-                    $(container).find('.sa-button-container').remove();
+                    $('.sa-button-container').find('.cancel').remove();
+                    $('.sa-button-container').find('.confirm').remove();
                     $('.showSweetAlert').append('<div class="loadword" ><p style="display: block;">请稍等</p></div>');
                 }
             }
@@ -176,7 +177,7 @@
                 var container = args;
                 if(container){
                     $(container).find('.loading').remove();
-                    $(container).find('.loadword').remove();
+                    $('.showSweetAlert').find('.loadword').remove();
                 }
             }
         };
