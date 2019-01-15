@@ -79,6 +79,7 @@ jQuery(document).ready(function(){
                         hideLoading(args);
                         setTimeout(function(){window.location.reload()},loadShowTime);
                     }else{
+                        hideLoading(args);
                         alert('error')
                         window.location.reload()
                     }
@@ -103,7 +104,6 @@ jQuery(document).ready(function(){
         }
         return args;
     };
-
     /**
      * 隐藏加载loading
      * @param {Object} args
@@ -124,9 +124,30 @@ jQuery(document).ready(function(){
         $.get("{% url 'api-deploy:build_app' %}", {'id':id}, function(result){
             console.log(result)
         });
-        $.get("{% url 'api-deploy:get_jenkins_all' %}", {}, function(){});
+        var loadShowTime = 600;
+        var args = '#test1'
+        args = showLoading(args);
+        setTimeout(function(){console.log(args)},20000);
 
-        setTimeout(function(){window.location.reload()},2000);
+        //$.get("{% url 'api-deploy:get_jenkins_all' %}", {}, function(){});
+
+        $.ajax({
+            type: "GET",
+            dataType: "json",
+            url: "{% url 'api-deploy:get_jenkins_all' %}",
+            contentType: "application/x-www-form-urlencoded",
+            success: function (result){
+                console.log(result)
+                if (result.code == 200){
+                    hideLoading(args);
+                    setTimeout(function(){window.location.reload()},loadShowTime);
+                }else{
+                    hideLoading(args);
+                    alert('error')
+                    window.location.reload()
+                }
+            }
+        });
         
     });
 
