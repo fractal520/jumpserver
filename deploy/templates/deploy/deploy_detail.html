@@ -8,6 +8,7 @@
 {% endblock %}
 
 {% block content %}
+<div id="#test1">
     <div class="wrapper wrapper-content animated fadeInRight">
         <div class="row">
             <div class="col-sm-12">
@@ -143,11 +144,42 @@
             </div>
         </div>
     </div>
+</div>
 
 {% endblock %}
 {% block custom_foot_js %}
 <script>
     jQuery(document).ready(function(){
+
+        /**
+         * 显示加载loading
+         * @param {Object} args
+         */
+        function showLoading(args){
+            var args = '#test1';
+            if(args){
+                var container = args;
+                if(container){
+                    $(container).css({"position":"relative"});
+                    $(container).append('<div class="loading" style="width:60px; height:24px; position:absolute;left:50%;top:50%;margin-left:-30px;margin-top:-12px;"><img src="{% static "img/loading-0.gif" %}"/></div>');
+                }
+            }
+            return args;
+        };
+        /**
+         * 隐藏加载loading
+         * @param {Object} args
+         */
+        function hideLoading(args){
+            var args = '#test1';
+            if(args){
+                var container = args;
+                if(container){
+                    $(container).find('.loading').remove();
+                }
+            }
+        };
+
         console.log('detail')
         $('body').on('click', '.btn-deploy-per', function(){
             swal({
@@ -160,7 +192,9 @@
                 confirmButtonText: "{% trans 'Confirm' %}",
                 closeOnConfirm: false
                  }, function(){
+                    var loadShowTime = 600;
                     var data = $('.deploy-form').serializeArray();
+                    showLoading('#test1')
                     $.ajax({
                         type: "GET",
                         dataType: "json",
@@ -169,6 +203,7 @@
                         data: data,
                         success: function (result){
                             if(result.code==200) {
+                                hideLoading(args);
                                 console.log(result.task)
                                 swal({
                                     title: "",
@@ -179,6 +214,7 @@
                                 },function(){window.location.reload()})
                             }
                             else if(result.code==400) {
+                                hideLoading(args);
                                 console.log(result.error)
                                 swal({
                                     title: "",
