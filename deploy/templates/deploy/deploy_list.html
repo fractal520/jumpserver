@@ -62,30 +62,34 @@
 <script>
 jQuery(document).ready(function(){
     $('#deploy_table').DataTable();
+
+    function getJenkinsInfo(){
+        var loadShowTime = 600;
+        var args = "#test1";
+        args = showLoading(args);
+        $.ajax({
+            type: "GET",
+            dataType: "json",
+            url: "{% url 'api-deploy:get_jenkins_all' %}",
+            contentType: "application/x-www-form-urlencoded",
+            success: function (result){
+                console.log(result)
+                if (result.code == 200){
+                    hideLoading(args);
+                    setTimeout(function(){window.location.reload()},loadShowTime);
+                }else{
+                    hideLoading(args);
+                    alert('error')
+                    window.location.reload()
+                }
+            }
+        });
+    };
+
     //flush deploy list
     $('body').on('click', '.btn-update', function(){
         //$.get("{% url 'api-deploy:get_jenkins_all' %}", {}, function(){});
-            var loadShowTime = 600;
-            var args = "#test1";
-            args = showLoading(args);
-            $.ajax({
-                type: "GET",
-                dataType: "json",
-                url: "{% url 'api-deploy:get_jenkins_all' %}",
-                contentType: "application/x-www-form-urlencoded",
-                success: function (result){
-                    console.log(result)
-                    if (result.code == 200){
-                        hideLoading(args);
-                        setTimeout(function(){window.location.reload()},loadShowTime);
-                    }else{
-                        hideLoading(args);
-                        alert('error')
-                        window.location.reload()
-                    }
-                }
-            });
-
+        getJenkinsInfo()
         //setTimeout(function(){window.location.reload()},2000);
     });
 
@@ -124,30 +128,10 @@ jQuery(document).ready(function(){
         $.get("{% url 'api-deploy:build_app' %}", {'id':id}, function(result){
             console.log(result)
         });
-        var loadShowTime = 600;
-        var args = '#test1'
-        args = showLoading(args);
         setTimeout(function(){console.log(args)},20000);
 
         //$.get("{% url 'api-deploy:get_jenkins_all' %}", {}, function(){});
-
-        $.ajax({
-            type: "GET",
-            dataType: "json",
-            url: "{% url 'api-deploy:get_jenkins_all' %}",
-            contentType: "application/x-www-form-urlencoded",
-            success: function (result){
-                console.log(result)
-                if (result.code == 200){
-                    hideLoading(args);
-                    setTimeout(function(){window.location.reload()},loadShowTime);
-                }else{
-                    hideLoading(args);
-                    alert('error')
-                    window.location.reload()
-                }
-            }
-        });
+        getJenkinsInfo()
         
     });
 
