@@ -63,7 +63,7 @@ jQuery(document).ready(function(){
     //flush deploy list
     $('body').on('click', '.btn-update', function(){
         $.get("{% url 'api-deploy:get_jenkins_all' %}", {}, function(){});
-        window.location.reload()
+        setTimeout(function(){window.location.reload()},2000);
     });
 
     //build job
@@ -73,9 +73,9 @@ jQuery(document).ready(function(){
             console.log(result)
         });
         $.get("{% url 'api-deploy:get_jenkins_all' %}", {}, function(){});
-        setTimeout(function(){
-          window.location.reload()
-        },2000);
+
+        setTimeout(function(){window.location.reload()},2000);
+        
     });
 
     $('body').on('click', '.btn-deploy', function(){
