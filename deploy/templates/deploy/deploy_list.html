@@ -128,10 +128,13 @@ jQuery(document).ready(function(){
         $.get("{% url 'api-deploy:build_app' %}", {'id':id}, function(result){
             console.log(result)
         });
-        setTimeout(function(){console.log(args)},20000);
+        showLoading('#test1');
+
+
+        setTimeout(function(){hideLoading('#test1'), getJenkinsInfo()},20000);
 
         //$.get("{% url 'api-deploy:get_jenkins_all' %}", {}, function(){});
-        getJenkinsInfo()
+        
         
     });
 
