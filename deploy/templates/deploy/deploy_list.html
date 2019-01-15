@@ -97,7 +97,7 @@ jQuery(document).ready(function(){
             var container = $(args.loadingId);
             if(container){
                 container.css({"position":"relative"});
-                container.append('<div class="loading" style="width:60px; height:24px; position:absolute;left:50%;top:50%;margin-left:-30px;margin-top:-12px;"><img src="img/loading-0.gif"/></div>');
+                container.append('<div class="loading" style="width:60px; height:24px; position:absolute;left:50%;top:50%;margin-left:-30px;margin-top:-12px;"><img src="{% static "img/loading-0.gif" %}"/></div>');
             }
         }
         return args;
