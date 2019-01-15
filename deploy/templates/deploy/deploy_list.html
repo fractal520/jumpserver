@@ -90,7 +90,7 @@ jQuery(document).ready(function(){
      * 显示加载loading
      * @param {Object} args
      */
-    showLoading:function(args){
+    function showLoading(args){
         args = !args?{}:args;
         args.timestamp = new Date().getTime();
         if(args.loadingId){
@@ -107,7 +107,7 @@ jQuery(document).ready(function(){
      * 隐藏加载loading
      * @param {Object} args
      */
-    hideLoading:function(args){
+    function hideLoading(args){
         if(args.loadingId){
             var container = $(args.loadingId);
             if(container){
