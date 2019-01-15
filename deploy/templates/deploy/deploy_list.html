@@ -62,8 +62,24 @@ jQuery(document).ready(function(){
     $('#deploy_table').DataTable();
     //flush deploy list
     $('body').on('click', '.btn-update', function(){
-        $.get("{% url 'api-deploy:get_jenkins_all' %}", {}, function(){});
-        setTimeout(function(){window.location.reload()},2000);
+        //$.get("{% url 'api-deploy:get_jenkins_all' %}", {}, function(){});
+
+            $.ajax({
+                type: "GET",
+                dataType: "json",
+                url: "{% url 'api-deploy:get_jenkins_all' %}",
+                contentType: "application/x-www-form-urlencoded",
+                success: function (result){
+                    console.log(result)
+                    if (result.code == 200){
+                        window.location.reload()
+                    }else{
+                        alert('error')
+                    }
+                }
+            });
+
+        //setTimeout(function(){window.location.reload()},2000);
     });
 
     //build job
