@@ -235,7 +235,7 @@ def add_version_list(app_name, version_status=True):
         version.version_status = version_status
         version.symbol = True
         version.save()
-        return True
+        return version
     except BaseException as error:
         logger.error(error)
         pass
@@ -246,7 +246,7 @@ def add_version_list(app_name, version_status=True):
         version.version_status = version_status
         version.symbol = True
         version.save()
-        return True
+        return version
     except ObjectDoesNotExist as error:
         logger.error(error)
         pass
@@ -256,9 +256,9 @@ def add_version_list(app_name, version_status=True):
         version.symbol = True
         version.save()
         logger.error(error)
-        return True
+        return version
 
-    DeployVersion.objects.create(
+    version = DeployVersion.objects.create(
         app_name=app,
         version_path=app.deploy_file_path,
         symbol=True,
@@ -270,7 +270,7 @@ def add_version_list(app_name, version_status=True):
             DeployList.BACKUP_FILE_DIR.format(APP_NAME=app_name, VERSION=app.deploy_file_path.split('/')[-1])
         )
     )
-    return True
+    return version
 
 
 def save_backup_path(app_name, version):
@@ -325,3 +325,17 @@ class DeployRecord(models.Model):
     app_name = models.ForeignKey(DeployList, on_delete=models.PROTECT, null=True, verbose_name=_("App Name"))
     version = models.ForeignKey(DeployVersion, on_delete=models.PROTECT, null=True, verbose_name=_("App version"))
     deploy_time = models.DateTimeField(auto_now_add=True)
+    result = models.BooleanField(default=True)
+
+    def __str__(self):
+        return "{}-{} to {}".format(self.deploy_time, self.version.version, self.asset.hostname)
+
+    @classmethod
+    def add_record(cls, asset, app_name, version, result=True):
+        DeployRecord.objects.create(
+            asset=asset,
+            app_name=app_name,
+            version=version,
+            result=result
+        )
+        return True

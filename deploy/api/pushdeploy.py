@@ -5,12 +5,12 @@ from rest_framework import generics
 from rest_framework.response import Response
 from django.utils import timezone
 from django.core import serializers
-from ..models import DeployList, DeployVersion, add_version_list, turn_build_file_to_deploy
+from ..models import DeployList, DeployVersion, add_version_list, turn_build_file_to_deploy, DeployRecord
 from assets.models import AdminUser, Asset
 from common.utils import get_logger
 from django.http import JsonResponse, HttpResponse
 from django.core.exceptions import ObjectDoesNotExist
-from ..tasks import test_ansible_ping, push_build_file_to_asset_manual, check_asset_file_exist, backup_asset_app_file
+from ..tasks import test_ansible_ping, push_build_file_to_asset_manual, backup_asset_app_file
 from ..util import pack_up_deploy_file
 
 
@@ -81,8 +81,9 @@ def deploy_file_to_asset(request):
         job.published_time = timezone.now()
         job.published_status = True
         job.save()
-        add_version_list(app_name)
+        version = add_version_list(app_name)
         logger.info('应用{0}成功发布到{1}'.format(app_name, asset.hostname))
+        DeployRecord.add_record(asset, app_name, version)
         return JsonResponse(dict(code=200, task=task))
     else:
         logger.error("升级失败 {0}".format(task))
