@@ -83,7 +83,10 @@ def deploy_file_to_asset(request):
         job.save()
         version = add_version_list(app_name)
         logger.info('应用{0}成功发布到{1}'.format(app_name, asset.hostname))
-        DeployRecord.add_record(asset, app_name, version)
+        try:
+            DeployRecord.add_record(asset, app_name, version)
+        except BaseException as error:
+            logger.error(error)
         return JsonResponse(dict(code=200, task=task))
     else:
         logger.error("升级失败 {0}".format(task))

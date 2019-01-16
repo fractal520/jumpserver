@@ -332,9 +332,10 @@ class DeployRecord(models.Model):
 
     @classmethod
     def add_record(cls, asset, app_name, version, result=True):
+        app = DeployList.objects.get(app_name=app_name)
         DeployRecord.objects.create(
             asset=asset,
-            app_name=app_name,
+            app_name=app,
             version=version,
             result=result
         )
