@@ -8,6 +8,7 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from ..pjenkins.exec_jenkins import JenkinsWork
+from assets.models import Asset
 from common.utils import get_logger
 from datetime import datetime
 
@@ -316,3 +317,11 @@ def update_deploy_info(app_name, deploy_file_path):
     app.deploy_file_path = deploy_file_path
     app.save()
     return add_version_list(app_name)
+
+
+class DeployRecord(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4)
+    asset = models.ForeignKey(Asset, on_delete=models.PROTECT, null=True, verbose_name=_("Asset Name"))
+    app_name = models.ForeignKey(DeployList, on_delete=models.PROTECT, null=True, verbose_name=_("App Name"))
+    version = models.ForeignKey(DeployVersion, on_delete=models.PROTECT, null=True, verbose_name=_("App version"))
+    deploy_time = models.DateTimeField(auto_now_add=True)
