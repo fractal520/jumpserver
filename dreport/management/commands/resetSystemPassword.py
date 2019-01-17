@@ -1,14 +1,19 @@
 # !/usr/bin/env python
 # encoding: utf-8
 import os
-import json
 import random
 import csv
 from django.core.management.base import BaseCommand
 from django.core.exceptions import ObjectDoesNotExist
+from django.conf import settings
+from datetime import datetime
 from celery import shared_task
 from common.utils import get_logger
-from assets.models import Asset, AdminUser
+from assets.models import Asset, AdminUser, Node
+
+time = datetime.now()
+
+SAVE_ADDRESS = os.path.join(settings.DEVICE_REPORT_DIR, 'savePassword{}.csv'.format(time.strftime("%Y%m%d%H%M")))
 
 
 logger = get_logger('jumpserver')
@@ -92,11 +97,15 @@ class Command(BaseCommand):
         except ObjectDoesNotExist as error:
             self.admin = None
             logger.error(error)
+        self.node = Node.objects.filter(value="DEFAULT")
 
     def handle(self, *args, **options):
         if not self.admin:
             return False
-        # assets = Asset.objects.filter(platform="Linux", admin_user=self.admin)
-        assets = Asset.objects.filter(ip="192.168.0.127")
+        if self.node:
+            assets = self.node.assets.filter(platform="Linux", admin_user=self.admin)
+        else:
+            assets = Asset.objects.filter(platform="Linux", admin_user=self.admin)
+            # assets = Asset.objects.filter(ip="192.168.0.127")
         pm = PassManager()
         pm.modify_password(assets)
