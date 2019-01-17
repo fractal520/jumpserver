@@ -32,7 +32,7 @@ def modify_asset_root_password_util(asset, password, task_name):
             "name": "Reset asset root password",
             "action": {
                 "module": "user",
-                "args": "",
+                "args": "name=root password={} update_password=always".format(password),
             }
         }
     ]
@@ -41,8 +41,6 @@ def modify_asset_root_password_util(asset, password, task_name):
         'timeout': 10,
         'forks': 10,
     }
-
-    tasks[0]['action']['args'] = "name=root password={}".format(password)
 
     task, create = update_or_create_ansible_task(
         task_name=task_name,
@@ -53,9 +51,7 @@ def modify_asset_root_password_util(asset, password, task_name):
 
     print(tasks)
 
-    result = task.run()
-
-    return result
+    return task.run()
 
 
 class PassManager(object):
