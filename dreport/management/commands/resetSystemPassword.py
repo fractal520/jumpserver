@@ -25,14 +25,12 @@ def modify_asset_root_password_util(asset, password, task_name):
     from ops.utils import update_or_create_ansible_task
     hosts = [asset.fullname]
 
-    password = "{{ '{}' | password_hash('sha512') }}".format(password)
-
     tasks = [
         {
             "name": "Reset asset root password",
             "action": {
-                "module": "user",
-                "args": "name=root password={} update_password=always".format(password),
+                "module": "shell",
+                "args": "sudo echo root:{} | sudo chpasswd".format(password),
             }
         }
     ]
