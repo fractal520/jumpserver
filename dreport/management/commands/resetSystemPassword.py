@@ -85,7 +85,10 @@ class PassManager(object):
             for asset in assets:
                 password = self.generate_password(num=4, word=6)
                 result = modify_asset_root_password(asset, password)
-                print(result)
+                if result[0]['ok']:
+                    logger.info("Reset {} {} root password successful.".format(asset.hostname, asset.ip))
+                else:
+                    logger.error(result)
                 writer.writerow([asset.hostname, 'root', password, asset.ip, 'new'])
 
 
@@ -103,9 +106,9 @@ class Command(BaseCommand):
         if not self.admin:
             return False
         if self.node:
-            assets = self.node.assets.filter(platform="Linux", admin_user=self.admin)
+            assets = self.node.assets.filter(platform="Linux", admin_user=self.admin, model="KVM")
         else:
-            assets = Asset.objects.filter(platform="Linux", admin_user=self.admin)
+            assets = Asset.objects.filter(platform="Linux", admin_user=self.admin, model="KVM")
             # assets = Asset.objects.filter(ip="192.168.0.127")
         pm = PassManager()
         pm.modify_password(assets)
