@@ -97,7 +97,7 @@ class Command(BaseCommand):
         except ObjectDoesNotExist as error:
             self.admin = None
             logger.error(error)
-        self.node = Node.objects.filter(value="ROOT")
+        self.node = Node.objects.filter(value="ROOT")[0]
 
     def handle(self, *args, **options):
         if not self.admin:
