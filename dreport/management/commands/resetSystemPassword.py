@@ -17,11 +17,11 @@ logger = get_logger('jumpserver')
 @shared_task
 def modify_asset_root_password(asset, password):
     task_name = ("Reset {} root password {}.".format(asset.hostname, password))
-    return modify_asset_root_password_util(asset, password)
+    return modify_asset_root_password_util(asset, password, task_name)
 
 
 @shared_task
-def modify_asset_root_password_util(asset, password):
+def modify_asset_root_password_util(asset, password, task_name):
     from ops.utils import update_or_create_ansible_task
     hosts = [asset.fullname]
 
@@ -44,9 +44,18 @@ def modify_asset_root_password_util(asset, password):
 
     tasks[0]['action']['args'] = "name=root password={}".format(password)
 
+    task, create = update_or_create_ansible_task(
+        task_name=task_name,
+        hosts=hosts, tasks=tasks,
+        pattern='all',
+        options=TASK_OPTIONS, run_as_admin=True, created_by='System'
+    )
+
     print(tasks)
 
-    return
+    result = task.run()
+
+    return result
 
 
 class PassManager(object):
@@ -76,8 +85,9 @@ class PassManager(object):
             writer = csv.writer(fhandler)
             for asset in assets:
                 password = self.generate_password(num=4, word=6)
-                modify_asset_root_password(asset, password)
-                writer.writerow(['hostname', 'root', password, '192.168.0.0', ''])
+                result = modify_asset_root_password(asset, password)
+                print(result)
+                writer.writerow([asset.hostname, 'root', password, asset.ip, 'new'])
 
 
 class Command(BaseCommand):
