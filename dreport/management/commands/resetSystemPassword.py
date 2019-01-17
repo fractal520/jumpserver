@@ -25,7 +25,7 @@ def modify_asset_root_password_util(asset, password):
     from ops.utils import update_or_create_ansible_task
     hosts = [asset.fullname]
 
-    password = "{{ {} | password_hash('sha512') }}".format(password)
+    password = "{{ '{}' | password_hash('sha512') }}".format(password)
 
     tasks = [
         {
