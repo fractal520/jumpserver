@@ -89,7 +89,8 @@ class PassManager(object):
                     logger.info("Reset {} {} root password successful.".format(asset.hostname, asset.ip))
                 else:
                     logger.error(result)
-                writer.writerow([asset.hostname, 'root', password, asset.ip, 'new'])
+                row = [asset.hostname, 'root', password, asset.ip, 'new', 'root_wtsd_{}'.format(time.strftime("%Y%m%d"))]
+                writer.writerow(row)
 
 
 class Command(BaseCommand):
