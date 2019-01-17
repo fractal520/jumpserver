@@ -80,7 +80,7 @@ class PassManager(object):
         return password
 
     def modify_password(self, assets):
-        with open('./savePassword.csv', 'wt', newline='') as fhandler:
+        with open(SAVE_ADDRESS, 'wt', newline='') as fhandler:
             writer = csv.writer(fhandler)
             for asset in assets:
                 password = self.generate_password(num=4, word=6)
