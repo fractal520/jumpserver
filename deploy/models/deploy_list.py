@@ -8,6 +8,7 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from ..pjenkins.exec_jenkins import JenkinsWork
+from assets.models import Asset
 from common.utils import get_logger
 from datetime import datetime
 
@@ -143,7 +144,12 @@ def create_or_update(queryset):
                 last_success_build_num = 0
             else:
                 last_success_build_num = data.get('last_success_build_num')
-            os.makedirs(os.path.join(DeployList.DEPLOY_FILE_DIR, job['name'], 'app'), mode=0o755)
+
+            try:
+                os.makedirs(os.path.join(DeployList.DEPLOY_FILE_DIR, job['name'], 'app'), mode=0o755)
+            except FileExistsError as error:
+                logger.info(error)
+
             DeployList.objects.create(
                 app_name=data['app_name'],
                 build_status=data.get('build_status', 'RUNNING'),
@@ -229,7 +235,7 @@ def add_version_list(app_name, version_status=True):
         version.version_status = version_status
         version.symbol = True
         version.save()
-        return True
+        return version
     except BaseException as error:
         logger.error(error)
         pass
@@ -240,7 +246,7 @@ def add_version_list(app_name, version_status=True):
         version.version_status = version_status
         version.symbol = True
         version.save()
-        return True
+        return version
     except ObjectDoesNotExist as error:
         logger.error(error)
         pass
@@ -250,9 +256,9 @@ def add_version_list(app_name, version_status=True):
         version.symbol = True
         version.save()
         logger.error(error)
-        return True
+        return version
 
-    DeployVersion.objects.create(
+    version = DeployVersion.objects.create(
         app_name=app,
         version_path=app.deploy_file_path,
         symbol=True,
@@ -264,7 +270,7 @@ def add_version_list(app_name, version_status=True):
             DeployList.BACKUP_FILE_DIR.format(APP_NAME=app_name, VERSION=app.deploy_file_path.split('/')[-1])
         )
     )
-    return True
+    return version
 
 
 def save_backup_path(app_name, version):
@@ -311,3 +317,26 @@ def update_deploy_info(app_name, deploy_file_path):
     app.deploy_file_path = deploy_file_path
     app.save()
     return add_version_list(app_name)
+
+
+class DeployRecord(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4)
+    asset = models.ForeignKey(Asset, on_delete=models.PROTECT, null=True, verbose_name=_("Asset Name"))
+    app_name = models.ForeignKey(DeployList, on_delete=models.PROTECT, null=True, verbose_name=_("App Name"))
+    version = models.ForeignKey(DeployVersion, on_delete=models.PROTECT, null=True, verbose_name=_("App version"))
+    deploy_time = models.DateTimeField(auto_now_add=True)
+    result = models.BooleanField(default=True)
+
+    def __str__(self):
+        return "{}-{} to {}".format(self.deploy_time, self.version.version, self.asset.hostname)
+
+    @classmethod
+    def add_record(cls, asset, app_name, version, result=True):
+        app = DeployList.objects.get(app_name=app_name)
+        DeployRecord.objects.create(
+            asset=asset,
+            app_name=app,
+            version=version,
+            result=result
+        )
+        return True

@@ -148,6 +148,38 @@
 {% block custom_foot_js %}
 <script>
     jQuery(document).ready(function(){
+
+        /**
+         * 显示加载loading
+         * @param {Object} args
+         */
+        function showLoading(args){
+            var args = '.sa-warning';
+            if(args){
+                var container = args;
+                if(container){
+                    $(container).css({"position":"relative"});
+                    $(container).append('<div class="loading" style="width:60px; height:24px; position:absolute;left:50%;top:50%;margin-left:-30px;margin-top:-12px;"><img src="{% static "img/loading-0.gif" %}"/></div>');
+                    $('.showSweetAlert').append('<div class="loadword" ><p style="display: block;">请稍等</p></div>');
+                }
+            }
+            return args;
+        };
+        /**
+         * 隐藏加载loading
+         * @param {Object} args
+         */
+        function hideLoading(args){
+            var args = '.sa-warning';
+            if(args){
+                var container = args;
+                if(container){
+                    $(container).find('.loading').remove();
+                    $('.showSweetAlert').find('.loadword').remove();
+                }
+            }
+        };
+
         console.log('detail')
         $('body').on('click', '.btn-deploy-per', function(){
             swal({
@@ -160,28 +192,38 @@
                 confirmButtonText: "{% trans 'Confirm' %}",
                 closeOnConfirm: false
                  }, function(){
+                    var loadShowTime = 600;
                     var data = $('.deploy-form').serializeArray();
-                    console.log(data)
-                    $.get("{% url 'api-deploy:deploy_file_to_asset' %}", data, function(result){
-                        if(result.code==200) {
-                            console.log(result.task)
-                            swal({
-                                title: "",
-                                text: "升级完成,请验证。",
-                                type: "success",
-                                confirmButtonText: '确认',
-                                confirmButtonColor: '#4cd964',
-                            },function(){window.location.reload()})
-                        }
-                        else if(result.code==400) {
-                            console.log(result.error)
-                            swal({
-                                title: "",
-                                text: "升级失败！请手工修复！",
-                                type: "error",
-                                confirmButtonText: '确认',
-                                confirmButtonColor: '#4cd964',
-                            },function(){window.location.reload()})
+                    showLoading('.sa-warning')
+                    $.ajax({
+                        type: "GET",
+                        dataType: "json",
+                        url: "{% url 'api-deploy:deploy_file_to_asset' %}",
+                        contentType: "application/x-www-form-urlencoded",
+                        data: data,
+                        success: function (result){
+                            if(result.code==200) {
+                                hideLoading('.sa-warning');
+                                console.log(result.task)
+                                swal({
+                                    title: "",
+                                    text: "升级完成,请验证。",
+                                    type: "success",
+                                    confirmButtonText: '确认',
+                                    confirmButtonColor: '#4cd964',
+                                },function(){window.location.reload()})
+                            }
+                            else if(result.code==400) {
+                                hideLoading('.sa-warning');
+                                console.log(result.error)
+                                swal({
+                                    title: "",
+                                    text: "升级失败！请手工修复！",
+                                    type: "error",
+                                    confirmButtonText: '确认',
+                                    confirmButtonColor: '#4cd964',
+                                },function(){window.location.reload()})
+                            }
                         }
                     });
             });
