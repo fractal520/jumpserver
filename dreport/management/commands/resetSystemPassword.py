@@ -100,7 +100,7 @@ class Command(BaseCommand):
         except ObjectDoesNotExist as error:
             self.admin = None
             logger.error(error)
-        self.node = Node.objects.filter(value="ROOT")[0]
+        self.node = None
 
     def handle(self, *args, **options):
         if not self.admin:
@@ -109,6 +109,7 @@ class Command(BaseCommand):
             assets = self.node.assets.filter(platform="Linux", admin_user=self.admin, model="KVM")
         else:
             assets = Asset.objects.filter(platform="Linux", admin_user=self.admin, model="KVM")
+            assets = assets.exclude(hostname__icontains='DB')
             # assets = Asset.objects.filter(ip="192.168.0.127")
         pm = PassManager()
         pm.modify_password(assets)
