@@ -67,7 +67,7 @@ v1_api_patterns = [
     path('common/v1/', include('common.urls.api_urls', namespace='api-common')),
     path('devops/deploy/v1/', include('deploy.urls.api_urls', namespace='api-deploy')),
     path('devops/dreport/v1/', include('dreport.urls.api_urls', namespace='api-dreport')),
-    path('devops/devops/v1/', include('devops.urls.api_urls', namespace='api-devops')),
+    path('devops/dev_ops/v1/', include('devops.urls.api_urls', namespace='api-devops')),
 ]
 
 app_view_patterns = [
@@ -80,7 +80,7 @@ app_view_patterns = [
     path('orgs/', include('orgs.urls.views_urls', namespace='orgs')),
     path('devops/deploy/', include('deploy.urls.views_urls', namespace='deploy')),
     path('devops/dreport/', include('dreport.urls.views_urls', namespace='dreport')),
-    path('devops/devops/', include('devops.urls.views_urls', namespace='devops')),
+    path('devops/dev_ops/', include('devops.urls.views_urls', namespace='devops')),
 ]
 
 if settings.XPACK_ENABLED:
