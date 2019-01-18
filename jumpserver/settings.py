@@ -66,6 +66,7 @@ INSTALLED_APPS = [
     'audits.apps.AuditsConfig',
     'deploy.apps.DeployConfig',
     'dreport.apps.DreportConfig',
+    'devops.apps.DevopsConfig',
     'rest_framework',
     'rest_framework_swagger',
     'drf_yasg',
