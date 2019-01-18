@@ -46,7 +46,6 @@
                            <th class="text-center">{% trans 'IP' %}</th>
                            <th class="text-center">{% trans 'Comment' %}</th>
                            <th class="text-center">{% trans 'Active' %}</th>
-                           <th class="text-center">{% trans 'System users' %}</th>
                        </tr>
                    </thead>
                    <tbody>
@@ -88,20 +87,12 @@ function initTable() {
                     $(td).html('<i class="fa fa-check text-navy"></i>')
                 }
             }},
-            {targets: 5, createdCell: function (td, cellData) {
-                var users = [];
-                $.each(cellData, function (id, data) {
-                    users.push(data.name);
-                });
-                $(td).html(users.join(', '))
-            }}
         ],
         ajax_url: url,
         columns: [
             {data: "id"}, {data: "hostname" }, {data: "ip" },
             {data: "comment", orderable: false },
-            {data: "is_active", orderable: false },
-            {data: "system_users_granted", orderable: false}
+            {data: "is_active", orderable: false }
         ]
     };
     asset_table = jumpserver.initDataTable(options);
