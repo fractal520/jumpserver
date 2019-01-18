@@ -10,3 +10,4 @@ router.register(r'assets', api.AssetViewSet, 'asset')
 urlpatterns = [
 
 ]
+urlpatterns += router.urls
