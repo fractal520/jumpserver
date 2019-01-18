@@ -81,6 +81,13 @@ function initTable() {
                 var detail_btn = '<a class="asset_detail" asset-id="rowData_id" data-toggle="modal" data-target="#user_asset_detail_modal" tabindex="0">'+ cellData +'</a>'
                 $(td).html(detail_btn.replace("rowData_id", rowData.id));
                 }},
+            {targets: 3, createdCell: function (td, cellData) {
+                var users = [];
+                $.each(cellData, function (id, data) {
+                    users.push(data.name);
+                });
+                $(td).html(users.join(', '))
+            }},
             {targets: 4, createdCell: function (td, cellData) {
                 if (!cellData) {
                     $(td).html('<i class="fa fa-times text-danger"></i>')
