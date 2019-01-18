@@ -8,21 +8,13 @@ from assets.models import Asset, AdminUser, SystemUser, Label, Node, Domain
 # Create your views here.
 
 
-def index(request):
-    print('devops_index')
-    return JsonResponse(dict(code=200, msg='devops index'))
-
-
-class AssetListView(LoginRequiredMixin, TemplateView):
-    template_name = 'devops/asset_list.html'
+class UserAssetListView(LoginRequiredMixin, TemplateView):
+    template_name = 'devops/user_asset_list.html'
 
     def get_context_data(self, **kwargs):
-        Node.root()
         context = {
-            'app': _('Assets'),
-            'action': _('Asset list'),
-            'labels': Label.objects.all().order_by('name'),
-            'nodes': Node.objects.all().order_by('-key'),
+            'action': _('My assets'),
+            'system_users': SystemUser.objects.all(),
         }
         kwargs.update(context)
         return super().get_context_data(**kwargs)
