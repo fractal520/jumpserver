@@ -44,6 +44,7 @@
                            <th class="text-center"><input type="checkbox" class="ipt_check_all"></th>
                            <th class="text-center">{% trans 'Hostname' %}</th>
                            <th class="text-center">{% trans 'IP' %}</th>
+                           <th class="text-center">{% trans 'Comment' %}</th>
                            <th class="text-center">{% trans 'Active' %}</th>
                            <th class="text-center">{% trans 'System users' %}</th>
                        </tr>
@@ -80,14 +81,14 @@ function initTable() {
                 var detail_btn = '<a class="asset_detail" asset-id="rowData_id" data-toggle="modal" data-target="#user_asset_detail_modal" tabindex="0">'+ cellData +'</a>'
                 $(td).html(detail_btn.replace("rowData_id", rowData.id));
                 }},
-            {targets: 3, createdCell: function (td, cellData) {
+            {targets: 4, createdCell: function (td, cellData) {
                 if (!cellData) {
                     $(td).html('<i class="fa fa-times text-danger"></i>')
                 } else {
                     $(td).html('<i class="fa fa-check text-navy"></i>')
                 }
             }},
-            {targets: 4, createdCell: function (td, cellData) {
+            {targets: 5, createdCell: function (td, cellData) {
                 var users = [];
                 $.each(cellData, function (id, data) {
                     users.push(data.name);
@@ -98,6 +99,7 @@ function initTable() {
         ajax_url: url,
         columns: [
             {data: "id"}, {data: "hostname" }, {data: "ip" },
+            {data: "comment", orderable: false },
             {data: "is_active", orderable: false },
             {data: "system_users_granted", orderable: false}
         ]
