@@ -107,9 +107,9 @@ class Command(BaseCommand):
         if not self.admin:
             return False
         if self.node:
-            assets = self.node.assets.filter(platform="Linux", admin_user=self.admin, model="KVM")
+            assets = self.node.assets.filter(platform="Linux", admin_user=self.admin, model="PowerEdge R730")
         else:
-            assets = Asset.objects.filter(platform="Linux", admin_user=self.admin, model="KVM")
+            assets = Asset.objects.filter(platform="Linux", admin_user=self.admin, model="PowerEdge R730")
             assets = assets.exclude(hostname__icontains='DB')
             # assets = Asset.objects.filter(ip="192.168.0.127")
         pm = PassManager()
