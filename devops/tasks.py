@@ -1,8 +1,5 @@
 #  encoding: utf-8
-import os
 from celery import shared_task
-from django.utils import timezone
-from django.conf import settings
 from django.utils.translation import ugettext as _
 from common.utils import get_logger
 from . import const
@@ -20,6 +17,7 @@ def push_file_manual(asset, dest_path=None, file_path=None):
 @shared_task
 def push_file_util(asset, dest_path, task_name, file_path):
     from ops.utils import update_or_create_ansible_task
+    logger.info("start push {} to {}:{}".format(file_path, asset.ip, dest_path))
     hosts = [asset.fullname]
     tasks = const.PUSH_FILE_TASK
     tasks[0]['action']['args'] = "src={0} dest={1}".format(file_path, dest_path)
