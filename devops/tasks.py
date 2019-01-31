@@ -13,7 +13,7 @@ logger = get_logger('jumpserver')
 # push file to asset
 @shared_task
 def push_file_manual(asset, dest_path=None, file_path=None):
-    task_name = _("Collect city pause from rcs {}.".format(asset.hostname))
+    task_name = _("push_file_manual {}.".format(asset.hostname))
     return push_file_util(asset, dest_path, task_name, file_path)
 
 
@@ -31,5 +31,8 @@ def push_file_util(asset, dest_path, task_name, file_path):
     )
 
     result = task.run()
-
+    if result[0]['ok']:
+        logger.info("push {} to {}:{} successful".format(file_path, asset.ip, dest_path))
+    else:
+        logger.error("push {} to {}:{} failed".format(file_path, asset.ip, dest_path))
     return result
