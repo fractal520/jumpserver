@@ -32,5 +32,6 @@ def push_file_util(asset, dest_path, task_name, file_path):
     if result[0]['ok']:
         logger.info("push {} to {}:{} successful".format(file_path, asset.ip, dest_path))
     else:
+        print(asset.ip + 'failed')
         logger.error("push {} to {}:{} failed".format(file_path, asset.ip, dest_path))
-    return result
+    return True
