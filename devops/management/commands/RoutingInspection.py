@@ -46,4 +46,8 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         assets = Asset.objects.all()
         result = get_asset_hardware_info(assets=assets)
-        print(result)
+        for hostname, value in result[0]['ok'].items():
+            print(hostname)
+            facts = value.get('ansible_facts', {})
+            print(facts)
+
