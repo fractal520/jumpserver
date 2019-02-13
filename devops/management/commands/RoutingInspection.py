@@ -1,6 +1,7 @@
 # !/usr/bin/env python
 # encoding: utf-8
 from datetime import datetime
+import datetime as dtime
 from django.core.management.base import BaseCommand
 from celery import shared_task
 from common.utils import get_logger
@@ -48,6 +49,23 @@ class Command(BaseCommand):
         result = get_asset_hardware_info(assets=assets)
         for hostname, value in result[0]['ok'].items():
             print(hostname)
-            facts = value.get['setup']['invocation']['ansible_facts']
-            print(facts)
-
+            facts = value.get['setup']['ansible_facts']
+            ansible_uptime_seconds = str(dtime.timedelta(seconds=facts.get('ansible_uptime_seconds')))
+            cpu_processor_count = facts.get('ansible_processor_count')
+            hostname = facts.get('ansible_hostname')
+            IP = facts.get('ansible_default_ipv4').get('address')
+            mb_total = facts.get('ansible_memory_mb').get('real').get('total')
+            mb_use = facts.get('ansible_memory_mb').get('real').get('used')
+            mb_free = facts.get('ansible_memory_mb').get('real').get('free')
+            disk_dict = {}
+            for disk in facts.get('ansible_mounts'):
+                disk_device = disk.get('device')
+                disk_size_total = disk.get('size_total')
+                disk_size_avail = disk.get('size_available')
+                d_d = {disk_device: {'disk_size_total': disk_size_total, 'disk_size_avail': disk_size_avail}}
+                disk_dict.update(d_d)
+            # print(mb_total)
+            host_data = {'cpu_processor_count': cpu_processor_count, 'ansible_uptime_seconds': ansible_uptime_seconds,
+                         'hostname': hostname, 'IP': IP, 'mb_total': mb_total, 'mb_use': mb_use, 'mb_free': mb_free,
+                         'disk_dict': disk_dict}
+            print(host_data)
