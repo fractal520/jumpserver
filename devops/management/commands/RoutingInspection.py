@@ -5,7 +5,7 @@ from django.core.management.base import BaseCommand
 from celery import shared_task
 from common.utils import get_logger
 from assets import const
-from assets.models import Assets
+from assets.models import Asset
 
 logger = get_logger('jumpserver')
 DATE_TIME = datetime.now()
@@ -44,6 +44,6 @@ def genrate_routing_record(result):
 class Command(BaseCommand):
 
     def handle(self, *args, **options):
-        assets = Assets.objects.all()
+        assets = Asset.objects.all()
         result = get_asset_hardware_info(assets=assets)
         print(result)
