@@ -48,6 +48,6 @@ class Command(BaseCommand):
         result = get_asset_hardware_info(assets=assets)
         for hostname, value in result[0]['ok'].items():
             print(hostname)
-            facts = value.get('ansible_facts', {})
+            facts = value.get['setup']['invocation']['ansible_facts']
             print(facts)
 
