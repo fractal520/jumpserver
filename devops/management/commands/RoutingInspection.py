@@ -89,6 +89,7 @@ class DataWriter(object):
                 info.write(json.dumps(data)+'\n')
         if not os.path.isfile(file_name):
             raise FileNotFoundError('数据文件不存在,请重新生成。')
+        logger.info('数据写入成功')
 
     @staticmethod
     def remote_file_save(data_list):
