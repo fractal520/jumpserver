@@ -56,7 +56,6 @@ def genrate_routing_record(result):
         logger.info(result[1]['failed'])
         logger.info(result[2])
     for hostname, value in result[0]['ok'].items():
-        print(hostname)
         facts = value['setup']['ansible_facts']
         ansible_uptime_seconds = str(dtime.timedelta(seconds=facts.get('ansible_uptime_seconds')))
         cpu_processor_count = facts.get('ansible_processor_count')
