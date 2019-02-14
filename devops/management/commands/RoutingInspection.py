@@ -52,6 +52,9 @@ def genrate_routing_record(result):
         logger.info(result[0])
         logger.debug(result)
         return False
+    if result[1]['failed']:
+        logger.info(result[1]['failed'])
+        logger.info(result[2])
     for hostname, value in result[0]['ok'].items():
         print(hostname)
         facts = value['setup']['ansible_facts']
