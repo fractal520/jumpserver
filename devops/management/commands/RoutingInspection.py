@@ -1,6 +1,7 @@
 # !/usr/bin/env python
 # encoding: utf-8
 import os
+import json
 from datetime import datetime
 import datetime as dtime
 from django.core.management.base import BaseCommand
@@ -80,7 +81,10 @@ class Command(BaseCommand):
         assets = Asset.objects.order_by('hostname')
         data_list = get_asset_hardware_info(assets=assets)
         if not data_list:
+            logger.error('没有获取到巡检数据，请手动检查。')
             return False
         with open(os.path.join(ROUTING_INSPECTION_DATA_PATH, DATE_TIME.strftime('%Y%m%d')+'.txt'), 'wt') as info:
+            logger.info('开始写入数据')
             for data in data_list:
-                info.writelines(data)
+                info.write(json.dumps(data))
+                info.write('\n')
