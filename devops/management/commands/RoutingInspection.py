@@ -177,4 +177,7 @@ class Command(BaseCommand):
             logger.error(str(error))
 
         if local_result:
-            pass
+            try:
+                DataWriter.remote_file_save(data_list)
+            except BaseException as error:
+                logger.error(str(error))
