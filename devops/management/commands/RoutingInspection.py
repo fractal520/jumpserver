@@ -159,6 +159,7 @@ class DataWriter(object):
             wb_name
         )
         workbook.save(wb_path)
+        return wb_path
 
 
 class Command(BaseCommand):
@@ -177,7 +178,9 @@ class Command(BaseCommand):
             logger.error(str(error))
 
         if local_result:
+            logger.info('开始生成excel文件')
             try:
-                DataWriter.remote_file_save(data_list)
+                wb_path = DataWriter.remote_file_save(data_list)
+                logger.info('生成成功，保存路径为{}。'.format(wb_path))
             except BaseException as error:
                 logger.error(str(error))
