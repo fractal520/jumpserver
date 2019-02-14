@@ -2,6 +2,7 @@
 # encoding: utf-8
 import os
 import json
+import xlwt
 from datetime import datetime
 import datetime as dtime
 from django.core.management.base import BaseCommand
@@ -10,10 +11,12 @@ from celery import shared_task
 from common.utils import get_logger
 from assets import const
 from assets.models import Asset
+from contextlib import suppress
+
 
 logger = get_logger('jumpserver')
 DATE_TIME = datetime.now()
-
+MONTH = "{}月".format(DATE_TIME.strftime("%m").replace("0", ""))
 # 本地存档
 ROUTING_INSPECTION_DATA_PATH = settings.ROUTING_INSPECTION_DATA_PATH
 # 运维samba归档
@@ -75,6 +78,89 @@ def genrate_routing_record(result):
     return data_list
 
 
+class DataWriter(object):
+
+    @staticmethod
+    def local_save(data_list):
+        file_name = os.path.join(ROUTING_INSPECTION_DATA_PATH, DATE_TIME.strftime('%Y%m%d') + '.txt')
+        with open(file_name, 'wt') as info:
+            logger.info('开始写入数据')
+            for data in data_list:
+                info.write(json.dumps(data)+'\n')
+        if not os.path.isfile(file_name):
+            raise FileNotFoundError('数据文件不存在,请重新生成。')
+
+    @staticmethod
+    def remote_file_save(data_list):
+        host = '巡检记录'
+        line_count = 1
+        row_count = 0
+        name_list = ['ID', 'hostname', 'IPaddress', 'date', 'uptime', 'processor_count', 'Total_Mem', 'Used_mem',
+                     'Free_mem']
+        workbook = xlwt.Workbook(encoding='utf-8')
+        worksheet = workbook.add_sheet(host)
+        worksheet.col(0).width = 1000
+        worksheet.col(1).width = 4500
+        worksheet.col(4).width = 4500
+        titlestyle = xlwt.easyxf('pattern: pattern solid, fore_colour dark_green_ega;')
+        warnstyle = xlwt.easyxf('pattern: pattern solid, fore_colour red;')
+        for name in name_list:
+            worksheet.write(0, row_count, name, titlestyle)
+            row_count += 1
+        for line_dict in data_list:
+            worksheet.write(line_count, 0, line_count)
+            worksheet.write(line_count, 1, line_dict.get('hostname'))
+            worksheet.write(line_count, 2, line_dict.get('IP'))
+            worksheet.write(line_count, 3, datetime.now().strftime('%Y%m%d'))
+            worksheet.write(line_count, 4, line_dict.get('ansible_uptime_seconds'))
+            worksheet.write(line_count, 5, line_dict.get('cpu_processor_count'))
+            worksheet.write(line_count, 6, str(line_dict.get('mb_total')) + 'MB')
+            worksheet.write(line_count, 7, str(line_dict.get('mb_use')) + 'MB')
+            worksheet.write(line_count, 8, str(line_dict.get('mb_free')) + 'MB')
+            row = 9
+            for key, value in line_dict.get('disk_dict').items():
+                try:
+                    with suppress(BaseException):
+                        worksheet.write(0, row, 'disk_name', titlestyle)
+                    worksheet.write(line_count, row, key)
+                    row += 1
+
+                    with suppress(BaseException):
+                        worksheet.write(0, row, 'disk_size_total', titlestyle)
+                    disk_size_total = int(value.get('disk_size_total') / 1024 / 1024)
+                    worksheet.write(line_count, row, str(disk_size_total) + 'MB')
+                    row += 1
+
+                    with suppress(BaseException):
+                        worksheet.write(0, row, 'disk_size_avail', titlestyle)
+                    disk_size_avail = int(value.get('disk_size_avail') / 1024 / 1024)
+                    worksheet.write(line_count, row, str(disk_size_avail) + 'MB')
+                    row += 1
+
+                    with suppress(BaseException):
+                        worksheet.write(0, row, 'disk_use', titlestyle)
+                    disk_use = int(100 * (1 - (int(value.get('disk_size_avail') / 1024 / 1024) / int(
+                        value.get('disk_size_total') / 1024 / 1024))))
+                    if disk_use >= 70:
+                        worksheet.write(line_count, row, str(disk_use) + '%', warnstyle)
+                        row += 1
+                    else:
+                        worksheet.write(line_count, row, str(disk_use) + '%')
+                        row += 1
+                except BaseException as e:
+                    print(e, line_dict.get('hostname'))
+            line_count += 1
+        wb_name = host+DATE_TIME.strftime('%Y%m%d')+'.xls'
+        wb_path = os.path.join(
+            ROUTING_INSPECTION_FILE_SAVE,
+            DATE_TIME.strftime("%Y"),
+            MONTH,
+            DATE_TIME.strftime("%Y%m%d"),
+            wb_name
+        )
+        workbook.save(wb_path)
+
+
 class Command(BaseCommand):
 
     def handle(self, *args, **options):
@@ -83,8 +169,12 @@ class Command(BaseCommand):
         if not data_list:
             logger.error('没有获取到巡检数据，请手动检查。')
             return False
-        with open(os.path.join(ROUTING_INSPECTION_DATA_PATH, DATE_TIME.strftime('%Y%m%d')+'.txt'), 'wt') as info:
-            logger.info('开始写入数据')
-            for data in data_list:
-                info.write(json.dumps(data))
-                info.write('\n')
+        try:
+            DataWriter.local_save(data_list)
+            local_result = True
+        except FileNotFoundError as error:
+            local_result = None
+            logger.error(str(error))
+
+        if local_result:
+            pass
