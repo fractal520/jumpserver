@@ -52,9 +52,10 @@ def genrate_routing_record(result):
         logger.info(result[0])
         logger.debug(result)
         return False
-    if result[0]['failed']:
-        logger.info(result[0]['failed'])
-        logger.info(result[1])
+    if result[1]['dark']:
+        for k, v in result[1]['dark'].items():
+            logger.info('{}无法收集巡检数据，原因是{}'.format(k, json.dumps(v)))
+
     for hostname, value in result[0]['ok'].items():
         facts = value['setup']['ansible_facts']
         ansible_uptime_seconds = str(dtime.timedelta(seconds=facts.get('ansible_uptime_seconds')))
