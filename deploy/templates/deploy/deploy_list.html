@@ -133,7 +133,7 @@ jQuery(document).ready(function(){
             data['id'] = id
             data['is_first'] = is_first
             $.ajax({
-                type: "GET",
+                type: "POST",
                 dataType: "json",
                 url: "{% url 'api-deploy:polling' %}",
                 data: data,

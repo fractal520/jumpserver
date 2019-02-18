@@ -4,20 +4,22 @@ from time import sleep
 from django.http import JsonResponse
 from ..pjenkins.exec_jenkins import JenkinsWork
 from common.utils import get_logger
+from ..models import DeployList
 
 logger = get_logger('jumpserver')
 
 
 def polling(request):
-    print(request.GET)
+    print(request.POST)
     jw = JenkinsWork()
-    app_name = request.GET.get('app_name')
-    is_first = request.GET.get('is_first')
+    id = request.POST.get('id')
+    is_first = request.POST.get('is_first')
+    app = DeployList.objects.get(id=id)
     MAX_COUNT = 100
     polling_count = 0
     while polling_count < MAX_COUNT:
         print(polling_count)
-        result = jw.collect_job(name=app_name)
+        result = jw.collect_job(name=app.app_name)
 
         if result['build_status'] == "SUCCESS":
             if is_first:
