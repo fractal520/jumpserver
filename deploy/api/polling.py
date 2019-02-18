@@ -26,15 +26,15 @@ def polling(request):
             if is_first == 'true':
                 logger.debug('polling build_status SUCCESS continue')
             if not is_first:
-                JsonResponse(dict(code=200, msg="SUCCESS"))
+                return JsonResponse(dict(code=200, msg="SUCCESS"))
         if result.get('build_status') == "RUNNING":
             if is_first == 'true':
-                JsonResponse(dict(code=200, msg="RUNNING"))
+                return JsonResponse(dict(code=200, msg="RUNNING"))
             if not is_first:
                 logger.debug('polling build_status RUNNING continue')
         if result['build_status'] == "FAILURE":
-            JsonResponse(dict(code=200, error="FAILURE"))
+            return JsonResponse(dict(code=200, error="FAILURE"))
         polling_count += 1
         sleep(2)
 
-    JsonResponse(dict(code=200, data="TIME OUT FAILURE"))
+    return JsonResponse(dict(code=200, data="TIME OUT FAILURE"))
