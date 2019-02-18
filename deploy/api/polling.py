@@ -1,48 +1,37 @@
 # encoding: utf-8
 
 from time import sleep
+from django.http import JsonResponse
 from ..pjenkins.exec_jenkins import JenkinsWork
 from common.utils import get_logger
 
 logger = get_logger('jumpserver')
 
 
-def first_polling(request):
+def polling(request):
+    print(request.GET)
     jw = JenkinsWork()
+    app_name = request.GET.get('app_name')
+    is_first = request.GET.get('is_first')
     MAX_COUNT = 100
     polling_count = 0
     while polling_count < MAX_COUNT:
         print(polling_count)
-        result = jw.collect_job(name='MPS')
+        result = jw.collect_job(name=app_name)
 
         if result['build_status'] == "SUCCESS":
-            logger.debug('polling build_status SUCCESS continue')
+            if is_first:
+                logger.debug('polling build_status SUCCESS continue')
+            if not is_first:
+                JsonResponse(dict(code=200, msg="SUCCESS"))
         if result['build_status'] == "RUNNING":
-            return "RUNNING"
+            if is_first:
+                JsonResponse(dict(code=200, msg="RUNNING"))
+            if not is_first:
+                logger.debug('polling build_status RUNNING continue')
         if result['build_status'] == "FAILURE":
-            return "FAILURE"
+            JsonResponse(dict(code=200, error="FAILURE"))
         polling_count += 1
         sleep(2)
 
-    return "TIME OUT FAILURE"
-
-
-def sec_polling(request):
-    jw = JenkinsWork()
-    MAX_COUNT = 100
-    polling_count = 0
-    while polling_count < MAX_COUNT:
-        print(polling_count)
-        result = jw.collect_job(name='MPS')
-
-        if result['build_status'] == "SUCCESS":
-            return "SUCCESS"
-        if result['build_status'] == "RUNNING":
-            logger.debug('polling build_status RUNNING continue')
-        if result['build_status'] == "FAILURE":
-            return "FAILURE"
-        polling_count += 1
-        sleep(2)
-
-    return "TIME OUT FAILURE"
-
+    JsonResponse(dict(code=200, data="TIME OUT FAILURE"))

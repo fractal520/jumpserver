@@ -125,8 +125,30 @@ jQuery(document).ready(function(){
     //build job
     $('body').on('click', '.btn-build', function(){
         var id = $(this).parent().attr("id");
+
         $.get("{% url 'api-deploy:build_app' %}", {'id':id}, function(result){
+            let is_first = true
             console.log(result)
+            var data = {}
+            data.push({'name': 'id', 'value': id})
+            data.push({'name': 'is_first', 'value': is_first})
+            $.ajax({
+                type: "GET",
+                dataType: "json",
+                url: "{% url 'api-deploy:polling' %}",
+                data: data,
+                contentType: "application/x-www-form-urlencoded",
+                success: function (result){
+                    console.log(result)
+                    if (result.code == 200){
+                        //window.location.reload()
+                        console.log(result)
+                        alert(result)
+                    }else{
+                        alert(result.error)
+                    }
+                }
+            });
         });
         showLoading('#test1');
 
