@@ -139,7 +139,9 @@ jQuery(document).ready(function(){
                 if (result.code == 200){
                         //window.location.reload()
                         console.log(result)
-                        alert(result)
+                        $.get("{% url 'api-deploy:polling' %}", {"id":id, "is_first":""}, function(result){
+                            alert(result.msg)
+                        });
                 }else{
                         alert(result.error)
                 }
