@@ -9,4 +9,5 @@ logger = get_logger('jumpserver')
 def polling(request):
     jw = JenkinsWork()
     result = jw.collect_job(name='MPS')
-    print(result)
+    # print(result)
+    return result
