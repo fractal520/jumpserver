@@ -127,8 +127,8 @@ jQuery(document).ready(function(){
         var id = $(this).parent().attr("id");
 
         $.get("{% url 'api-deploy:build_app' %}", {'id':id}, function(result){
+            showLoading('#test1');
             let is_first = true
-
             var data = new Array();
             data['id'] = id
             data['is_first'] = is_first
@@ -137,21 +137,17 @@ jQuery(document).ready(function(){
             $.get("{% url 'api-deploy:polling' %}", {"id":id, "is_first":is_first}, function(result){
                 console.log(result)
                 if (result.code == 200){
-                        //window.location.reload()
-                        console.log(result)
                         $.get("{% url 'api-deploy:polling' %}", {"id":id, "is_first":""}, function(result){
-                            alert(result.msg)
+                            hideLoading('#test1')
+                            window.location.reload()
                         });
                 }else{
+                        hideLoading('#test1')
                         alert(result.error)
                 }
             });
 
         });
-        //showLoading('#test1');
-
-
-        //setTimeout(function(){hideLoading('#test1'), getJenkinsInfo()},20000);
 
         //$.get("{% url 'api-deploy:get_jenkins_all' %}", {}, function(){});
         
