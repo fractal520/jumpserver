@@ -27,12 +27,12 @@ def polling(request):
                 logger.debug('polling build_status SUCCESS continue')
             if not is_first:
                 create_or_update([{
-                    'name': result.app_name,
-                    'last_build_time': result.last_build_time,
-                    'build_console_output': result.last_build_console,
-                    'last_success_build_num': result.last_success_build_num,
-                    'last_build_num': result.last_build_num,
-                    'build_status': result.build_status
+                    'name': result['app_name'],
+                    'last_build_time': result['last_build_time'],
+                    'build_console_output': result['last_build_console'],
+                    'last_success_build_num': result['last_success_build_num'],
+                    'last_build_num': result['last_build_num'],
+                    'build_status': result['build_status']
 
                 }])
                 return JsonResponse(dict(code=200, msg="SUCCESS"))
