@@ -23,12 +23,12 @@ def polling(request):
         result = jw.collect_job(name=app.app_name)
         print(result['build_status'])
         if result['build_status'] == "SUCCESS":
-            if is_first:
+            if is_first == 'true':
                 logger.debug('polling build_status SUCCESS continue')
             if not is_first:
                 JsonResponse(dict(code=200, msg="SUCCESS"))
-        if result.get('build_status', 'RUNNING') == "RUNNING":
-            if is_first:
+        if result.get('build_status') == "RUNNING":
+            if is_first == 'true':
                 JsonResponse(dict(code=200, msg="RUNNING"))
             if not is_first:
                 logger.debug('polling build_status RUNNING continue')
