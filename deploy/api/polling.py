@@ -17,10 +17,11 @@ def polling(request):
     app = DeployList.objects.get(id=id)
     MAX_COUNT = 100
     polling_count = 0
+    print(id, is_first)
     while polling_count < MAX_COUNT:
         print(polling_count)
         result = jw.collect_job(name=app.app_name)
-
+        print(result['build_status'])
         if result['build_status'] == "SUCCESS":
             if is_first:
                 logger.debug('polling build_status SUCCESS continue')
