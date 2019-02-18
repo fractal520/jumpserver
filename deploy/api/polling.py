@@ -27,7 +27,7 @@ def polling(request):
                 logger.debug('polling build_status SUCCESS continue')
             if not is_first:
                 JsonResponse(dict(code=200, msg="SUCCESS"))
-        if result['build_status'] == "RUNNING":
+        if result.get('build_status', 'RUNNING') == "RUNNING":
             if is_first:
                 JsonResponse(dict(code=200, msg="RUNNING"))
             if not is_first:
