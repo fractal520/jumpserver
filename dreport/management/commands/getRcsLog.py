@@ -1,6 +1,6 @@
 # !/usr/bin/env python
 # encoding: utf-8
-import os
+
 import json
 from datetime import datetime, timedelta
 from django.core.management.base import BaseCommand
@@ -21,7 +21,6 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         yestarday = datetime.strftime(datetime.now() - timedelta(days=1), "%Y-%m-%d")
-        log_path = os.path.join(self.rcs_log_dir, 'rcs.', yestarday, '.log')
         logger.info('获取风控服务器信息')
         try:
             rcs = Asset.objects.get(ip=self.rcs_ip)
