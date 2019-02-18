@@ -129,9 +129,9 @@ jQuery(document).ready(function(){
         $.get("{% url 'api-deploy:build_app' %}", {'id':id}, function(result){
             let is_first = true
             console.log(result)
-            var data = {}
-            data.push({'name': 'id', 'value': id})
-            data.push({'name': 'is_first', 'value': is_first})
+            var data = new Array();
+            data['id'] = id
+            data['is_first'] = is_first
             $.ajax({
                 type: "GET",
                 dataType: "json",
