@@ -10,10 +10,10 @@ logger = get_logger('jumpserver')
 
 
 def polling(request):
-    print(request.POST)
+    print(request.GET)
     jw = JenkinsWork()
-    id = request.POST.get('id')
-    is_first = request.POST.get('is_first')
+    id = request.GET.get('id')
+    is_first = request.GET.get('is_first')
     app = DeployList.objects.get(id=id)
     MAX_COUNT = 100
     polling_count = 0
