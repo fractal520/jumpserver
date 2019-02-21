@@ -24,7 +24,7 @@ def polling(request):
         print(result['build_status'])
         if result['build_status'] == "SUCCESS":
             if is_first:
-                logger.debug('polling build_status SUCCESS continue')
+                logger.debug('polling {} build_status SUCCESS continue'.format(app.app_name))
             if not is_first:
                 create_or_update([{
                     'name': result['app_name'],
