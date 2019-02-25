@@ -43,6 +43,7 @@ def push_file_util(asset, dest_path, task_name, file_path):
     return True
 
 
+
 # 使用playbook执行配置推送
 @shared_task
 def push_config_file(asset, dest=None, tpl=None, playbook_name='test.yml', extra_vars=None):
