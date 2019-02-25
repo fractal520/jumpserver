@@ -10,7 +10,7 @@ from ops.inventory import JMSInventory
 from . import const
 
 logger = get_logger('jumpserver')
-playbook_dir = os.path.join(settings.PROJECT_DIR, 'playbook')
+playbook_dir = os.path.join(settings.PROJECT_DIR, 'data', 'playbook')
 
 
 # push file to asset
@@ -80,6 +80,7 @@ def push_config_file(asset, dest=None, tpl=None, playbook_name='test.yml', extra
     hostname_list = [asset.fullname]
     options = get_default_options()
     playbook_path = os.path.join(playbook_dir, playbook_name)
+    logger.debug(playbook_path)
     if not playbook_name or not os.path.exists(playbook_path):
         raise FileNotFoundError('Please check playbook_path {}.'.format(playbook_name))
     options = options._replace(playbook_path=playbook_path)
