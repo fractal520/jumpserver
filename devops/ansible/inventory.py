@@ -4,7 +4,6 @@ from ansible.vars.manager import VariableManager
 from ansible.inventory.manager import InventoryManager
 from ansible.parsing.dataloader import DataLoader
 from assets.utils import get_system_user_by_name
-from perms.utils import NodePermissionUtil
 from assets.models import *
 
 __all__ = [
