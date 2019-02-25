@@ -76,7 +76,7 @@ def ansible_install_role(role_name, roles_path):
 
 # 使用playbook执行配置推送
 @shared_task
-def push_config_file(asset, dest=None, tpl=None, playbook_name='test.yml', extra_vars=None):
+def push_config_file(asset, playbook_name='test.yml', extra_vars=None):
     hostname_list = [asset.fullname]
     options = get_default_options()
     playbook_path = os.path.join(playbook_dir, playbook_name)
