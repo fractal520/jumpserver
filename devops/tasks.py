@@ -1,10 +1,16 @@
 #  encoding: utf-8
+import os
+import json
 from celery import shared_task
 from django.utils.translation import ugettext as _
+from django.conf import settings
 from common.utils import get_logger
+from ops.ansible.runner import get_default_options, PlayBookRunner
+from ops.inventory import JMSInventory
 from . import const
 
 logger = get_logger('jumpserver')
+playbook_dir = os.path.join(settings.PROJECT_DIR, 'playbook')
 
 
 # push file to asset
@@ -35,3 +41,22 @@ def push_file_util(asset, dest_path, task_name, file_path):
         print(asset.ip + 'failed')
         logger.error("push {} to {}:{} failed".format(file_path, asset.ip, dest_path))
     return True
+
+
+# 使用playbook执行配置推送
+@shared_task
+def push_config_file(asset, dest=None, tpl=None, playbook_name='test.yml', extra_vars=None):
+    hostname_list = [asset.fullname]
+    options = get_default_options()
+    playbook_path = os.path.join(playbook_dir, playbook_name)
+    if not playbook_name or not os.path.exists(playbook_path):
+        raise FileNotFoundError('Please check playbook_path {}.'.format(playbook_name))
+    options = options._replace(playbook_path=playbook_path)
+    inventory = JMSInventory(hostname_list=hostname_list, run_as_admin=True, run_as=None, become_info=None)
+    runner = PlayBookRunner(inventory=inventory, options=options)
+    if extra_vars:
+        runner.variable_manager.extra_vars = extra_vars
+        logger.debug(json.dumps(runner.variable_manager.get_vars()))
+    result = runner.run()
+    logger.debug(result)
+    return result
