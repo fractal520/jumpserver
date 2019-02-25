@@ -75,10 +75,10 @@ class TaskSelectView(LoginRequiredMixin, TemplateView):
             assets.update(set(group.get_all_active_assets()))
 
         if not self.request.user.is_superuser:
-            # granted_assets = Asset.objects.all()
-            assets = Asset.objects.all()
+            granted_assets = Asset.objects.all()
+            # assets = Asset.objects.all()
             # : 取交集
-            # assets = set(assets).intersection(set(granted_assets))
+            assets = set(assets).intersection(set(granted_assets))
 
         context = {
             'id': kwargs['pk'],
