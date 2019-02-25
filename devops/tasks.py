@@ -10,7 +10,7 @@ from ops.inventory import JMSInventory
 from . import const
 
 logger = get_logger('jumpserver')
-playbook_dir = os.path.join(settings.PROJECT_DIR, 'data', 'playbook')
+playbook_dir = os.path.join(settings.PROJECT_DIR, 'data', 'playbooks')
 
 
 # push file to asset
