@@ -1,7 +1,7 @@
 from django.urls import path
 
 from .. import views
-from ..api import pushdeploy, rollback
+from ..api import pushdeploy, rollback, polling
 
 app_name = 'deploy'
 
@@ -12,4 +12,5 @@ urlpatterns = [
     path('deploy_file_to_asset/', pushdeploy.deploy_file_to_asset, name='deploy_file_to_asset'),
     path('get_version_history/', pushdeploy.get_version_history, name='get_version_history'),
     path('rollback/', rollback.rollback, name='rollback'),
+    path('polling/', polling.polling, name='polling'),
 ]
