@@ -32,7 +32,7 @@
                 <td>{{deploy.published_time}}</td>
                 <td>
                     {% for asset in deploy.bound_asset.all %}
-                    {{asset.hostname}}
+                    <li>{{asset.hostname}}</li>
                     {% endfor %}
                 </td>
                 <td id="{{deploy.id}}">
