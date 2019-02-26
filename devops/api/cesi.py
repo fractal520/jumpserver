@@ -62,12 +62,6 @@ class CesiAPI(object):
         cesi_node_url = "http://10.128.1.198:5000/api/v2/nodes/{}/processes/{}/restart/".format(node_name, process_name)
         return self.get_tpl(cesi_node_url)
 
-
-if __name__ == "__main__":
-    cesi = CesiAPI()
-    cesi.login()
-    cesi.get_nodes()
-    cesi.get_node(node_name='monitoring-server')
-    cesi.get_node_processes(node_name='monitoring-server')
-    cesi.get_process(node_name='monitoring-server', process_name='cmdb_gunicron')
-    cesi.start_process(node_name='monitoring-server', process_name='wol_gunicron')
+    def read_process_log(self, node_name, process_name):
+        cesi_node_url = "http://10.128.1.198:5000/api/v2/nodes/{}/processes/{}/log/".format(node_name, process_name)
+        return self.get_tpl(cesi_node_url)
