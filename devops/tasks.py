@@ -5,8 +5,7 @@ from celery import shared_task
 from django.utils.translation import ugettext as _
 from django.conf import settings
 from common.utils import get_logger
-from ops.ansible.runner import get_default_options, PlayBookRunner
-from ops.inventory import JMSInventory
+from devops.utils import create_playbook_task
 from . import const
 
 logger = get_logger('jumpserver')
@@ -43,21 +42,10 @@ def push_file_util(asset, dest_path, task_name, file_path):
     return True
 
 
-# 使用playbook执行配置推送
+# 执行ansible-playbook
 @shared_task
-def push_config_file(asset, playbook_name='test.yml', extra_vars=None):
-    hostname_list = [asset.fullname]
-    options = get_default_options()
-    playbook_path = os.path.join(playbook_dir, playbook_name)
-    logger.debug(playbook_path)
-    if not playbook_name or not os.path.exists(playbook_path):
-        raise FileNotFoundError('Please check playbook_path {}.'.format(playbook_name))
-    options = options._replace(playbook_path=playbook_path)
-    inventory = JMSInventory(hostname_list=hostname_list, run_as_admin=True, run_as=None, become_info=None)
-    runner = PlayBookRunner(inventory=inventory, options=options)
-    if extra_vars:
-        runner.variable_manager.extra_vars = extra_vars
-        logger.debug(json.dumps(runner.variable_manager.get_vars()))
+def execute_playbook(asset, playbook_name=None, extra_vars=None):
+    runner = create_playbook_task(asset, playbook_name, extra_vars)
     result = runner.run()
     logger.debug(result)
     return result
