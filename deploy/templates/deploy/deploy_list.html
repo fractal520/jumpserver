@@ -19,7 +19,7 @@
         <tbody>
           {% for deploy in deploys %}
             <tr>
-                <td><a href="{% url 'deploy:deploy-update' pk=deploy.id %}">{{deploy.app_name}}</a></td>
+                <td><a href="javascript:void(0)">{{deploy.app_name}}</a></td>
                 <td>
                     {% if deploy.job_status %}
                         <i class="fa fa-check text-navy"></i>
@@ -36,15 +36,18 @@
                     {% endfor %}
                 </td>
                 <td id="{{deploy.id}}">
+                    <a href="{% url 'deploy:deploy-update' pk=deploy.id %}" class="btn btn-xs btn-default">修改</a>
                     {% if deploy.job_status %}
                     <a href="javascript:void(0)" class="btn btn-xs btn-info btn-build">构建</a>
                     {% else %}
                     <a href="javascript:void(0)" class="btn btn-xs btn-info btn-build" disabled="disabled">构建</a>
                     {% endif %}
-                    {% if deploy.build_status == "SUCCESS" %}
-                    <a href="{% url 'deploy:DeployOptionList' pk=deploy.pk %}" class="btn btn-xs btn-success btn-deploy">发布</a>
-                    {% else %}
+                    {% if deploy.build_status != "SUCCESS" %}
                     <a href="{% url 'deploy:DeployOptionList' pk=deploy.pk %}" class="btn btn-xs btn-success btn-deploy" disabled="disabled">发布</a>
+                    {% elif not deploy.job_status %}
+                    <a href="{% url 'deploy:DeployOptionList' pk=deploy.pk %}" class="btn btn-xs btn-success btn-deploy" disabled="disabled">发布</a>
+                    {% else %}
+                    <a href="{% url 'deploy:DeployOptionList' pk=deploy.pk %}" class="btn btn-xs btn-success btn-deploy">发布</a>
                     {% endif %}
                     {% if deploy.job_status %}
                     <a href="{% url 'deploy:DeployRollback' pk=deploy.pk %}" class="btn btn-xs btn-danger">回滚</a>

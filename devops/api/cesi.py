@@ -28,7 +28,10 @@ class CesiAPI(object):
 
     def get_tpl(self, url):
         req = self.request.Request(url=url, headers=self.header)
-        res = self.request.urlopen(req)
+        try:
+            res = self.request.urlopen(req)
+        except BaseException as error:
+            return False, error
         res = res.read()
         result = res.decode(encoding='utf-8')
         print(result)
