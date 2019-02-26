@@ -9,6 +9,9 @@ from ops.inventory import JMSInventory
 logger = get_logger('jumpserver')
 playbook_dir = os.path.join(settings.PROJECT_DIR, 'data', 'playbooks')
 
+if not os.path.isdir(playbook_dir):
+    os.makedirs(playbook_dir)
+
 
 def create_playbook_task(asset, playbook_name=None, extra_vars=None):
 
