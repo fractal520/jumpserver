@@ -39,7 +39,7 @@
                                             </a>
                                         </div>
                                     </div>
-                                    <div class="ibox-content {{ host.hostname }}">
+                                    <div class="ibox-content" id="{{ host.hostname }}">
 
                                     </div>
                                 </div>
@@ -68,7 +68,7 @@
             var name = '{{ host.hostname }}'
             console.log(name)
             var html = "<li><b>" + '{{ result.app_name }}' + "运行情况</b></li>"
-            $('.name').append(html)
+            $('#name').append(html)
         {% endfor %}
     });
 </script>
