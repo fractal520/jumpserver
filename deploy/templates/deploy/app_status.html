@@ -65,7 +65,7 @@
 <script>
     jQuery(document).ready(function(){
         {% for host in  result.bound_asset.all %}
-            var name = {{ host.hostname }}
+            var name = Str({{ host.hostname }})
             console.log(name)
         {% endfor %}
     });
