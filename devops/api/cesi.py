@@ -17,7 +17,7 @@ class CesiAPI(object):
         self.request.install_opener(self.opener)
 
     def login(self):
-        cesi_login_url = "http://10.128.1.198:5000/api/v2/auth/login/"
+        cesi_login_url = "http://{}/api/v2/auth/login/".format(cesi_url)
         post_data = {
             "username": "admin",
             "password": "admin"
