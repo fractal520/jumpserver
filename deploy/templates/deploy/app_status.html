@@ -66,8 +66,9 @@
     jQuery(document).ready(function(){
         {% for host in  result.bound_asset.all %}
             var name = '{{ host.hostname }}'
+            var app = '{{ result.app_name }}'
             console.log(name)
-            var html = "<li><b>" + '{{ result.app_name }}' + "运行情况</b></li>"
+            var html = "<li><b>" + app + "运行情况</b></li>"
             $('#name').append(html)
         {% endfor %}
     });
