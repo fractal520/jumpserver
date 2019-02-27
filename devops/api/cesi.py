@@ -1,6 +1,10 @@
 from urllib import request
 import http.cookiejar
 import json
+from common.utils import get_logger
+
+logger = get_logger('jumpserver')
+cesi_url = "127.0.0.1:5001"
 
 
 class CesiAPI(object):
@@ -23,7 +27,7 @@ class CesiAPI(object):
         res = self.request.urlopen(req)
         res = res.read()
         result = res.decode(encoding='utf-8')
-        print(result)
+        logger.info(result)
         return result
 
     def get_tpl(self, url):
@@ -31,40 +35,41 @@ class CesiAPI(object):
         try:
             res = self.request.urlopen(req)
         except BaseException as error:
+            logger.error(error)
             return False, error
         res = res.read()
         result = res.decode(encoding='utf-8')
-        print(result)
+        logger.info(result)
         return result
 
     def get_nodes(self):
-        cesi_nodes_url = "http://10.128.1.198:5000/api/v2/nodes/"
+        cesi_nodes_url = "http://{}/api/v2/nodes/".format(cesi_url)
         return self.get_tpl(cesi_nodes_url)
 
     def get_node(self, node_name):
-        cesi_node_url = "http://10.128.1.198:5000/api/v2/nodes/{}/".format(node_name)
+        cesi_node_url = "http://{}/api/v2/nodes/{}/".format(cesi_url, node_name)
         return self.get_tpl(cesi_node_url)
 
     def get_node_processes(self, node_name):
-        cesi_node_url = "http://10.128.1.198:5000/api/v2/nodes/{}/processes/".format(node_name)
+        cesi_node_url = "http://{}/api/v2/nodes/{}/processes/".format(cesi_url, node_name)
         return self.get_tpl(cesi_node_url)
 
     def get_process(self, node_name, process_name):
-        cesi_node_url = "http://10.128.1.198:5000/api/v2/nodes/{}/processes/{}/".format(node_name, process_name)
+        cesi_node_url = "http://{}/api/v2/nodes/{}/processes/{}/".format(cesi_url, node_name, process_name)
         return self.get_tpl(cesi_node_url)
 
     def start_process(self, node_name, process_name):
-        cesi_node_url = "http://10.128.1.198:5000/api/v2/nodes/{}/processes/{}/start/".format(node_name, process_name)
+        cesi_node_url = "http://{}/api/v2/nodes/{}/processes/{}/start/".format(cesi_url, node_name, process_name)
         return self.get_tpl(cesi_node_url)
 
     def stop_process(self, node_name, process_name):
-        cesi_node_url = "http://10.128.1.198:5000/api/v2/nodes/{}/processes/{}/stop/".format(node_name, process_name)
+        cesi_node_url = "http://{}/api/v2/nodes/{}/processes/{}/stop/".format(cesi_url, node_name, process_name)
         return self.get_tpl(cesi_node_url)
 
     def restart_process(self, node_name, process_name):
-        cesi_node_url = "http://10.128.1.198:5000/api/v2/nodes/{}/processes/{}/restart/".format(node_name, process_name)
+        cesi_node_url = "http://{}/api/v2/nodes/{}/processes/{}/restart/".format(cesi_url, node_name, process_name)
         return self.get_tpl(cesi_node_url)
 
     def read_process_log(self, node_name, process_name):
-        cesi_node_url = "http://10.128.1.198:5000/api/v2/nodes/{}/processes/{}/log/".format(node_name, process_name)
+        cesi_node_url = "http://{}/api/v2/nodes/{}/processes/{}/log/".format(cesi_url, node_name, process_name)
         return self.get_tpl(cesi_node_url)
