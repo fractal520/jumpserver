@@ -39,7 +39,7 @@
                                             </a>
                                         </div>
                                     </div>
-                                    <div class="ibox-content">
+                                    <div class="ibox-content {{ host.hostname }}">
 
                                     </div>
                                 </div>
@@ -62,4 +62,12 @@
     {% endfor %}
 {% endblock %}
 {% block custom_foot_js %}
+<script>
+    jQuery(document).ready(function(){
+        {% for host in  result.bound_asset.all %}
+            var name = {{ host.name }}
+            console.log(name)
+        {% endfor %}
+    });
+</script>
 {% endblock %}
