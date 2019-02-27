@@ -85,9 +85,16 @@ class DeployRollbackView(LoginRequiredMixin, DetailView):
         return super().get_context_data(**kwargs)
 
 
-class AppStatusView(LoginRequiredMixin, TemplateView):
+class AppStatusView(LoginRequiredMixin, DetailView):
+    model = DeployList
     template_name = 'deploy/app_status.html'
+    context_object_name = 'result'
+    object = None
 
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        return context
+        context = {
+            'app': _('deploy'),
+            'action': _('AppStatus'),
+        }
+        kwargs.update(context)
+        return super().get_context_data(**kwargs)
