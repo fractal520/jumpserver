@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.utils.translation import ugettext as _
 from django.http import JsonResponse
-from django.views.generic import ListView, DetailView, UpdateView
+from django.views.generic import ListView, DetailView, UpdateView, TemplateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
 from django.urls import reverse_lazy
@@ -83,3 +83,11 @@ class DeployRollbackView(LoginRequiredMixin, DetailView):
         }
         kwargs.update(context)
         return super().get_context_data(**kwargs)
+
+
+class AppStatusView(LoginRequiredMixin, TemplateView):
+    template_name = 'deploy/app_status.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        return context
