@@ -5,59 +5,61 @@
     <script src="{% static 'js/plugins/select2/select2.full.min.js' %}"></script>
 {% endblock %}
 {% block content %}
-   <div class="wrapper wrapper-content animated fadeInRight">
-        <div class="row">
-            <div class="col-sm-12">
-                <div class="ibox float-e-margins">
-                    <div class="panel-options">
-                        <ul class="nav nav-tabs">
-                            <li class="active">
-                                <a href="#" class="text-center"><i class="fa fa-laptop"></i> {% trans 'Detail' %} </a>
-                            </li>
-                            <li class="pull-right">
-                                <a class="btn btn-outline btn-default btn-update" href="{% url 'deploy:deploy-update' pk=result.id %}"><i class="fa fa-edit"></i>{% trans 'Update' %}</a>
-                            </li>
-                        </ul>
-                    </div>
-                    <div class="tab-content">
-                        <div class="col-sm-8" style="padding-left: 0;">
-                            <div class="ibox float-e-margins">
-                                <div class="ibox-title">
-                                    <span class="label"><b>{{ result.app_name }}</b></span>
-                                    <div class="ibox-tools">
-                                        <a class="collapse-link">
-                                            <i class="fa fa-chevron-up"></i>
-                                        </a>
-                                        <a class="dropdown-toggle" data-toggle="dropdown" href="#">
-                                            <i class="fa fa-wrench"></i>
-                                        </a>
-                                        <ul class="dropdown-menu dropdown-user">
-                                        </ul>
-                                        <a class="close-link">
-                                            <i class="fa fa-times"></i>
-                                        </a>
+    {% for host in  result.bound_asset %}
+       <div class="wrapper wrapper-content animated fadeInRight">
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="ibox float-e-margins">
+                        <div class="panel-options">
+                            <ul class="nav nav-tabs">
+                                <li class="active">
+                                    <a href="#" class="text-center"><i class="fa fa-laptop"></i> <b>{{ result.app_name }}</b> </a>
+                                </li>
+                                <li class="pull-right">
+                                    <a class="btn btn-outline btn-default btn-update" href="{% url 'deploy:deploy-update' pk=result.id %}"><i class="fa fa-edit"></i>{% trans 'Update' %}</a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="tab-content">
+                            <div class="col-sm-8" style="padding-left: 0;">
+                                <div class="ibox float-e-margins">
+                                    <div class="ibox-title">
+                                        <span class="label"><b>{{ host.hostname }}</b></span>
+                                        <div class="ibox-tools">
+                                            <a class="collapse-link">
+                                                <i class="fa fa-chevron-up"></i>
+                                            </a>
+                                            <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                                                <i class="fa fa-wrench"></i>
+                                            </a>
+                                            <ul class="dropdown-menu dropdown-user">
+                                            </ul>
+                                            <a class="close-link">
+                                                <i class="fa fa-times"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                    <div class="ibox-content">
+
                                     </div>
                                 </div>
-                                <div class="ibox-content">
-
-                                </div>
                             </div>
-                        </div>
-                        <div class="col-sm-4" style="padding-left: 0;padding-right: 0">
-                            <div class="panel panel-primary">
-                                <div class="panel-heading">
-                                    <i class="fa fa-info-circle"></i> 操作框
-                                </div>
-                                <div class="panel-body">
+                            <div class="col-sm-4" style="padding-left: 0;padding-right: 0">
+                                <div class="panel panel-primary">
+                                    <div class="panel-heading">
+                                        <i class="fa fa-info-circle"></i> 操作框
+                                    </div>
+                                    <div class="panel-body">
 
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-   </div>
+       </div>
+    {% endfor %}
 {% endblock %}
 {% block custom_foot_js %}
 {% endblock %}
