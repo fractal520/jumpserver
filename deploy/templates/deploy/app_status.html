@@ -71,7 +71,7 @@
             var app = '{{ result.app_name }}'
             console.log(name)
             var html = "<li class='list-group-item'><b>" + app + "运行情况</b></li>"
-            $('#name').append(html)
+            $("#"+name).append(html)
         {% endfor %}
     });
 </script>
