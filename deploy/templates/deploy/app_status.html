@@ -69,9 +69,10 @@
         {% for host in  result.bound_asset.all %}
             var host_id = '{{ host.id }}'
             var name = '{{ host.hostname }}'
+            var app_id = '{{ result.id }}'
             var app = '{{ result.app_name }}'
             console.log(name)
-            $.get("{% url 'api-devops:supervisor-status' %}", {}, function(result){
+            $.get("{% url 'api-devops:supervisor-status' %}", {'app_id': app_id, 'host_id': host_id}, function(result){
                 console.log(result)
             })
             var html = "<li class='list-group-item'><b>" + name + "运行情况</b></li>"

@@ -3,11 +3,13 @@ from rest_framework.generics import ListAPIView, RetrieveAPIView
 from rest_framework.response import Response
 from rest_framework import status
 from assets.serializers import AssetGrantedSerializer
+from assets.models import Asset
 from users.models import User
 from deploy.models import DeployList
 from perms.utils import AssetPermissionUtil
 from common.permissions import IsOrgAdminOrAppUser, IsValidUser
 from orgs.utils import set_to_root_org
+from devops.api import CesiAPI
 
 
 class UserGrantedAssetsApi(ListAPIView):
@@ -51,4 +53,13 @@ class GetSupervisorStatusApi(RetrieveAPIView):
     permission_classes = (IsValidUser,)
 
     def retrieve(self, request, *args, **kwargs):
+        app_id = request.GET.get('app_id')
+        host_id = request.GET.get('host_id')
+        print(request.GET)
+        app = DeployList.objects.get(id=app_id)
+        asset = Asset.objects.get(id=host_id)
+        cesi = CesiAPI()
+        cesi.login()
+        result = cesi.get_process(node_name=asset.hostname, process_name=app.app_name)
+        print(result)
         return Response({"key": "supervisor", "value": "status"})
