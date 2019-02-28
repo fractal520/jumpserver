@@ -9,7 +9,7 @@ from deploy.models import DeployList
 from perms.utils import AssetPermissionUtil
 from common.permissions import IsOrgAdminOrAppUser, IsValidUser
 from orgs.utils import set_to_root_org
-from devops.api import CesiAPI
+from devops.api.cesi import CesiAPI
 
 
 class UserGrantedAssetsApi(ListAPIView):
