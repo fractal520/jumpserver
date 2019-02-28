@@ -61,5 +61,6 @@ class GetSupervisorStatusApi(RetrieveAPIView):
         cesi = CesiAPI()
         cesi.login()
         result = cesi.get_process(node_name=asset.hostname, process_name=app.app_name)
-        print(result)
-        return Response({"key": "supervisor", "value": "status"})
+        data = eval(result, {'true': 0, 'false': 1})
+        print(data, type(data))
+        return Response(data)
