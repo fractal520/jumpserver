@@ -49,18 +49,28 @@ class UserGrantedAssetsApi(ListAPIView):
 
 
 class GetSupervisorStatusApi(RetrieveAPIView):
+    """
+    获取对应资产的应用情况
+    """
     queryset = DeployList.objects.all()
     permission_classes = (IsValidUser,)
 
     def retrieve(self, request, *args, **kwargs):
         app_id = request.GET.get('app_id')
         host_id = request.GET.get('host_id')
-        print(request.GET)
         app = DeployList.objects.get(id=app_id)
         asset = Asset.objects.get(id=host_id)
         cesi = CesiAPI()
         cesi.login()
         result = cesi.get_process(node_name=asset.hostname, process_name=app.app_name)
+        if not result[0]:
+            return Response({'code': 400, 'error': result[1]})
+
         data = eval(result, {'true': 0, 'false': 1})
-        print(data, type(data))
+        data = {
+            'code': 200,
+            'pid': data['process']['pid'],
+            'uptime': data['process']['uptime'],
+            'status': data['status']
+        }
         return Response(data)

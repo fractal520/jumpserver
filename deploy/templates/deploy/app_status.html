@@ -39,10 +39,7 @@
                                             </a>
                                         </div>
                                     </div>
-                                    <div class="ibox-content">
-                                        <ul class="list-group" id="{{ host.hostname }}">
-
-                                        </ul>
+                                    <div class="ibox-content" id="{{ host.hostname }}">
                                     </div>
                                 </div>
                             </div>
@@ -74,9 +71,10 @@
             console.log(name)
             $.get("{% url 'api-devops:supervisor-status' %}", {'app_id': app_id, 'host_id': host_id}, function(result){
                 console.log(result)
+                var html = "<li class='list-group-item'><b>" + name + "运行情况</b></li>"
+                $("#"+name).append(html)
             })
-            var html = "<li class='list-group-item'><b>" + name + "运行情况</b></li>"
-            $("#"+name).append(html)
+
         {% endfor %}
     });
 </script>
