@@ -5,7 +5,7 @@ from .. import api
 app_name = 'devops'
 
 router = routers.DefaultRouter()
-router.register(r'supervisor-status', api.GetSupervisorStatus, 'supervisor-status')
+router.register(r'supervisor-status', api.GetSupervisorStatusApi, 'supervisor-status')
 
 
 urlpatterns = [

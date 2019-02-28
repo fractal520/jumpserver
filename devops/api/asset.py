@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from assets.serializers import AssetGrantedSerializer
 from users.models import User
+from deploy.models import DeployList
 from perms.utils import AssetPermissionUtil
 from common.permissions import IsOrgAdminOrAppUser, IsValidUser
 from orgs.utils import set_to_root_org
@@ -45,9 +46,8 @@ class UserGrantedAssetsApi(ListAPIView):
         return super().get_permissions()
 
 
-class GetSupervisorStatus(RetrieveAPIView):
-    queryset = None
-    serializer_class = None
+class GetSupervisorStatusApi(RetrieveAPIView):
+    queryset = DeployList.objects.all()
     permission_classes = IsValidUser
 
     def retrieve(self, request, *args, **kwargs):
