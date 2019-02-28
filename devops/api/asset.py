@@ -48,8 +48,7 @@ class UserGrantedAssetsApi(ListAPIView):
 
 class GetSupervisorStatusApi(RetrieveAPIView):
     queryset = DeployList.objects.all()
-    permission_classes = IsValidUser
+    permission_classes = (IsValidUser,)
 
     def retrieve(self, request, *args, **kwargs):
-        result = [{"key": "supervisor", "value": "status"}]
-        return Response(result, status=status.HTTP_200_OK)
+        return Response({"key": "supervisor", "value": "status"})
