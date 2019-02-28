@@ -1,5 +1,7 @@
 from django.shortcuts import get_object_or_404
-from rest_framework.generics import ListAPIView
+from rest_framework.generics import ListAPIView, RetrieveAPIView
+from rest_framework.response import Response
+from rest_framework import status
 from assets.serializers import AssetGrantedSerializer
 from users.models import User
 from perms.utils import AssetPermissionUtil
@@ -41,3 +43,13 @@ class UserGrantedAssetsApi(ListAPIView):
         if self.kwargs.get('pk') is None:
             self.permission_classes = (IsValidUser,)
         return super().get_permissions()
+
+
+class GetSupervisorStatus(RetrieveAPIView):
+    queryset = None
+    serializer_class = None
+    permission_classes = IsValidUser
+
+    def retrieve(self, request, *args, **kwargs):
+        result = [{"key": "supervisor", "value": "status"}]
+        return Response(result, status=status.HTTP_200_OK)

@@ -67,10 +67,14 @@
 <script>
     jQuery(document).ready(function(){
         {% for host in  result.bound_asset.all %}
+            var host_id = '{{ host.id }}'
             var name = '{{ host.hostname }}'
             var app = '{{ result.app_name }}'
             console.log(name)
-            var html = "<li class='list-group-item'><b>" + app + "运行情况</b></li>"
+            $.get("{% url 'api-devops:supervisor-status' %}", {}, function(result){
+                console.log(result)
+            })
+            var html = "<li class='list-group-item'><b>" + name + "运行情况</b></li>"
             $("#"+name).append(html)
         {% endfor %}
     });
