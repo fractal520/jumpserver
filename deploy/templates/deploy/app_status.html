@@ -36,7 +36,17 @@
                                             </a>
                                         </div>
                                     </div>
-                                    <div class="ibox-content" id="{{ host.id }}">
+                                    <div class="ibox-content">
+                                        <table>
+                                            <thead>
+                                                <th><b>PID</b></th>
+                                                <th><b>UPTIME</b></th>
+                                                <th><b>STATUS</b></th>
+                                            </thead>
+                                            <tbody  id="{{ host.id }}">
+
+                                            </tbody>
+                                        </table>
                                     </div>
                                 </div>
                             </div>
@@ -75,11 +85,11 @@
             $.get("{% url 'api-devops:supervisor-status' %}", {'app_id': x.app_id, 'host_id': x.host_id}, function(data){
                 console.log(data)
                 if(data.code == 200){
-                    var html = "<li class='list-group-item'><b> pid:" + data.pid + " uptime:" + data.uptime + " status: " + data.status + "</b></li>"
+                    var html = "<td>" + data.pid + "</td><td>" + data.uptime + "</td><td>" + data.status + "</td>"
                     $("#"+data.id).append(html)
                 }
                 else{
-                    var html = "<li class='list-group-item'><b> error:" + data.error + "</b></li>"
+                    var html = "<td>0</td><td>0</td><td>" + data.error + "</td>"
                     $("#"+data.id).append(html)
                 }
 
