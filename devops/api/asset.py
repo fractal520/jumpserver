@@ -79,6 +79,8 @@ class GetSupervisorStatusApi(RetrieveAPIView):
             'code': 200,
             'pid': data['process']['pid'],
             'uptime': uptime,
-            'status': data['process']['statename']
+            'status': data['process']['statename'],
+            'id': asset.id
         }
+
         return Response(data)
