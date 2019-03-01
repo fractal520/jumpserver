@@ -64,12 +64,12 @@ class GetSupervisorStatusApi(RetrieveAPIView):
         cesi.login()
         result = cesi.get_process(node_name=asset.hostname, process_name=app.app_name)
         if not result[0]:
-            return Response({'code': 400, 'error': result[1]})
+            return Response({'code': 400, 'error': result[1], 'id': asset.id})
 
         data = eval(result, {'true': 0, 'false': 1})
         uptime = data['process']['uptime']
         if uptime == 0:
-            return Response({"code": 400, "error": data['process']['spawnerr']})
+            return Response({'code': 400, 'error': data['process']['spawnerr'], 'id': asset.id})
         elif ':' in uptime:
             uptime += ' hours'
         else:
