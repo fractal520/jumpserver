@@ -39,13 +39,12 @@
                                     <div class="ibox-content">
                                         <table class="{{ host.id }}">
                                             <thead>
-                                                <th><b>PID</b></th>
-                                                <th><b>UPTIME</b></th>
-                                                <th><b>STATUS</b></th>
+                                                <tr>
+                                                    <th><b>PID</b></th>
+                                                    <th><b>UPTIME</b></th>
+                                                    <th><b>STATUS</b></th>
+                                                </tr>
                                             </thead>
-                                            <tbody  id="{{ host.id }}">
-
-                                            </tbody>
                                         </table>
                                     </div>
                                 </div>
@@ -85,14 +84,28 @@
             $.get("{% url 'api-devops:supervisor-status' %}", {'app_id': x.app_id, 'host_id': x.host_id}, function(data){
                 console.log(data)
                 if(data.code == 200){
-                    var html = "<td>" + data.pid + "</td><td>" + data.uptime + "</td><td>" + data.status + "</td>"
-                    $("#"+data.id).append(html)
+                    $("."+data.id).DataTable({
+                        "processing": true,
+                        "columns": [
+                            {"data": data.pid},
+                            {"data": data.uptime},
+                            {"data": data.status}
+                        ]
+                    });
                 }
                 else{
-                    var html = "<td>0</td><td>0</td><td>" + data.error + "</td>"
-                    $("#"+data.id).append(html)
+                    $("."+data.id).DataTable({
+                        "processing": true,
+                        "columns": [
+                            {"data": 0},
+                            {"data": 0},
+                            {"data": data.error}
+                        ]
+                    });
                 }
-                $("."+data.id).DataTable();
+
+
+
             })
         }
 
