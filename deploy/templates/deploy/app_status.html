@@ -37,7 +37,7 @@
                                         </div>
                                     </div>
                                     <div class="ibox-content">
-                                        <table class="table">
+                                        <table class="{{ host.id }}">
                                             <thead>
                                                 <th><b>PID</b></th>
                                                 <th><b>UPTIME</b></th>
@@ -81,8 +81,6 @@
 <script>
     jQuery(document).ready(function(){
 
-        $('.table').DataTable();
-
         var dynamic_status = function(x){
             $.get("{% url 'api-devops:supervisor-status' %}", {'app_id': x.app_id, 'host_id': x.host_id}, function(data){
                 console.log(data)
@@ -94,7 +92,7 @@
                     var html = "<td>0</td><td>0</td><td>" + data.error + "</td>"
                     $("#"+data.id).append(html)
                 }
-
+                $("."+data.id).DataTable();
             })
         }
 
@@ -107,6 +105,7 @@
             dynamic_status(x)
 
         {% endfor %}
+
     });
 </script>
 {% endblock %}
