@@ -71,9 +71,12 @@
             $.get("{% url 'api-devops:supervisor-status' %}", {'app_id': app_id, 'host_id': host_id}, function(data){
                 console.log(host_id)
                 console.log(data)
-                if(result.code == 200){
+                if(data.code == 200){
                     var html = "<li class='list-group-item'><b> pid:" + data.pid + " uptime:" + data.uptime + " status: " + data.status + "</b></li>"
                     $("#"+host_id).append(html)
+                }
+                else{
+                    var html = "<li class='list-group-item'><b> error:" + data.error + "</b></li>"
                 }
 
             })

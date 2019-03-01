@@ -69,7 +69,7 @@ class GetSupervisorStatusApi(RetrieveAPIView):
         data = eval(result, {'true': 0, 'false': 1})
         uptime = data['process']['uptime']
         if uptime == 0:
-            return Response({"code": 400, "error": data['spawnerr']})
+            return Response({"code": 400, "error": data['process']['spawnerr']})
         elif ':' in uptime:
             uptime += ' hours'
         else:
