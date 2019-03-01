@@ -67,10 +67,16 @@ class GetSupervisorStatusApi(RetrieveAPIView):
             return Response({'code': 400, 'error': result[1]})
 
         data = eval(result, {'true': 0, 'false': 1})
+        uptime = data['process']['uptime']
+        if ':' in uptime:
+            uptime += ' hours'
+        else:
+            uptime += ' days'
+
         data = {
             'code': 200,
             'pid': data['process']['pid'],
-            'uptime': data['process']['uptime'],
-            'status': data['status']
+            'uptime': uptime,
+            'status': data['process']['statename']
         }
         return Response(data)
