@@ -68,11 +68,11 @@
             var name = '{{ host.hostname }}'
             var app_id = '{{ result.id }}'
             var app = '{{ result.app_name }}'
-            console.log(name)
             $.get("{% url 'api-devops:supervisor-status' %}", {'app_id': app_id, 'host_id': host_id}, function(result){
+                console.log(name)
                 console.log(result)
                 if(result.code == 200){
-                    var html = "<li class='list-group-item'><b> pid:" + result.code + " uptime:" + result.uptime + "status: " + result.status + "</b></li>"
+                    var html = "<li class='list-group-item'><b> pid:" + result.pid + " uptime:" + result.uptime + " status: " + result.status + "</b></li>"
                     $("#"+name).append(html)
                 }
 
