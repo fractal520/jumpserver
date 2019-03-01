@@ -15,9 +15,6 @@
                                 <li class="active">
                                     <a href="#" class="text-center"><i class="fa fa-laptop"></i> <b>{{ result.app_name }}</b> </a>
                                 </li>
-                                <li class="pull-right">
-                                    <a class="btn btn-outline btn-default btn-update" href="{% url 'deploy:deploy-update' pk=result.id %}"><i class="fa fa-edit"></i>{% trans 'Update' %}</a>
-                                </li>
                             </ul>
                         </div>
                         <div class="tab-content">
@@ -49,7 +46,17 @@
                                         <i class="fa fa-info-circle"></i> 操作框
                                     </div>
                                     <div class="panel-body">
-
+                                        <table>
+                                            <thead></thead>
+                                            <tbody>
+                                                <td>
+                                                    <button type="button" class="btn btn-success">Start</button>
+                                                    <button type="button" class="btn btn-danger">Stop</button>
+                                                    <button type="button" class="btn btn-warning">Restart</button>
+                                                    <button type="button" class="btn btn-info">Log</button>
+                                                </td>
+                                            </tbody>
+                                        </table>
                                     </div>
                                 </div>
                             </div>
@@ -63,12 +70,9 @@
 {% block custom_foot_js %}
 <script>
     jQuery(document).ready(function(){
-        {% for host in  result.bound_asset.all %}
-            var host_id = '{{ host.id }}'
-            var name = '{{ host.hostname }}'
-            var app_id = '{{ result.id }}'
-            var app = '{{ result.app_name }}'
-            $.get("{% url 'api-devops:supervisor-status' %}", {'app_id': app_id, 'host_id': host_id}, function(data){
+
+        var dynamic_status = function(x){
+            $.get("{% url 'api-devops:supervisor-status' %}", {'app_id': x.app_id, 'host_id': x.host_id}, function(data){
                 console.log(data)
                 if(data.code == 200){
                     var html = "<li class='list-group-item'><b> pid:" + data.pid + " uptime:" + data.uptime + " status: " + data.status + "</b></li>"
@@ -80,6 +84,15 @@
                 }
 
             })
+        }
+
+        {% for host in  result.bound_asset.all %}
+
+            var x = new Array();
+            x['host_id'] = '{{ host.id }}'
+            x['app_id'] = '{{ result.id }}'
+
+            dynamic_status(x)
 
         {% endfor %}
     });
