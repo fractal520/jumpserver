@@ -37,7 +37,7 @@
                                         </div>
                                     </div>
                                     <div class="ibox-content">
-                                        <table>
+                                        <table class="table">
                                             <thead>
                                                 <th><b>PID</b></th>
                                                 <th><b>UPTIME</b></th>
@@ -80,6 +80,8 @@
 {% block custom_foot_js %}
 <script>
     jQuery(document).ready(function(){
+
+        $('.table').DataTable();
 
         var dynamic_status = function(x){
             $.get("{% url 'api-devops:supervisor-status' %}", {'app_id': x.app_id, 'host_id': x.host_id}, function(data){
