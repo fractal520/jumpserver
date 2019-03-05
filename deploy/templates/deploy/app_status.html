@@ -86,20 +86,22 @@
                 if(data.code == 200){
                     $("."+data.id).DataTable({
                         "processing": true,
+                        "data": data,
                         "columns": [
-                            {"data": data.pid},
-                            {"data": data.uptime},
-                            {"data": data.status}
+                            {"data": "pid"},
+                            {"data": "uptime"},
+                            {"data": "status"}
                         ]
                     });
                 }
                 else{
                     $("."+data.id).DataTable({
                         "processing": true,
+                        "data": data,
                         "columns": [
                             {"data": 0},
                             {"data": 0},
-                            {"data": data.error}
+                            {"data": "error"}
                         ]
                     });
                 }
