@@ -32,15 +32,20 @@ class CesiAPI(object):
 
     def get_tpl(self, url):
         req = self.request.Request(url=url, headers=self.header)
-        try:
-            res = self.request.urlopen(req)
-        except BaseException as error:
-            logger.error(error)
-            return False, error
-        res = res.read()
-        result = res.decode(encoding='utf-8')
-        logger.info(result)
-        return result
+        retry = 0
+        return_error = None
+        while retry <= 3:
+            try:
+                res = self.request.urlopen(req)
+                res = res.read()
+                result = res.decode(encoding='utf-8')
+                logger.info(result)
+                return result
+            except BaseException as error:
+                logger.error(error)
+                return_error = error
+                retry += 1
+        return False, return_error
 
     def get_nodes(self):
         cesi_nodes_url = "http://{}/api/v2/nodes/".format(cesi_url)

@@ -10,6 +10,10 @@ from perms.utils import AssetPermissionUtil
 from common.permissions import IsOrgAdminOrAppUser, IsValidUser
 from orgs.utils import set_to_root_org
 from devops.api.cesi import CesiAPI
+from  devops.utils import translate_timestamp
+from common.utils import get_logger
+
+logger = get_logger('jumpserver')
 
 
 class UserGrantedAssetsApi(ListAPIView):
@@ -64,23 +68,119 @@ class GetSupervisorStatusApi(RetrieveAPIView):
         cesi.login()
         result = cesi.get_process(node_name=asset.hostname, process_name=app.app_name)
         if not result[0]:
-            return Response({'code': 400, 'error': result[1], 'id': asset.id})
+            return Response(dict(data=[{
+                'code': 400, 'pid': 0, 'uptime': 0, 'status': result[1], 'id': asset.id, 'messages': ""
+            }]))
 
         data = eval(result, {'true': 0, 'false': 1})
         uptime = data['process']['uptime']
         if uptime == 0:
-            return Response({'code': 400, 'error': data['process']['spawnerr'], 'id': asset.id})
+            stop_time = None
+            error = data['process']['statename'] if data['process']['statename'] else data['process']['spawnerr']
+            if data['process']['stop']:
+                stop_time = translate_timestamp(data['process']['stop'])
+            return Response(dict(data=[{
+                'code': 400, 'pid': 0, 'uptime': 0, 'status': error, 'id': asset.id, 'messages': 'stop time: '+stop_time
+            }]))
+
         elif ':' in uptime:
-            uptime += ' hours'
+            uptime += ' '
         else:
             uptime += ' days'
 
-        data = {
-            'code': 200,
-            'pid': data['process']['pid'],
-            'uptime': uptime,
-            'status': data['process']['statename'],
-            'id': asset.id
-        }
+        data = [
+            {
+                'code': 200,
+                'pid': data['process']['pid'],
+                'uptime': uptime,
+                'status': data['process']['statename'],
+                'id': asset.id,
+                'messages': 'start time: '+translate_timestamp(data['process']['start'])
+            },
+        ]
+        logger.info(data)
+        return Response(dict(data=data))
 
-        return Response(data)
+
+class StartAppApi(RetrieveAPIView):
+
+    queryset = DeployList.objects.all()
+    permission_classes = (IsValidUser,)
+
+    @staticmethod
+    def start_app(hostname, app_name):
+        cesi = CesiAPI()
+        cesi.login()
+        return cesi.start_process(node_name=hostname, process_name=app_name)
+
+    def retrieve(self, request, *args, **kwargs):
+
+        asset = Asset.objects.get(id=request.GET.get('host_id'))
+        app = DeployList.objects.get(id=request.GET.get('app_id'))
+
+        result = StartAppApi.start_app(hostname=asset.hostname, app_name=app.app_name)
+        if not result[0]:
+            return Response(dict(code=400, message=result[1]))
+
+        result = eval(result, {'true': 0, 'false': 1})
+
+        if result['status'] == 'success':
+            return Response(dict(code=200, message=result['message']))
+        else:
+            return Response(dict(code=400, message=""))
+
+
+class StopAppApi(RetrieveAPIView):
+
+    queryset = DeployList.objects.all()
+    permission_classes = (IsValidUser,)
+
+    @staticmethod
+    def stop_app(hostname, app_name):
+        cesi = CesiAPI()
+        cesi.login()
+        return cesi.stop_process(node_name=hostname, process_name=app_name)
+
+    def retrieve(self, request, *args, **kwargs):
+
+        asset = Asset.objects.get(id=request.GET.get('host_id'))
+        app = DeployList.objects.get(id=request.GET.get('app_id'))
+
+        result = StopAppApi.stop_app(hostname=asset.hostname, app_name=app.app_name)
+        if not result[0]:
+            return Response(dict(code=400, message=result[1]))
+
+        result = eval(result, {'true': 0, 'false': 1})
+
+        if result['status'] == 'success':
+            return Response(dict(code=200, message=result['message']))
+        else:
+            return Response(dict(code=400, message=""))
+
+
+class ReStartAppApi(RetrieveAPIView):
+
+    queryset = DeployList.objects.all()
+    permission_classes = (IsValidUser,)
+
+    @staticmethod
+    def restart_app(hostname, app_name):
+        cesi = CesiAPI()
+        cesi.login()
+        return cesi.restart_process(node_name=hostname, process_name=app_name)
+
+    def retrieve(self, request, *args, **kwargs):
+
+        asset = Asset.objects.get(id=request.GET.get('host_id'))
+        app = DeployList.objects.get(id=request.GET.get('app_id'))
+
+        result = ReStartAppApi.restart_app(hostname=asset.hostname, app_name=app.app_name)
+        if not result[0]:
+            return Response(dict(code=400, message=result[1]))
+
+        result = eval(result, {'true': 0, 'false': 1})
+
+        if result['status'] == 'success':
+            return Response(dict(code=200, message=result['message']))
+        else:
+            return Response(dict(code=400, message=""))

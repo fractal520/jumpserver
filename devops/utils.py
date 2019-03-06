@@ -1,6 +1,7 @@
 # encoding: utf-8
 import os
 import json
+import time
 from django.conf import settings
 from common.utils import get_logger
 from ops.ansible.runner import get_default_options, PlayBookRunner
@@ -44,3 +45,10 @@ def create_playbook_task(asset, playbook_name=None, extra_vars=None):
         logger.debug(json.dumps(runner.variable_manager.get_vars()))
 
     return runner
+
+
+# 将timestamp转换成当地时间字符串格式
+def translate_timestamp(timestamp):
+
+    time_array = time.localtime(timestamp)
+    return time.strftime("%Y-%m-%d %H:%M:%S", time_array)
