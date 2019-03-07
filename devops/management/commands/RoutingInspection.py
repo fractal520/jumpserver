@@ -66,12 +66,13 @@ def genrate_routing_record(result):
         mb_use = facts.get('ansible_memory_mb').get('real').get('used')
         mb_free = facts.get('ansible_memory_mb').get('real').get('free')
         disk_dict = {}
-        for disk in facts.get('ansible_mounts'):
-            disk_device = disk.get('device')
-            disk_size_total = disk.get('size_total')
-            disk_size_avail = disk.get('size_available')
-            d_d = {disk_device: {'disk_size_total': disk_size_total, 'disk_size_avail': disk_size_avail}}
-            disk_dict.update(d_d)
+        if facts.get('ansible_mounts'):
+            for disk in facts.get('ansible_mounts'):
+                disk_device = disk.get('device')
+                disk_size_total = disk.get('size_total')
+                disk_size_avail = disk.get('size_available')
+                d_d = {disk_device: {'disk_size_total': disk_size_total, 'disk_size_avail': disk_size_avail}}
+                disk_dict.update(d_d)
         # print(mb_total)
         host_data = {'cpu_processor_count': cpu_processor_count, 'ansible_uptime_seconds': ansible_uptime_seconds,
                      'hostname': hostname, 'IP': IP, 'mb_total': mb_total, 'mb_use': mb_use, 'mb_free': mb_free,
@@ -122,6 +123,8 @@ class DataWriter(object):
             worksheet.write(line_count, 7, str(line_dict.get('mb_use')) + 'MB')
             worksheet.write(line_count, 8, str(line_dict.get('mb_free')) + 'MB')
             row = 9
+            if not line_dict.get('disk_dict'):
+                continue
             for key, value in line_dict.get('disk_dict').items():
                 try:
                     with suppress(BaseException):

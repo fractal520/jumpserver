@@ -21,7 +21,7 @@ logger = get_logger('jumpserver')
 
 @shared_task
 def modify_asset_root_password(asset, password):
-    task_name = ("Reset {} root password {}.".format(asset.hostname, password))
+    task_name = ("Reset {} deploy password {}.".format(asset.hostname, password))
     return modify_asset_root_password_util(asset, password, task_name)
 
 
@@ -32,10 +32,10 @@ def modify_asset_root_password_util(asset, password, task_name):
 
     tasks = [
         {
-            "name": "Reset asset root password",
+            "name": "Reset asset deploy password",
             "action": {
                 "module": "shell",
-                "args": "sudo echo root:{} | sudo chpasswd".format(password),
+                "args": "sudo echo deploy:{} | sudo chpasswd".format(password),
             }
         }
     ]
@@ -86,10 +86,10 @@ class PassManager(object):
                 password = self.generate_password(num=4, word=6)
                 result = modify_asset_root_password(asset, password)
                 if result[0]['ok']:
-                    logger.info("Reset {} {} root password successful.".format(asset.hostname, asset.ip))
+                    logger.info("Reset {} {} deploy password successful.".format(asset.hostname, asset.ip))
                 else:
                     logger.error(result)
-                row = [asset.hostname, 'root', password, asset.ip, 'new', 'root_wtsd_{}'.format(time.strftime("%Y%m%d"))]
+                row = [asset.hostname, 'deploy', password, asset.ip, 'new', 'deploy_wtsd_{}'.format(time.strftime("%Y%m%d"))]
                 writer.writerow(row)
 
 
@@ -107,10 +107,11 @@ class Command(BaseCommand):
         if not self.admin:
             return False
         if self.node:
-            assets = self.node.assets.filter(platform="Linux", admin_user=self.admin, model="PowerEdge R730")
+            assets = self.node.assets.filter(platform="Linux", admin_user=self.admin)
+            # assets = Asset.objects.filter(ip="10.10.40.23")
         else:
-            assets = Asset.objects.filter(platform="Linux", admin_user=self.admin, model="PowerEdge R730")
-            assets = assets.exclude(hostname__icontains='DB')
-            # assets = Asset.objects.filter(ip="192.168.0.127")
+            assets = Asset.objects.filter(platform="Linux", admin_user=self.admin)
+            # assets = assets.exclude(hostname__icontains='DB')
+            # assets = Asset.objects.filter(ip="10.10.40.23")
         pm = PassManager()
         pm.modify_password(assets)
