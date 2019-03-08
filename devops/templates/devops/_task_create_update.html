@@ -62,6 +62,7 @@
 
         </div>
 
+
         <div class="hr-line-dashed"></div>
 
         <h3>{% trans 'Ansible' %}</h3>
@@ -69,6 +70,17 @@
             <label class="col-md-2 control-label" for="id_ansible_role">{% trans 'Role Name' %}</label>
             <div class="col-md-9">
                 <select data-placeholder="请选择" id="id_ansible_role" name="ansible_role" class="select2 form-control"
+                        tabindex="4">
+
+                </select>
+            </div>
+        </div>
+
+        <h3>{% trans 'assets' %}</h3>
+        <div class="form-group">
+            <label class="col-md-2 control-label" for="id_assets">{% trans 'Assets' %}</label>
+            <div class="col-md-9">
+                <select multiple="multiple" data-placeholder="请选择" id="id_assets" name="assets" class="select2 form-control"
                         tabindex="4">
 
                 </select>
@@ -102,6 +114,19 @@
                     }
                 },
                 minimumResultsForSearch: Infinity //禁止输入
+            });
+            $('#id_assets').select2({
+                //ajax查询all assets
+                ajax: {
+                    url: '{% url 'api-assets:asset-list' %}',
+                    dataType: 'json',
+                    processResults: function (data) {
+                        let results = $(data).each(function (index, element) {
+                            element.text = element.hostname
+                        })
+                        return {results: results};//必须赋值给results并且必须返回一个obj
+                    }
+                },
             });
         });
     </script>

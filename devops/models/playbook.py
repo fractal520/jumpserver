@@ -9,6 +9,7 @@ from common.utils import get_signer, get_logger
 from ops.ansible.runner import get_default_options, PlayBookRunner
 from ops.inventory import JMSInventory
 from ops.ansible import AnsibleError
+from assets.models import Asset
 
 logger = get_logger(__file__)
 
@@ -43,6 +44,7 @@ class PlayBookTask(models.Model):
     playbook_path = models.CharField(max_length=1000, verbose_name=_('Playbook Path'), blank=True, null=True)
     is_running = models.BooleanField(default=False, verbose_name=_('Is running'))
     extra_vars = models.CharField(max_length=512, verbose_name=_('Extra Vars'), blank=True, null=True)
+    assets = models.ManyToManyField('assets.Asset', blank=True, verbose_name=_("Assets"))
     _hosts = models.TextField(blank=True, verbose_name=_('Hosts'))  # ['hostname1', 'hostname2']
 
     @property

@@ -21,7 +21,7 @@ class TaskSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = PlayBookTask
-        exclude = ('_hosts', )
+        fields = '__all__'
 
     @staticmethod
     def get_ansible_role_name(obj):

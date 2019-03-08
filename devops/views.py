@@ -5,7 +5,7 @@ import logging
 from django.contrib.auth.mixins import LoginRequiredMixin
 
 from django.utils.translation import ugettext as _
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView, CreateView
 from assets.models import *
 from .forms import *
 # Create your views here.
@@ -37,14 +37,15 @@ class PlayBookListView(LoginRequiredMixin, TemplateView):
         return super().get_context_data(**kwargs)
 
 
-class TaskCreateView(LoginRequiredMixin, TemplateView):
+class TaskCreateView(LoginRequiredMixin, CreateView):
+    model = PlayBookTask
     template_name = 'devops/task_create.html'
+    form_class = TaskForm
 
     def get_context_data(self, **kwargs):
         context = {
             'app': _('Devops'),
             'action': _('Create Task'),
-            'form': TaskForm,
         }
         kwargs.update(context)
         return super(TaskCreateView, self).get_context_data(**kwargs)
