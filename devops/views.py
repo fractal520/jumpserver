@@ -5,7 +5,7 @@ import logging
 from django.contrib.auth.mixins import LoginRequiredMixin
 
 from django.utils.translation import ugettext as _
-from django.views.generic import TemplateView, CreateView
+from django.views.generic import TemplateView, CreateView, DetailView
 from assets.models import *
 from .forms import *
 # Create your views here.

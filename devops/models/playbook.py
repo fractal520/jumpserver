@@ -63,8 +63,9 @@ class PlayBookTask(models.Model):
     # 使用JMSInventory构建inventory
     @property
     def inventory(self):
+        hostname_list = [asset.fullname for asset in self.assets.all()]
         return JMSInventory(
-            hostname_list=self.hosts,
+            hostname_list=hostname_list,
             run_as_admin=self.run_as_admin,
             run_as=self.run_as,
             become_info=None
@@ -104,6 +105,9 @@ class PlayBookTask(models.Model):
             logger.debug(json.dumps(runner.variable_manager.get_vars()))
         try:
             result = runner.run()
+            self.is_running = True
+            self.save()
+            logger.debug(result)
             return result
         except AnsibleError as e:
             logger.warn("Failed run playbook {}, {}".format(self.name, e))

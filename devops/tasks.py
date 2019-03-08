@@ -1,12 +1,13 @@
 #  encoding: utf-8
 import os
 import json
-from celery import shared_task
+from celery import shared_task, subtask
 from django.utils.translation import ugettext as _
 from django.conf import settings
-from common.utils import get_logger
+from common.utils import get_logger, get_object_or_none
 from devops.utils import create_playbook_task
-from . import const
+from devops import const
+from devops.models import PlayBookTask
 
 logger = get_logger('jumpserver')
 playbook_dir = os.path.join(settings.PROJECT_DIR, 'data', 'playbooks')
@@ -49,3 +50,20 @@ def execute_playbook(asset, playbook_name=None, extra_vars=None):
     result = runner.run()
     logger.debug(result)
     return result
+
+
+@shared_task
+def run_ansible_playbook(tid, callback=None, **kwargs):
+    """
+    :param tid: is the tasks serialized data
+    :param callback: callback function name
+    :return:
+    """
+    task = get_object_or_none(PlayBookTask, id=tid)
+    if task:
+        result = task.run()
+        if callback is not None:
+            subtask(callback).delay(result, task_name=task.name)
+        return result
+    else:
+        logger.error("No task found")

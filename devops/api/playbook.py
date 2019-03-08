@@ -1,7 +1,9 @@
-from rest_framework.generics import ListAPIView
+from rest_framework.generics import ListAPIView, RetrieveAPIView
 from rest_framework import viewsets, mixins
+from rest_framework.response import Response
 from devops.serializers import TaskReadSerializer, TaskSerializer, AnsibleRoleSerializer
 from devops.models import AnsibleRole, PlayBookTask
+from devops.tasks import run_ansible_playbook
 from common.permissions import IsOrgAdminOrAppUser, IsValidUser
 
 
@@ -41,3 +43,22 @@ class AnsibleRoleViewSet(viewsets.ModelViewSet):
     queryset = AnsibleRole.objects.all()
     serializer_class = AnsibleRoleSerializer
     permission_classes = (IsOrgAdminOrAppUser,)
+
+
+class TaskViewSet(viewsets.ModelViewSet):
+    queryset = PlayBookTask.objects.all()
+    serializer_class = TaskSerializer
+    permission_classes = (IsOrgAdminOrAppUser,)
+    label = None
+    help_text = ''
+
+
+class TaskRun(RetrieveAPIView):
+    queryset = PlayBookTask.objects.all()
+    serializer_class = TaskViewSet
+    permission_classes = (IsOrgAdminOrAppUser,)
+
+    def retrieve(self, request, *args, **kwargs):
+        task = self.get_object()
+        t = run_ansible_playbook.delay(str(task.id))
+        return Response({"task": t.id})

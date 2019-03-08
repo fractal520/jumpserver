@@ -43,7 +43,7 @@
                          * @param rowData  该条记录值
                          */
                         createdCell: function (td, cellData, rowData) {
-                            var detail_btn = '<a href="#">' + cellData + '</a>';
+                            var detail_btn = '<a href="{% url "devops:task-detail" pk=DEFAULT_PK %}">' + cellData + '</a>';
                             $(td).html(detail_btn.replace('{{ DEFAULT_PK }}', rowData.id));
                         }
                     },
@@ -88,6 +88,43 @@
                 let uid = $this.data('uid');
                 let the_url = '{% url "api-devops:task-opt-detail" pk=DEFAULT_PK %}'.replace('{{ DEFAULT_PK }}', uid);
                 objectDelete($this, name, the_url);
-            })
+            }).on('click', '.btn-task-exec', function () {
+            //执行任务
+            let $this = $(this);
+            let uid = $this.data('uid');
+            executeTask(uid);
+        });
+
+        function executeTask(id) {
+            layer.open({
+                type: 1,
+                title: '请确认执行'
+                , content: data, area: ['500px']
+                , btn: ['确认', '关闭']
+                , zIndex: 500
+                , btnAlign: 'c' //按钮居中
+                , shade: 0 //不显示遮罩
+                , yes: function () {
+
+                    var the_url = '{% url "api-devops:task-run" pk=DEFAULT_PK %}'.replace('{{ DEFAULT_PK }}', id);
+                    var success = function () {
+                        setTimeout(function () {
+                            console.log("ok")
+                        }, 1000);
+                        window.location = "{% url 'devops:play-task-list' %}";
+                    };
+                    APIUpdateAttr({
+                        url: the_url,
+                        method: 'GET',
+                        success_message: success_message,
+                        error: error,
+                        success: success
+                    });
+                    layer.closeAll();
+                }, no: function () {
+                    layer.closeAll();
+                }
+            });
+        }
     </script>
 {% endblock %}

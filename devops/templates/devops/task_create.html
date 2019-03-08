@@ -4,9 +4,9 @@
         $('#submit_btn').click(function () {
             let the_url = "{% url 'api-devops:task-opt-list' %}";
             let form = $('#form').serializeObject()
-            if (typeof(form.tags)==="string") {
-                let tag = form.tags;
-                form.tags = new Array(tag);
+            if (typeof(form.assets)==="string") {
+                let assets = form.assets;
+                form.assets = new Array(assets);
             }
             let success = function () {
                 location.href = "{% url 'devops:play-task-list' %}";

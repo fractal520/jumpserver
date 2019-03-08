@@ -15,6 +15,7 @@ urlpatterns = [
     path('supervisor/stop_app/', api.StopAppApi.as_view(), name='stop_app'),
     path('supervisor/restart_app/', api.ReStartAppApi.as_view(), name='restart_app'),
     path('playbook/task-list/', api.PlayBookTaskListViewApi.as_view(), name='task-list'),
+    path('tasks/<uuid:pk>/run/', api.TaskRun.as_view(), name='task-run'),
 ]
 
 urlpatterns += router.urls
