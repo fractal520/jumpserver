@@ -3,9 +3,10 @@ from __future__ import unicode_literals
 import logging
 
 from django.contrib.auth.mixins import LoginRequiredMixin
-
+from django.contrib.messages.views import SuccessMessageMixin
 from django.utils.translation import ugettext as _
-from django.views.generic import TemplateView, CreateView, DetailView
+from django.views.generic import TemplateView, CreateView, UpdateView
+from django.urls import reverse_lazy
 from assets.models import *
 from .forms import *
 # Create your views here.
@@ -49,3 +50,18 @@ class TaskCreateView(LoginRequiredMixin, CreateView):
         }
         kwargs.update(context)
         return super(TaskCreateView, self).get_context_data(**kwargs)
+
+
+class TaskUpdateView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
+    model = PlayBookTask
+    template_name = 'devops/task_update.html'
+    form_class = TaskUpdateForm
+    success_url = reverse_lazy('deploy:deploy_list')
+
+    def get_context_data(self, **kwargs):
+        context = {
+            'app': _('Devops'),
+            'action': _('Update Task'),
+        }
+        kwargs.update(context)
+        return super(TaskUpdateView, self).get_context_data(**kwargs)
