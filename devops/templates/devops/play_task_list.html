@@ -29,6 +29,8 @@
 
 
 {% block custom_foot_js %}
+
+    <script src="{% static "js/plugins/layer/layer.js" %}"></script>
     <script>
         $(document).ready(function () {
             let options = {
@@ -43,7 +45,7 @@
                          * @param rowData  该条记录值
                          */
                         createdCell: function (td, cellData, rowData) {
-                            var detail_btn = '<a href="{% url "devops:task-detail" pk=DEFAULT_PK %}">' + cellData + '</a>';
+                            var detail_btn = '<a href="#">' + cellData + '</a>';
                             $(td).html(detail_btn.replace('{{ DEFAULT_PK }}', rowData.id));
                         }
                     },
@@ -96,10 +98,12 @@
         });
 
         function executeTask(id) {
+            let success_message = "正在执行中。。。"
+            let error = "未知错误"
             layer.open({
                 type: 1,
                 title: '请确认执行'
-                , content: data, area: ['500px']
+                , area: ['500px']
                 , btn: ['确认', '关闭']
                 , zIndex: 500
                 , btnAlign: 'c' //按钮居中

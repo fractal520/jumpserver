@@ -76,7 +76,7 @@ class PlayBookTask(models.Model):
         return self.id.hex
 
     def create_playbook(self, ansible_role):
-        self.playbook_path = os.path.join(playbook_dir, self.hex_id)
+        self.playbook_path = os.path.join(playbook_dir, self.hex_id, '.yml')
         yml_tpl = [{'hosts': 'all', 'roles': [{'role': ansible_role.name}]}]
         with open(self.playbook_path, 'wt') as fhandler:
             yaml.dump(yml_tpl, fhandler)

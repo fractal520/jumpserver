@@ -60,5 +60,5 @@ class TaskRun(RetrieveAPIView):
 
     def retrieve(self, request, *args, **kwargs):
         task = self.get_object()
-        t = run_ansible_playbook.delay(str(task.id))
-        return Response({"task": t.id})
+        t = run_ansible_playbook(str(task.id))
+        return Response(dict(code=200, msg=str(t)))
