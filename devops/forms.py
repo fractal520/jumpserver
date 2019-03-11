@@ -26,16 +26,12 @@ class TaskForm(forms.ModelForm):
 class TaskUpdateForm(OrgModelForm):
     class Meta:
         model = PlayBookTask
-        fields = ['name', 'desc', 'ansible_role', 'run_as_admin', 'run_as', 'extra_vars', 'assets']
+        fields = ['name', 'desc', 'run_as_admin', 'extra_vars', 'assets']
         widgets = {
             'assets': forms.SelectMultiple(attrs={
                 'class': 'select2', 'data-placeholder': _('assets')
-            }),
-            'ansible_role': forms.Select(attrs={
-                'class': 'select2', 'data-placeholder': _('ansible_role')
             })
         }
         labels = {}
         help_texts = {
-            'ansible_role': '* 不要随便修改',
         }

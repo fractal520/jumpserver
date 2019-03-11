@@ -56,7 +56,7 @@ class TaskUpdateView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
     model = PlayBookTask
     template_name = 'devops/task_update.html'
     form_class = TaskUpdateForm
-    success_url = reverse_lazy('deploy:deploy_list')
+    success_url = reverse_lazy('devops:play-task-list')
 
     def get_context_data(self, **kwargs):
         context = {

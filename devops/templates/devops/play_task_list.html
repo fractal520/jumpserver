@@ -45,7 +45,7 @@
                          * @param rowData  该条记录值
                          */
                         createdCell: function (td, cellData, rowData) {
-                            var detail_btn = '<a href="#">' + cellData + '</a>';
+                            var detail_btn = '<a href="javascript:void(0)" class="btn-detail">' + cellData + '</a>';
                             $(td).html(detail_btn.replace('{{ DEFAULT_PK }}', rowData.id));
                         }
                     },
