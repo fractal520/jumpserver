@@ -11,7 +11,7 @@ from django.urls import reverse_lazy
 from assets.models import *
 from common.permissions import SuperUserRequiredMixin
 from .forms import *
-from devops.models import PlayBookTask
+from devops.models import PlayBookTask, TaskHistory
 # Create your views here.
 
 logger = logging.getLogger(__name__)
@@ -91,6 +91,19 @@ class TaskDetailView(SuperUserRequiredMixin, DetailView):
         context = {
             'app': _('devops'),
             'action': _('Play task detail'),
+        }
+        kwargs.update(context)
+        return super().get_context_data(**kwargs)
+
+
+class TaskHistoryView(SuperUserRequiredMixin, DetailView):
+    model = TaskHistory
+    template_name = 'devops/task_history.html'
+
+    def get_context_data(self, **kwargs):
+        context = {
+            'app': _('Ops'),
+            'action': _('Task run history'),
         }
         kwargs.update(context)
         return super().get_context_data(**kwargs)

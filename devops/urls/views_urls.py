@@ -11,4 +11,5 @@ urlpatterns = [
     path('play-task/<uuid:pk>/update', views.TaskUpdateView.as_view(), name='task-update'),
     path('play-task/<uuid:pk>/clone', views.TaskCloneView.as_view(), name='task-clone'),
     path('play-task/<uuid:pk>/', views.TaskDetailView.as_view(), name='task-detail'),
+    path('play-task/<uuid:pk>/history', views.TaskHistoryView.as_view(), name='task-history'),
 ]
