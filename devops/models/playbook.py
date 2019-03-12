@@ -89,7 +89,8 @@ class PlayBookTask(models.Model):
     def _run_only(self):
         options = self.options
 
-        self.create_playbook(self.ansible_role)
+        if not self.playbook_path:
+            self.create_playbook(self.ansible_role)
 
         # 判断playbook是否存在
         if not os.path.exists(self.playbook_path) or not os.path.isfile(self.playbook_path):

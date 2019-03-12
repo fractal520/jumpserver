@@ -1,11 +1,12 @@
 from __future__ import unicode_literals
 
 import logging
+import uuid
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
 from django.utils.translation import ugettext as _
-from django.views.generic import TemplateView, CreateView, UpdateView
+from django.views.generic import TemplateView, CreateView, UpdateView, RedirectView
 from django.urls import reverse_lazy
 from assets.models import *
 from .forms import *
@@ -65,3 +66,16 @@ class TaskUpdateView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
         }
         kwargs.update(context)
         return super(TaskUpdateView, self).get_context_data(**kwargs)
+
+
+class TaskCloneView(LoginRequiredMixin, RedirectView):
+    url = reverse_lazy('devops:play-task-list')
+
+    def get(self, request, *args, **kwargs):
+        #: 克隆一个变量组
+        old_task = PlayBookTask.objects.get(id=kwargs['pk'])
+        new_task = PlayBookTask(name=old_task.name + "-copy-" + uuid.uuid4().hex, desc=old_task.desc + "-copy",
+                                ansible_role_id=old_task.ansible_role_id)
+        new_task.save()
+        new_task.create_playbook(new_task.ansible_role)
+        return super(TaskCloneView, self).get(request, *args, **kwargs)

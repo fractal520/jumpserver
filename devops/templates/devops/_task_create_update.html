@@ -48,7 +48,7 @@
             <div class="col-md-9">
                 <input placeholder="请选择Ansible Role 压缩文件" readonly class="form-control" type="text"
                        id="fileName" style="width: 73%;display: inline-block">
-                <div id="picker" class="btn btn-primary float-right disabled" style="width: 13%;">{% trans 'Select Zip' %}
+                <div id="picker" class="btn btn-primary float-right" style="width: 13%;">{% trans 'Select Zip' %}
                 </div>
                 <button class="btn btn-primary float-right disabled" type="button" style="width: 13%;"
                         id="file_install_btn">{% trans 'install' %}</button>
@@ -143,6 +143,79 @@
                     }
                 },
             });
+
+            var uploader = WebUploader.create({
+                // 文件接收服务端。
+                server: "{% url 'api-devops:role-zip-install' %}",
+
+                // 内部根据当前运行是创建，可能是input元素，也可能是flash.
+                pick: {
+                    id: '#picker',
+                    multiple: false
+                },
+
+                // 不压缩image, 默认如果是jpeg，文件上传前会压缩一把再上传！
+                resize: false,
+                accept: {
+                    title: 'Zip',
+                    extensions: 'zip,gz',
+                    mimeTypes: 'application/zip'
+                },
+                formData: {"csrfmiddlewaretoken": $("input[name='csrfmiddlewaretoken']").val()},  //额外的表单参数
+                fileVal: "file_data"
+            });
+
+
+            uploader.on('beforeFileQueued', function (file) {
+                if (file.ext === "zip" || file.ext === "gz") {
+                    uploader.reset()
+                }
+            });
+            // 当有文件被添加进队列的时候 显示文件名
+            uploader.on('fileQueued', function (file) {
+                $("#fileName").val(file.name);
+            });
+            uploader.on('uploadStart', function (file) {
+                file.name = file.name.replaceAll("." + file.ext, "")
+            });
+            uploader.on('uploadSuccess', function (file) {
+                toastr.info("安装" + file.name.substr(0, file.name.lastIndexOf(".")) + "成功");
+                uploader.reset();
+                $("#fileName").val("");
+            });
+            uploader.on('uploadError', function (file, reson) {
+                file.setStatus("inited")
+                toastr.error("安装失败，请稍后再试。");
+            });
+            uploader.on('uploadProgress', function (file, percentage) {
+                $(".progress").show()
+                $(".progress-bar").css("width", percentage * 100 + "%")
+                if (percentage === 1) {
+                    setTimeout(function () {
+                        $(".progress").hide()
+                    }, 1000)
+                }
+            });
+            $("#file_install_btn").click(function () {
+                uploader.upload()
+            })
+
+            $('#role_install_btn').click(function () {
+                toastr.info("安装中，请稍候。。。")
+                let the_url = "{% url 'api-devops:role-install' %}";
+                const name = $('#id_role_install').val();
+                APIUpdateAttr({
+                    url: the_url,
+                    method: 'POST',
+                    success_message: "安装" + name + "成功",
+                    fail_message: "安装" + name + "失败,请检查输入或查看任务详情。",
+                    body: JSON.stringify({name: name})
+                })
+            });
+
+
+
+
         });
     </script>
     {% block custom_create_update_js %}

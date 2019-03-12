@@ -67,3 +67,13 @@ def run_ansible_playbook(tid, callback=None, **kwargs):
         return result
     else:
         logger.error("No task found")
+
+
+def reset_task_playbook_path(tid):
+    task = get_object_or_none(PlayBookTask, id=tid)
+    result = task.create_playbook(task.ansible_role)
+    if result:
+        return True
+    else:
+        logger.error('Reset playbook path failed!')
+        return False
