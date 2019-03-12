@@ -50,7 +50,7 @@
                        id="fileName" style="width: 73%;display: inline-block">
                 <div id="picker" class="btn btn-primary float-right" style="width: 13%;">{% trans 'Select Zip' %}
                 </div>
-                <button class="btn btn-primary float-right disabled" type="button" style="width: 13%;"
+                <button class="btn btn-primary float-right" type="button" style="width: 13%;"
                         id="file_install_btn">{% trans 'install' %}</button>
                 <div class="progress progress-striped active" style="width: 100%;display: none">
                     <div class="progress-bar" role="progressbar"
@@ -202,7 +202,7 @@
 
             $('#role_install_btn').click(function () {
                 toastr.info("安装中，请稍候。。。")
-                let the_url = "{% url 'api-devops:role-install' %}";
+                let the_url = "#";
                 const name = $('#id_role_install').val();
                 APIUpdateAttr({
                     url: the_url,

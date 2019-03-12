@@ -6,10 +6,12 @@ import uuid
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
 from django.utils.translation import ugettext as _
-from django.views.generic import TemplateView, CreateView, UpdateView, RedirectView
+from django.views.generic import TemplateView, CreateView, UpdateView, RedirectView, DetailView
 from django.urls import reverse_lazy
 from assets.models import *
+from common.permissions import SuperUserRequiredMixin
 from .forms import *
+from devops.models import PlayBookTask
 # Create your views here.
 
 logger = logging.getLogger(__name__)
@@ -68,7 +70,7 @@ class TaskUpdateView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
         return super(TaskUpdateView, self).get_context_data(**kwargs)
 
 
-class TaskCloneView(LoginRequiredMixin, RedirectView):
+class TaskCloneView(SuperUserRequiredMixin, RedirectView):
     url = reverse_lazy('devops:play-task-list')
 
     def get(self, request, *args, **kwargs):
@@ -79,3 +81,16 @@ class TaskCloneView(LoginRequiredMixin, RedirectView):
         new_task.save()
         new_task.create_playbook(new_task.ansible_role)
         return super(TaskCloneView, self).get(request, *args, **kwargs)
+
+
+class TaskDetailView(SuperUserRequiredMixin, DetailView):
+    model = PlayBookTask
+    template_name = 'devops/task_detail.html'
+
+    def get_context_data(self, **kwargs):
+        context = {
+            'app': _('devops'),
+            'action': _('Play task detail'),
+        }
+        kwargs.update(context)
+        return super().get_context_data(**kwargs)

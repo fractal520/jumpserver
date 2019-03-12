@@ -9,6 +9,7 @@ from common.utils import get_signer, get_logger
 from ops.ansible.runner import get_default_options, PlayBookRunner
 from ops.inventory import JMSInventory
 from ops.ansible import AnsibleError
+from ops.models import AdHocRunHistory
 from assets.models import Asset
 
 logger = get_logger(__file__)
@@ -83,10 +84,24 @@ class PlayBookTask(models.Model):
         self.save()
         return True
 
+    def record(self, result="", error=None):
+        print(result)
+        print(error)
+        if result and not error:
+            history = TaskHistory.objects.create(task=self, exec_result='success', result_info=json.dumps(result))
+            logger.info("创建{}历史记录成功".format(history.id))
+        elif error and result:
+            history = TaskHistory.objects.create(task=self, exec_result='failed', result_info=result)
+            logger.error("创建{}错误历史记录成功".format(history.id))
+
     def run(self):
         return self._run_only()
 
     def _run_only(self):
+
+        self.is_running = True
+        self.save()
+
         options = self.options
 
         if not self.playbook_path:
@@ -106,10 +121,41 @@ class PlayBookTask(models.Model):
             logger.debug(json.dumps(runner.variable_manager.get_vars()))
         try:
             result = runner.run()
-            self.is_running = True
-            self.save()
             logger.debug(result)
+            self.record(result)
+            self.is_running = False
+            self.save()
             return result
         except AnsibleError as e:
+            self.record(error=True, result=str(e))
+            self.is_running = False
+            self.save()
             logger.warn("Failed run playbook {}, {}".format(self.name, e))
             pass
+
+
+class TaskHistory(models.Model):
+
+    id = models.UUIDField(uuid.uuid4, primary_key=True)
+    task = models.ForeignKey(PlayBookTask, verbose_name="Task", on_delete=models.CASCADE)
+    exe_result = models.CharField(max_length=10, choices=(
+        ('success', '执行成功'), ('failed', '执行失败'), ('warning', '异常执行'),
+        ('unrun', '未执行'), ('running', '正在执行')), default='unrun', verbose_name="任务状态")
+    result_info = models.TextField(null=True, blank=True, verbose_name="任务结果详情")
+    create_time = models.DateTimeField(auto_now_add=True)
+    _hosts = models.TextField(null=True, blank=True, verbose_name=_('Hosts'))  # ['hostname1': {}, 'hostname2': {}]
+
+    @property
+    def hosts(self):
+        return json.loads(self._hosts)
+
+    @hosts.setter
+    def hosts(self, item):
+        self._hosts = json.dumps(item)
+
+    class Meta:
+        verbose_name = '任务历史'
+        verbose_name_plural = verbose_name
+
+    def __str__(self):
+        return '{}(执行时间{})'.format(self.task.name, self.create_time)

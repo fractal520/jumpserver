@@ -17,8 +17,7 @@
         <tr>
             <th class="text-center">{% trans 'Id' %}</th>
             <th class="text-center">{% trans 'Name' %}</th>
-            <th class="text-center">{% trans 'Description' %}</th>
-            <th class="text-center">{% trans 'Running' %}</th>
+            <th class="text-center">{% trans 'Descrption' %}</th>
             <th class="text-center">{% trans 'Ansible Role' %}</th>
             <th class="text-center">{% trans 'Action' %}</th>
         </tr>
@@ -70,12 +69,12 @@
                          * @param rowData  该条记录值
                          */
                         createdCell: function (td, cellData, rowData) {
-                            var detail_btn = '<a href="javascript:void(0)" class="btn-detail" data-uid="99991937" data-name="99991938">'.replace('99991937', rowData.id).replace('99991938', rowData.name) + cellData + '</a>';
+                            var detail_btn = '<a href="{% url "devops:task-detail" pk=DEFAULT_PK %}" class="btn-detail" data-uid="99991937" data-name="99991938">'.replace('99991937', rowData.id).replace('99991938', rowData.name) + cellData + '</a>';
                             $(td).html(detail_btn.replace('{{ DEFAULT_PK }}', rowData.id));
                         }
                     },
                     {
-                        targets: 5,
+                        targets: 4,
                         createdCell: function (td, cellData, rowData) {
                             let update_btn;
                             let clone_btn;
@@ -98,7 +97,7 @@
                         }
                     }
                 ],
-                columns: [{data: 'id'}, {data: "name"}, {data: "desc"}, {data: "is_running"}, {data: "ansible_role_name"}, {data: 'id'}],
+                columns: [{data: 'id'}, {data: "name"}, {data: "desc"}, {data: "ansible_role_name"}, {data: 'id'}],
                 ajax_url: '{% url "api-devops:task-list" %}'
             }
             var TaskTable = jumpserver.initDataTable(options);
@@ -126,7 +125,7 @@
             //task详情
             let $this = $(this);
             let uid = $this.data('uid');
-            TaskDetail(uid);
+            //TaskDetail(uid);
         });
 
         function TaskDetail(uid){
@@ -197,10 +196,12 @@
         function executeTask(id) {
             let success_message = "正在执行中。。。"
             let error = "未知错误"
+            let data = "请确认是否执行以及你十分清楚这个task执行后的结果!"
+
             layer.open({
                 type: 1,
                 title: '请确认执行'
-                , content: id, area: ['500px']
+                , content: data, area: ['500px']
                 , btn: ['确认', '关闭']
                 , zIndex: 500
                 , btnAlign: 'c' //按钮居中
