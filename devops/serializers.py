@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import PlayBookTask, AnsibleRole
+from .models import PlayBookTask, AnsibleRole, TaskHistory
 
 
 class TaskReadSerializer(serializers.ModelSerializer):
@@ -31,4 +31,10 @@ class TaskSerializer(serializers.ModelSerializer):
 class AnsibleRoleSerializer(serializers.ModelSerializer):
     class Meta:
         model = AnsibleRole
+        fields = '__all__'
+
+
+class TaskHistorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TaskHistory
         fields = '__all__'

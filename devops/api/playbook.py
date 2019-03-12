@@ -7,8 +7,10 @@ from rest_framework.response import Response
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 from django.conf import settings
-from devops.serializers import TaskReadSerializer, TaskSerializer, AnsibleRoleSerializer
-from devops.models import AnsibleRole, PlayBookTask
+from django.shortcuts import get_object_or_404
+
+from devops.serializers import TaskReadSerializer, TaskSerializer, AnsibleRoleSerializer, TaskHistorySerializer
+from devops.models import AnsibleRole, PlayBookTask, TaskHistory
 from devops.tasks import run_ansible_playbook, reset_task_playbook_path
 from common.permissions import IsOrgAdminOrAppUser, IsValidUser
 
@@ -115,3 +117,17 @@ class InstallZipRoleView(CreateAPIView):
         headers = self.get_success_headers(serializer.data)
         #: 返回
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+
+class AdHocRunHistorySet(viewsets.ModelViewSet):
+    queryset = TaskHistory.objects.all()
+    serializer_class = TaskHistorySerializer
+    permission_classes = (IsOrgAdminOrAppUser,)
+
+    def get_queryset(self):
+        task_id = self.request.query_params.get('task')
+        if task_id:
+            task = PlayBookTask.objects.filter(id=task_id)
+            self.queryset = self.queryset.filter(adhoc__in=task)
+
+        return self.queryset

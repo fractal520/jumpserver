@@ -14,7 +14,7 @@ from assets.models import Asset
 
 logger = get_logger(__file__)
 
-__all__ = ["AnsibleRole", "PlayBookTask"]
+__all__ = ["AnsibleRole", "PlayBookTask", "TaskHistory"]
 
 playbook_dir = os.path.join(settings.PROJECT_DIR, 'data', 'playbooks')
 
@@ -87,11 +87,12 @@ class PlayBookTask(models.Model):
     def record(self, result="", error=None):
         print(result)
         print(error)
+        hid = str(uuid.uuid4())
         if result and not error:
-            history = TaskHistory.objects.create(task=self, exec_result='success', result_info=json.dumps(result))
+            history = TaskHistory.objects.create(id=hid, task=self, exe_result='success', result_info=json.dumps(result))
             logger.info("创建{}历史记录成功".format(history.id))
         elif error and result:
-            history = TaskHistory.objects.create(task=self, exec_result='failed', result_info=result)
+            history = TaskHistory.objects.create(id=hid, task=self, exe_result='failed', result_info=result)
             logger.error("创建{}错误历史记录成功".format(history.id))
 
     def run(self):
@@ -132,6 +133,9 @@ class PlayBookTask(models.Model):
             self.save()
             logger.warn("Failed run playbook {}, {}".format(self.name, e))
             pass
+
+    def __str__(self):
+        return self.name
 
 
 class TaskHistory(models.Model):

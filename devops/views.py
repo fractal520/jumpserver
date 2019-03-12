@@ -97,7 +97,7 @@ class TaskDetailView(SuperUserRequiredMixin, DetailView):
 
 
 class TaskHistoryView(SuperUserRequiredMixin, DetailView):
-    model = TaskHistory
+    model = PlayBookTask
     template_name = 'devops/task_history.html'
 
     def get_context_data(self, **kwargs):
