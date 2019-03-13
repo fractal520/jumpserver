@@ -39,7 +39,7 @@ def create_playbook_task(
 
     PlayBookTask.objects.update_or_create(name=task_name, defaults=defaults)
     task = PlayBookTask.objects.get(name=task_name)
-    task.assets = assets
+    task.assets.set(assets)
     task.save()
 
     return task

@@ -9,6 +9,7 @@ from django.utils import timezone
 from django.conf import settings
 from django.utils.translation import ugettext as _
 
+from assets.models import Asset
 from common.utils import get_logger
 from devops.utils import create_playbook_task
 from devops.models import AnsibleRole
@@ -243,11 +244,13 @@ def push_app_startup_config_file(asset, app_name):
     except BaseException as error:
         logger.error(error)
         return False
-
+    assets = Asset.objects.filter(hostname=asset.hostname)
     return create_playbook_task(
-        assets=asset,
+        assets=assets,
         task_name="push_app_startup_config_file",
         extra_vars={'APP_NAME': app_name},
         description="push_{}_startup_config_file to {}".format(app_name, asset.hostname),
-        ansible_role=ansible_role
+        ansible_role=ansible_role,
+        run_as_admin=True,
+        run_as=""
     )

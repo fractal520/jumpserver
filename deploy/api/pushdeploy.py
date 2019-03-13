@@ -61,8 +61,12 @@ def deploy_file_to_asset(request):
     if not check_result[0]['ok']:
         logger.info("应用启动文件不存在，需要推送应用启动文件")
         task = push_app_startup_config_file(asset, app_name)
-        if task:
-            task.run()
+        try:
+            if task:
+                task.run()
+        except BaseException as error:
+            logger.error(error)
+            return JsonResponse(dict(code=400, error=error))
 
     logger.info('全量打包')
     pack_result = pack_up_deploy_file(app_name, only_jar=False)
