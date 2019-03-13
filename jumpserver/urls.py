@@ -80,7 +80,7 @@ app_view_patterns = [
     path('orgs/', include('orgs.urls.views_urls', namespace='orgs')),
     path('extra_app/deploy/', include('deploy.urls.views_urls', namespace='deploy')),
     path('extra_app/dreport/', include('dreport.urls.views_urls', namespace='dreport')),
-    path('extra_app/devops/', include('devops.urls.views_urls', namespace='devops')),
+    path('extra_app/', include('devops.urls.views_urls', namespace='devops')),
 ]
 
 if settings.XPACK_ENABLED:
