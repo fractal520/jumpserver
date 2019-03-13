@@ -12,7 +12,7 @@ def create_playbook_task(
         assets,
         task_name="",
         extra_vars=None,
-        created_by=None,
+        created_by="System",
         description="",
         ansible_role=None,
         run_as_admin=False,
@@ -39,7 +39,7 @@ def create_playbook_task(
 
     PlayBookTask.objects.update_or_create(name=task_name, defaults=defaults)
     task = PlayBookTask.objects.get(name=task_name)
-    task.hosts = assets
+    task.assets = assets
     task.save()
 
     return task

@@ -1,16 +1,15 @@
 # encoding: utf-8
 
-from django.db import transaction
-from rest_framework import generics
-from rest_framework.response import Response
 from django.utils import timezone
 from django.core import serializers
+
 from ..models import DeployList, DeployVersion, add_version_list, turn_build_file_to_deploy, DeployRecord
 from assets.models import AdminUser, Asset
 from common.utils import get_logger
 from django.http import JsonResponse, HttpResponse
 from django.core.exceptions import ObjectDoesNotExist
-from ..tasks import test_ansible_ping, push_build_file_to_asset_manual, backup_asset_app_file
+from deploy.tasks import test_ansible_ping, push_build_file_to_asset_manual, \
+    backup_asset_app_file, check_asset_file_exist, push_app_startup_config_file
 from ..util import pack_up_deploy_file
 
 
@@ -46,8 +45,7 @@ def deploy_file_to_asset(request):
     # backup old version on remote host and return result
     backup_result = backup_asset_app_file(asset, app_name)
     if not backup_result:
-        print(backup_result)
-        pass
+        logger.info(backup_result)
 
     # rename build file and return result
     if not turn_build_file_to_deploy(app_name):
@@ -55,11 +53,17 @@ def deploy_file_to_asset(request):
         return JsonResponse(dict(code=400, error='file not found!'))
 
     # check remote host is already have target APP
-    # check_result = check_asset_file_exist(asset, app_name)
+    check_result = check_asset_file_exist(asset, app_name)
     # if check_result[0]['ok']:
     #     logger.info('增量打包')
     #     pack_result = pack_up_deploy_file(app_name)
     # else:
+    if not check_result[0]['ok']:
+        logger.info("应用启动文件不存在，需要推送应用启动文件")
+        task = push_app_startup_config_file(asset, app_name)
+        if task:
+            task.run()
+
     logger.info('全量打包')
     pack_result = pack_up_deploy_file(app_name, only_jar=False)
 
