@@ -8,7 +8,7 @@ router = routers.DefaultRouter()
 router.register('tasks-opt', api.TaskOperationViewSet, 'task-opt')
 router.register('roles', api.AnsibleRoleViewSet, 'role')
 router.register('task', api.TaskViewSet, 'task')
-router.register('history', api.AdHocRunHistorySet, 'history')
+router.register('history', api.TaskHistorySet, 'history')
 
 urlpatterns = [
     path('assets/', api.UserGrantedAssetsApi.as_view(), name='my-assets'),

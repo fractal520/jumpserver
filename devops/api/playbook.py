@@ -17,6 +17,7 @@ from common.permissions import IsOrgAdminOrAppUser, IsValidUser
 
 class PlayBookTaskListViewApi(ListAPIView):
     queryset = PlayBookTask.objects.all()
+    queryset = queryset.filter
     permission_classes = (IsValidUser, )
     serializer_class = TaskReadSerializer
 
@@ -119,7 +120,7 @@ class InstallZipRoleView(CreateAPIView):
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
 
-class AdHocRunHistorySet(viewsets.ModelViewSet):
+class TaskHistorySet(viewsets.ModelViewSet):
     queryset = TaskHistory.objects.all()
     serializer_class = TaskHistorySerializer
     permission_classes = (IsOrgAdminOrAppUser,)
@@ -128,6 +129,6 @@ class AdHocRunHistorySet(viewsets.ModelViewSet):
         task_id = self.request.query_params.get('task')
         if task_id:
             task = PlayBookTask.objects.filter(id=task_id)
-            self.queryset = self.queryset.filter(adhoc__in=task)
+            self.queryset = self.queryset.filter(task__in=task)
 
         return self.queryset

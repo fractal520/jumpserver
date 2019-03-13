@@ -67,6 +67,8 @@
         </div>
     </div>
 {% endblock %}
+
+{% block custom_foot_js %}
 <script>
     function initTable() {
         var options = {
@@ -79,6 +81,8 @@
         };
         jumpserver.initDataTable(options);
     }
+    $(document).ready(function () {
+        initTable();
+    });
 </script>
-{% block custom_foot_js %}
 {% endblock %}

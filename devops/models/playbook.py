@@ -9,12 +9,10 @@ from common.utils import get_signer, get_logger
 from ops.ansible.runner import get_default_options, PlayBookRunner
 from ops.inventory import JMSInventory
 from ops.ansible import AnsibleError
-from ops.models import AdHocRunHistory
-from assets.models import Asset
+
 
 logger = get_logger(__file__)
 
-__all__ = ["AnsibleRole", "PlayBookTask", "TaskHistory"]
 
 playbook_dir = os.path.join(settings.PROJECT_DIR, 'data', 'playbooks')
 
@@ -89,10 +87,22 @@ class PlayBookTask(models.Model):
         print(error)
         hid = str(uuid.uuid4())
         if result and not error:
-            history = TaskHistory.objects.create(id=hid, task=self, exe_result='success', result_info=json.dumps(result))
+            history = TaskHistory.objects.create(
+                id=hid,
+                task=self,
+                exe_result='success',
+                result_info=json.dumps(result),
+                result_summary=json.dumps(result.get('stats'))
+            )
             logger.info("创建{}历史记录成功".format(history.id))
         elif error and result:
-            history = TaskHistory.objects.create(id=hid, task=self, exe_result='failed', result_info=result)
+            history = TaskHistory.objects.create(
+                id=hid,
+                task=self,
+                exe_result='failed',
+                result_info=result,
+                result_summary=json.dumps(result.get('stats'))
+            )
             logger.error("创建{}错误历史记录成功".format(history.id))
 
     def run(self):
@@ -146,6 +156,7 @@ class TaskHistory(models.Model):
         ('success', '执行成功'), ('failed', '执行失败'), ('warning', '异常执行'),
         ('unrun', '未执行'), ('running', '正在执行')), default='unrun', verbose_name="任务状态")
     result_info = models.TextField(null=True, blank=True, verbose_name="任务结果详情")
+    result_summary = models.TextField(null=True, blank=True, verbose_name="任务结果简要")
     create_time = models.DateTimeField(auto_now_add=True)
     _hosts = models.TextField(null=True, blank=True, verbose_name=_('Hosts'))  # ['hostname1': {}, 'hostname2': {}]
 

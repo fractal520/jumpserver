@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import PlayBookTask, AnsibleRole, TaskHistory
+from devops.models import PlayBookTask, AnsibleRole, TaskHistory
 
 
 class TaskReadSerializer(serializers.ModelSerializer):
