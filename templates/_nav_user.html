@@ -19,7 +19,7 @@
         <span class="nav-label">{% trans 'File manager' %}</span>
     </a>
 </li>
-<li id="devops">
+<li id="extra_app">
     <a>
         <i class="fa fa-cloud" style="width: 14px"></i> <span class="nav-label">运维自动化</span><span class="fa arrow"></span>
     </a>
@@ -27,6 +27,6 @@
         <li id="deploy"><a href="{% url 'deploy:deploy_list' %}" id="deploy-list">自动发布</a></li>
     </ul>
     <ul class="nav nav-second-level">
-        <li id="dev_ops"><a href="{% url 'devops:index' %}">资产应用对应表</a></li>
+        <li id="app-form"><a href="{% url 'devops:app-form' %}">资产应用对应表</a></li>
     </ul>
 </li>

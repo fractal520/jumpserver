@@ -69,7 +69,7 @@
 </li>
 {% endif %}
 
-<li id="devops">
+<li id="extra_app">
     <a>
         <i class="fa fa-cloud" style="width: 14px"></i> <span class="nav-label">运维自动化</span><span class="fa arrow"></span>
     </a>
@@ -80,7 +80,10 @@
         <li id="dreport"><a href="{% url 'dreport:CityView' %}" id="CityView">设备网络运行状况</a></li>
     </ul>
     <ul class="nav nav-second-level">
-        <li id="dev_ops"><a href="{% url 'devops:index' %}">资产应用对应表</a></li>
+        <li id="app-form"><a href="{% url 'devops:app-form' %}">资产应用对应表</a></li>
+    </ul>
+    <ul class="nav nav-second-level">
+        <li id="play-task-list"><a href="{% url 'devops:play-task-list' %}">Ansible任务中心</a></li>
     </ul>
 </li>
 

@@ -83,16 +83,33 @@ class PlayBookTask(models.Model):
         return True
 
     def record(self, result="", error=None):
-        print(result)
-        print(error)
         hid = str(uuid.uuid4())
+        total_num = 0
+        success_num = 0
+        failed_num = 0
+
+        if result:
+
+            for host, value in result.get('stats').items():
+                total_num += value['ok'] + value['failures'] + value['unreachable']
+                success_num += value['ok']
+                failed_num += value['failures']
+            print(total_num, '/', success_num, '/', failed_num)
+
         if result and not error:
+            if failed_num == 0:
+                exe_result = 'success'
+            else:
+                exe_result = 'failed'
             history = TaskHistory.objects.create(
                 id=hid,
                 task=self,
-                exe_result='success',
+                exe_result=exe_result,
                 result_info=json.dumps(result),
-                result_summary=json.dumps(result.get('stats'))
+                result_summary=json.dumps(result.get('stats')),
+                total_num=total_num,
+                success_num=success_num,
+                failed_num=failed_num
             )
             logger.info("创建{}历史记录成功".format(history.id))
         elif error and result:
@@ -101,7 +118,10 @@ class PlayBookTask(models.Model):
                 task=self,
                 exe_result='failed',
                 result_info=result,
-                result_summary=json.dumps(result.get('stats'))
+                result_summary=json.dumps(result.get('stats')),
+                total_num=total_num,
+                success_num=success_num,
+                failed_num=failed_num
             )
             logger.error("创建{}错误历史记录成功".format(history.id))
 
@@ -132,7 +152,7 @@ class PlayBookTask(models.Model):
             logger.debug(json.dumps(runner.variable_manager.get_vars()))
         try:
             result = runner.run()
-            logger.debug(result)
+            logger.debug(json.dumps(result, indent=4))
             self.record(result)
             self.is_running = False
             self.save()
@@ -157,8 +177,15 @@ class TaskHistory(models.Model):
         ('unrun', '未执行'), ('running', '正在执行')), default='unrun', verbose_name="任务状态")
     result_info = models.TextField(null=True, blank=True, verbose_name="任务结果详情")
     result_summary = models.TextField(null=True, blank=True, verbose_name="任务结果简要")
+    total_num = models.IntegerField(null=True, blank=True, verbose_name="执行总数")
+    success_num = models.IntegerField(null=True, blank=True, verbose_name="成功执行总数")
+    failed_num = models.IntegerField(null=True, blank=True, verbose_name="失败执行总数")
     create_time = models.DateTimeField(auto_now_add=True)
     _hosts = models.TextField(null=True, blank=True, verbose_name=_('Hosts'))  # ['hostname1': {}, 'hostname2': {}]
+
+    @property
+    def short_id(self):
+        return str(self.id).split('-')[-1]
 
     @property
     def hosts(self):

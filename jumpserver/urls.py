@@ -65,9 +65,9 @@ v1_api_patterns = [
     path('audits/v1/', include('audits.urls.api_urls', namespace='api-audits')),
     path('orgs/v1/', include('orgs.urls.api_urls', namespace='api-orgs')),
     path('common/v1/', include('common.urls.api_urls', namespace='api-common')),
-    path('devops/deploy/v1/', include('deploy.urls.api_urls', namespace='api-deploy')),
-    path('devops/dreport/v1/', include('dreport.urls.api_urls', namespace='api-dreport')),
-    path('devops/dev_ops/v1/', include('devops.urls.api_urls', namespace='api-devops')),
+    path('extra_app/deploy/v1/', include('deploy.urls.api_urls', namespace='api-deploy')),
+    path('extra_app/dreport/v1/', include('dreport.urls.api_urls', namespace='api-dreport')),
+    path('extra_app/devops/v1/', include('devops.urls.api_urls', namespace='api-devops')),
 ]
 
 app_view_patterns = [
@@ -78,9 +78,9 @@ app_view_patterns = [
     path('ops/', include('ops.urls.view_urls', namespace='ops')),
     path('audits/', include('audits.urls.view_urls', namespace='audits')),
     path('orgs/', include('orgs.urls.views_urls', namespace='orgs')),
-    path('devops/deploy/', include('deploy.urls.views_urls', namespace='deploy')),
-    path('devops/dreport/', include('dreport.urls.views_urls', namespace='dreport')),
-    path('devops/dev_ops/', include('devops.urls.views_urls', namespace='devops')),
+    path('extra_app/deploy/', include('deploy.urls.views_urls', namespace='deploy')),
+    path('extra_app/dreport/', include('dreport.urls.views_urls', namespace='dreport')),
+    path('extra_app/devops/', include('devops.urls.views_urls', namespace='devops')),
 ]
 
 if settings.XPACK_ENABLED:

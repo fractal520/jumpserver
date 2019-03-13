@@ -35,6 +35,21 @@ class AnsibleRoleSerializer(serializers.ModelSerializer):
 
 
 class TaskHistorySerializer(serializers.ModelSerializer):
+    stat = serializers.SerializerMethodField()
+    taskhistory_short_id = serializers.SerializerMethodField()
+
     class Meta:
         model = TaskHistory
         fields = '__all__'
+
+    @staticmethod
+    def get_stat(obj):
+        return {
+            "total_num": obj.total_num,
+            "success_num": obj.success_num,
+            "failed_num": obj.failed_num,
+        }
+
+    @staticmethod
+    def get_taskhistory_short_id(obj):
+        return obj.short_id

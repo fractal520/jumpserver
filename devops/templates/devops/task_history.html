@@ -51,8 +51,9 @@
                                                 </th>
                                                 <th>{% trans 'Date start' %}</th>
                                                 <th>{% trans 'Status' %}</th>
-                                                <th>{% trans 'Info' %}</th>
-                                                <th>{% trans 'ID' %}</th>
+                                                <th>{% trans 'F/S/T' %}</th>
+                                                <th>{% trans 'Version' %}</th>
+                                                <th>{% trans 'Action' %}</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -76,8 +77,22 @@
             buttons: [],
             order: [],
             select: [],
+            columnDefs: [
+                {targets: 3, createdCell: function (td, cellData) {
+                    var total = "<span>" + cellData.total_num + "</span>";
+                    var success = "<span class='text-navy'>" + cellData.success_num + "</span>";
+                    var failed = "<span class='text-danger'>" + cellData.failed_num + "</span>";
+                    $(td).html(failed + '/' + success + '/' + total );
+                }},
+                {targets: 5, createdCell: function (td, cellData) {
+                   var run_btn = '<a class="btn btn-xs btn-primary m-l-xs btn-run" href="#">{% trans "Detail" %}</a>'
+                   if (cellData) {
+                       $(td).html(run_btn);
+                   }
+                }}
+            ],
             ajax_url: '{% url "api-devops:history-list" %}?task={{ object.pk }}',
-            columns: [{data: function(){return ""}}, {data: "create_time"}, {data: "exe_result"}, {data: "result_info"}, {data: "id"}]
+            columns: [{data: function(){return ""}}, {data: "create_time"}, {data: "exe_result"}, {data: 'stat'}, {data: 'taskhistory_short_id'}, {data: "id"}]
         };
         jumpserver.initDataTable(options);
     }
