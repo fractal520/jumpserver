@@ -5,7 +5,7 @@ import yaml
 from django.db import models
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
-from common.utils import get_signer, get_logger
+from common.utils import get_logger
 from ops.ansible.runner import get_default_options, PlayBookRunner
 from ops.inventory import JMSInventory
 from ops.ansible import AnsibleError
@@ -23,9 +23,12 @@ if not os.path.isdir(playbook_dir):
 class AnsibleRole(models.Model):
 
     name = models.CharField(max_length=200, verbose_name=_('Name'))
+    add_time = models.DateTimeField(auto_now_add=True)
+    created_by = models.CharField(max_length=128, blank=True, null=True, default='')
+    desc = models.TextField(verbose_name="使用说明", blank=True, null=True, default='')
 
     def __str__(self):
-        return str(self.name)
+        return str(self.name) + '(创建者:'+str(self.created_by)+')'
 
 
 class PlayBookTask(models.Model):
@@ -36,7 +39,8 @@ class PlayBookTask(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
     desc = models.TextField(null=True, blank=True, verbose_name=_('Description'))
     ansible_role = models.ForeignKey(
-        AnsibleRole, verbose_name=_('Ansible Role'), related_name='task', on_delete=models.DO_NOTHING
+        AnsibleRole, verbose_name=_('Ansible Role'), related_name='task',
+        on_delete=models.DO_NOTHING
     )
     run_as_admin = models.BooleanField(default=False, verbose_name=_('Run as admin'))
     run_as = models.CharField(max_length=128, default='', verbose_name=_("Run as"))
@@ -153,6 +157,7 @@ class PlayBookTask(models.Model):
         try:
             result = runner.run()
             logger.debug(json.dumps(result, indent=4))
+            logger.info(json.dumps(result.get('stats'), indent=4))
             self.record(result)
             self.is_running = False
             self.save()
@@ -162,7 +167,6 @@ class PlayBookTask(models.Model):
             self.is_running = False
             self.save()
             logger.warn("Failed run playbook {}, {}".format(self.name, e))
-            pass
 
     def __str__(self):
         return self.name
@@ -182,6 +186,26 @@ class TaskHistory(models.Model):
     failed_num = models.IntegerField(null=True, blank=True, verbose_name="失败执行总数")
     create_time = models.DateTimeField(auto_now_add=True)
     _hosts = models.TextField(null=True, blank=True, verbose_name=_('Hosts'))  # ['hostname1': {}, 'hostname2': {}]
+
+    @property
+    def failed_host(self):
+        failed_host = []
+        if self.result_summary:
+            summary = json.loads(self.result_summary)
+            for host, value in summary.items():
+                if value["failures"] != 0 or value["unreachable"] != 0:
+                    failed_host.append(host)
+        return failed_host
+
+    @property
+    def success_host(self):
+        success_host = []
+        if self.result_summary:
+            summary = json.loads(self.result_summary)
+            for host, value in summary.items():
+                if value["failures"] == 0 and value["unreachable"] == 0:
+                    success_host.append(host)
+        return success_host
 
     @property
     def short_id(self):

@@ -66,6 +66,10 @@
                                             <td><b>{{ object.ansible_role.name }}</b></td>
                                         </tr>
                                         <tr>
+                                            <td width="20%">{% trans 'Ansible Playbook' %}:</td>
+                                            <td style="word-wrap:break-word;word-break:break-all;" width="100px";><b>{{ object.playbook_path }}</b></td>
+                                        </tr>
+                                        <tr>
                                             <td>{% trans 'Date created' %}:</td>
                                             <td><b>{{ object.date_created }}</b></td>
                                         </tr>
@@ -77,6 +81,14 @@
                                             <td>{% trans 'Description' %}:</td>
                                             <td><b>{{ object.desc }}</b></td>
                                         </tr>
+                                        <tr>
+                                            <td width="20%">运行主机:</td>
+                                            <td>
+                                                {% for asset in object.assets.all %}
+                                                    <li><b>{{ asset.hostname }}</b></li>
+                                                {% endfor %}
+                                            </td>
+                                        </tr>                                         
                                         </tbody>
                                     </table>
                                 </div>
@@ -90,7 +102,9 @@
                                 <div class="panel-body">
                                     <table class="table">
                                         <tbody>
-
+                                            {% for asset in object.taskhistory_set.last.failed_host %}
+                                                <li><b>{{ asset }}</b></li>
+                                            {% endfor %}
                                         </tbody>
                                     </table>
                                 </div>
@@ -103,6 +117,9 @@
                                 <div class="panel-body">
                                     <table class="table">
                                         <tbody>
+                                            {% for asset in object.taskhistory_set.last.success_host %}
+                                                <li><b>{{ asset }}</b></li>
+                                            {% endfor %}                                            
                                         </tbody>
                                     </table>
                                 </div>
@@ -122,11 +139,11 @@
         let name = $this.data('name');
         let uid = $this.data('uid');
         let the_url = '{% url "api-devops:task-opt-detail" pk=DEFAULT_PK %}'.replace('{{ DEFAULT_PK }}', uid);
-        objectDelete($this, name, the_url);
+        let redirect_url = '{% url "devops:play-task-list" %}'
+        objectDelete($this, name, the_url, redirect_url);
         setTimeout(function () {
             console.log("ok")
         }, 1000);
-        window.location = "{% url 'devops:play-task-list' %}";
     })
 </script>
 {% endblock %}

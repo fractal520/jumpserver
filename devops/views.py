@@ -1,15 +1,16 @@
 from __future__ import unicode_literals
 
 import logging
-import uuid
 
+from django.core.exceptions import ImproperlyConfigured
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
 from django.utils.translation import ugettext as _
 from django.views.generic import TemplateView, CreateView, UpdateView, RedirectView, DetailView
 from django.urls import reverse_lazy
+
 from assets.models import *
-from common.permissions import SuperUserRequiredMixin
+from common.permissions import SuperUserRequiredMixin, IsValidUser
 from .forms import *
 from devops.models import PlayBookTask, TaskHistory
 # Create your views here.
@@ -76,14 +77,14 @@ class TaskCloneView(SuperUserRequiredMixin, RedirectView):
     def get(self, request, *args, **kwargs):
         #: 克隆一个变量组
         old_task = PlayBookTask.objects.get(id=kwargs['pk'])
-        new_task = PlayBookTask(name=old_task.name + "-copy-" + uuid.uuid4().hex, desc=old_task.desc + "-copy",
+        new_task = PlayBookTask(name=old_task.name + "-copy-" + uuid.uuid4().hex[0:8], desc=old_task.desc + "-copy",
                                 ansible_role_id=old_task.ansible_role_id)
         new_task.save()
         new_task.create_playbook(new_task.ansible_role)
         return super(TaskCloneView, self).get(request, *args, **kwargs)
 
 
-class TaskDetailView(SuperUserRequiredMixin, DetailView):
+class TaskDetailView(IsValidUser, DetailView):
     model = PlayBookTask
     template_name = 'devops/task_detail.html'
 
@@ -96,14 +97,67 @@ class TaskDetailView(SuperUserRequiredMixin, DetailView):
         return super().get_context_data(**kwargs)
 
 
-class TaskHistoryView(SuperUserRequiredMixin, DetailView):
+class TaskHistoryView(IsValidUser, DetailView):
     model = PlayBookTask
     template_name = 'devops/task_history.html'
 
     def get_context_data(self, **kwargs):
         context = {
-            'app': _('Ops'),
+            'app': _('devops'),
             'action': _('Task run history'),
+        }
+        kwargs.update(context)
+        return super().get_context_data(**kwargs)
+
+
+class TaskHistoryDetailView(SuperUserRequiredMixin, DetailView):
+    model = TaskHistory
+    template_name = 'devops/task_history_detail.html'
+
+    def get_context_data(self, **kwargs):
+        context = {
+            'app': _('devops'),
+            'action': _('Task history detail'),
+        }
+        kwargs.update(context)
+        return super().get_context_data(**kwargs)
+
+
+class AnsibleRoleView(SuperUserRequiredMixin, TemplateView):
+    template_name = 'devops/ansible_role_list.html'
+
+    def get_context_data(self, **kwargs):
+        context = {
+            'app': _('devops'),
+            'action': _('Ansible role list'),
+        }
+        kwargs.update(context)
+        return super().get_context_data(**kwargs)
+
+
+class AnsibleRoleUpdateView(SuperUserRequiredMixin, SuccessMessageMixin, UpdateView):
+    model = AnsibleRole
+    template_name = 'devops/role_update.html'
+    form_class = AnsibleRoleUpdateForm
+    success_url = reverse_lazy('devops:ansible-role-list')
+
+    def get_context_data(self, **kwargs):
+        context = {
+            'app': _('Devops'),
+            'action': _('Update Task'),
+        }
+        kwargs.update(context)
+        return super(AnsibleRoleUpdateView, self).get_context_data(**kwargs)
+
+
+class AnsibleRoleDetailView(SuperUserRequiredMixin, DetailView):
+    model = AnsibleRole
+    template_name = 'devops/role_detail.html'
+
+    def get_context_data(self, **kwargs):
+        context = {
+            'app': _('devops'),
+            'action': _('Role detail'),
         }
         kwargs.update(context)
         return super().get_context_data(**kwargs)

@@ -12,4 +12,8 @@ urlpatterns = [
     path('devops/play-task/<uuid:pk>/clone', views.TaskCloneView.as_view(), name='task-clone'),
     path('devops/play-task/<uuid:pk>/', views.TaskDetailView.as_view(), name='task-detail'),
     path('devops/play-task/<uuid:pk>/history', views.TaskHistoryView.as_view(), name='task-history'),
+    path('devops/play-task/<uuid:pk>/history-detail', views.TaskHistoryDetailView.as_view(), name='task-history-detail'),
+    path('devops/ansible-role-list/', views.AnsibleRoleView.as_view(), name='ansible-role-list'),
+    path('devops/ansible-role/<pk>/', views.AnsibleRoleDetailView.as_view(), name='role-detail'),
+    path('devops/ansible-role/<pk>/update', views.AnsibleRoleUpdateView.as_view(), name='ansible-role-update'),
 ]

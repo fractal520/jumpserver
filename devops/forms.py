@@ -25,10 +25,13 @@ class TaskForm(forms.ModelForm):
 class TaskUpdateForm(OrgModelForm):
     class Meta:
         model = PlayBookTask
-        fields = ['name', 'desc', 'run_as_admin', 'extra_vars', 'assets']
+        fields = ['name', 'desc', 'run_as_admin', 'extra_vars', 'assets', 'ansible_role', 'playbook_path']
         widgets = {
             'assets': forms.SelectMultiple(attrs={
                 'class': 'select2', 'data-placeholder': _('assets')
+            }),
+            'ansible_role': forms.Select(attrs={
+                'class': 'select2', 'data-placeholder': _('ansible_role')
             })
         }
         labels = {
@@ -36,8 +39,23 @@ class TaskUpdateForm(OrgModelForm):
             'desc': '任务描述',
             'run_as_admin': '管理员身份运行',
             'extra_vars': '额外变量',
-            'assets': '运行主机'
+            'assets': '运行主机',
+            'ansible_role': 'Ansible role',
+            'playbook_path': 'Playbook路径'
         }
         help_texts = {
-            'extra_vars': '*变量格式为{key:value}格式,字符串需要用单引号括起来'
+            'extra_vars': '*变量格式为{key:value}格式,字符串需要用单引号括起来',
+            'ansible_role': '*更改role后必须重新设置playbookpath,如非必要请勿修改此项'
         }
+
+
+class AnsibleRoleUpdateForm(OrgModelForm):
+    class Meta:
+        model = AnsibleRole
+        fields = ['name', 'desc']
+        widgets = {}
+        labels = {
+            'name': 'AnsibleRole名称',
+            'desc': 'Role详情及使用描述'
+        }
+        help_texts = {}

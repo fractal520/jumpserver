@@ -74,6 +74,13 @@
                         }
                     },
                     {
+                        targets: 3,
+                        createdCell: function(td, cellData, rowData){
+                            var role_detail_btn = '<a href="{% url "devops:role-detail" pk=DEFAULT_PK %}" class="btn-detail" data-uid="99991937" data-name="99991938">'.replace('99991937', rowData.ansible_role).replace('99991938', rowData.ansible_role).replace('{{DEFAULT_PK}}', rowData.ansible_role) + cellData + '</a>';
+                            $(td).html(role_detail_btn);
+                        }   
+                    },
+                    {
                         targets: 4,
                         createdCell: function (td, cellData, rowData) {
                             let update_btn;
@@ -193,7 +200,7 @@
         }
 
         function executeTask(id) {
-            let success_message = "正在执行中。。。"
+            let success_message = "执行成功"
             let error = "未知错误"
             let data = "请确认是否执行以及你十分清楚这个task执行后的结果!"
 
@@ -212,8 +219,9 @@
                         setTimeout(function () {
                             console.log("ok")
                         }, 1000);
-                        window.location = "{% url 'devops:play-task-list' %}";
+                        window.location = "{% url 'devops:task-history' pk=DEFAULT_PK %}".replace('{{ DEFAULT_PK }}', id);
                     };
+                    toastr.info("任务执行中，请稍候。。。")
                     APIUpdateAttr({
                         url: the_url,
                         method: 'GET',

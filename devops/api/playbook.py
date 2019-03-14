@@ -7,12 +7,17 @@ from rest_framework.response import Response
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 from django.conf import settings
+from django.db import IntegrityError
 from django.shortcuts import get_object_or_404
 
 from devops.serializers import TaskReadSerializer, TaskSerializer, AnsibleRoleSerializer, TaskHistorySerializer
 from devops.models import AnsibleRole, PlayBookTask, TaskHistory
 from devops.tasks import run_ansible_playbook, reset_task_playbook_path
 from common.permissions import IsOrgAdminOrAppUser, IsValidUser
+from common.utils import get_logger
+
+
+logger = get_logger(__file__)
 
 
 class PlayBookTaskListViewApi(ListAPIView):
@@ -46,13 +51,18 @@ class TaskOperationViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin,
         return response
 
 
-class AnsibleRoleViewSet(viewsets.ModelViewSet):
+class AnsibleRoleViewSet(mixins.ListModelMixin, mixins.DestroyModelMixin, viewsets.GenericViewSet):
     """
         对AnsibleRole提供的API操作
     """
     queryset = AnsibleRole.objects.all()
     serializer_class = AnsibleRoleSerializer
     permission_classes = (IsOrgAdminOrAppUser,)
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class TaskViewSet(viewsets.ModelViewSet):
@@ -115,6 +125,9 @@ class InstallZipRoleView(CreateAPIView):
         #: 保存实例
         if not self.get_queryset().filter(name=request.data['name']).exists():
             serializer.save()
+            role = AnsibleRole.objects.get(name=request.data['name'])
+            role.created_by = request.user.name
+            role.save()
         headers = self.get_success_headers(serializer.data)
         #: 返回
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)

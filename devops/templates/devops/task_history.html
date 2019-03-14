@@ -85,9 +85,9 @@
                     $(td).html(failed + '/' + success + '/' + total );
                 }},
                 {targets: 5, createdCell: function (td, cellData) {
-                   var run_btn = '<a class="btn btn-xs btn-primary m-l-xs btn-run" href="#">{% trans "Detail" %}</a>'
+                   var detail_btn = '<a class="btn btn-xs btn-primary m-l-xs btn-run" href="{% url "devops:task-history-detail" pk=DEFAULT_PK %}">{% trans "Detail" %}</a>'.replace('{{ DEFAULT_PK }}', cellData);
                    if (cellData) {
-                       $(td).html(run_btn);
+                       $(td).html(detail_btn);
                    }
                 }}
             ],

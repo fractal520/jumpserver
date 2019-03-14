@@ -17,7 +17,7 @@ from common.utils import get_logger
 from .exceptions import AnsibleError
 
 
-__all__ = ["AdHocRunner", "PlayBookRunner"]
+__all__ = ["AdHocRunner", "PlayBookRunner", "get_default_options"]
 C.HOST_KEY_CHECKING = False
 logger = get_logger(__name__)
 

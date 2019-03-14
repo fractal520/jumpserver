@@ -47,11 +47,12 @@
             <label class="col-md-2 control-label" for="id_role_install">{% trans 'Install Role' %}(Zip)</label>
             <div class="col-md-9">
                 <input placeholder="请选择Ansible Role 压缩文件" readonly class="form-control" type="text"
-                       id="fileName" style="width: 73%;display: inline-block">
+                       id="fileName" style="width: 59%;display: inline-block">
                 <div id="picker" class="btn btn-primary float-right" style="width: 13%;">{% trans 'Select Zip' %}
                 </div>
                 <button class="btn btn-primary float-right" type="button" style="width: 13%;"
                         id="file_install_btn">{% trans 'install' %}</button>
+                <button class="btn btn-primary float-right btn-role" style="width: 13%;">role管理</button>
                 <div class="progress progress-striped active" style="width: 100%;display: none">
                     <div class="progress-bar" role="progressbar"
                          aria-valuenow="60" aria-valuemin="0" aria-valuemax="100"
@@ -59,7 +60,6 @@
                     </div>
                 </div>
             </div>
-
         </div>
 
 
@@ -71,7 +71,6 @@
             <div class="col-md-9">
                 <select data-placeholder="请选择" id="id_ansible_role" name="ansible_role" class="select2 form-control"
                         tabindex="4">
-
                 </select>
             </div>
         </div>
@@ -213,7 +212,9 @@
                 })
             });
 
-
+            $('body').on('click', '.btn-role', function(){
+                window.location = '{% url 'devops:ansible-role-list' %}';
+            })
 
 
         });
