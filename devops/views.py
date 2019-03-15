@@ -110,7 +110,7 @@ class TaskHistoryView(IsValidUser, DetailView):
         return super().get_context_data(**kwargs)
 
 
-class TaskHistoryDetailView(SuperUserRequiredMixin, DetailView):
+class TaskHistoryDetailView(IsValidUser, DetailView):
     model = TaskHistory
     template_name = 'devops/task_history_detail.html'
 
@@ -123,7 +123,7 @@ class TaskHistoryDetailView(SuperUserRequiredMixin, DetailView):
         return super().get_context_data(**kwargs)
 
 
-class AnsibleRoleView(SuperUserRequiredMixin, TemplateView):
+class AnsibleRoleView(IsValidUser, TemplateView):
     template_name = 'devops/ansible_role_list.html'
 
     def get_context_data(self, **kwargs):
@@ -135,7 +135,7 @@ class AnsibleRoleView(SuperUserRequiredMixin, TemplateView):
         return super().get_context_data(**kwargs)
 
 
-class AnsibleRoleUpdateView(SuperUserRequiredMixin, SuccessMessageMixin, UpdateView):
+class AnsibleRoleUpdateView(IsValidUser, SuccessMessageMixin, UpdateView):
     model = AnsibleRole
     template_name = 'devops/role_update.html'
     form_class = AnsibleRoleUpdateForm
@@ -150,7 +150,7 @@ class AnsibleRoleUpdateView(SuperUserRequiredMixin, SuccessMessageMixin, UpdateV
         return super(AnsibleRoleUpdateView, self).get_context_data(**kwargs)
 
 
-class AnsibleRoleDetailView(SuperUserRequiredMixin, DetailView):
+class AnsibleRoleDetailView(IsValidUser, DetailView):
     model = AnsibleRole
     template_name = 'devops/role_detail.html'
 

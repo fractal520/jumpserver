@@ -22,7 +22,6 @@ logger = get_logger(__file__)
 
 class PlayBookTaskListViewApi(ListAPIView):
     queryset = PlayBookTask.objects.all()
-    queryset = queryset.filter
     permission_classes = (IsValidUser, )
     serializer_class = TaskReadSerializer
 
@@ -68,7 +67,7 @@ class AnsibleRoleViewSet(mixins.ListModelMixin, mixins.DestroyModelMixin, viewse
 class TaskViewSet(viewsets.ModelViewSet):
     queryset = PlayBookTask.objects.all()
     serializer_class = TaskSerializer
-    permission_classes = (IsOrgAdminOrAppUser,)
+    permission_classes = (IsValidUser,)
     label = None
     help_text = ''
 
@@ -76,7 +75,7 @@ class TaskViewSet(viewsets.ModelViewSet):
 class TaskRun(RetrieveAPIView):
     queryset = PlayBookTask.objects.all()
     serializer_class = TaskViewSet
-    permission_classes = (IsOrgAdminOrAppUser,)
+    permission_classes = (IsValidUser,)
 
     def retrieve(self, request, *args, **kwargs):
         task = self.get_object()
@@ -136,7 +135,7 @@ class InstallZipRoleView(CreateAPIView):
 class TaskHistorySet(viewsets.ModelViewSet):
     queryset = TaskHistory.objects.all()
     serializer_class = TaskHistorySerializer
-    permission_classes = (IsOrgAdminOrAppUser,)
+    permission_classes = (IsValidUser,)
 
     def get_queryset(self):
         task_id = self.request.query_params.get('task')

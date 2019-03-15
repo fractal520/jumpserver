@@ -24,11 +24,13 @@
                             <li class="pull-right">
                                 <a class="btn btn-outline btn-default" href="{% url 'devops:task-update' pk=object.id %}"><i class="fa fa-edit"></i>更新</a>
                             </li>
+                            {% if request.user.is_superuser %}
                             <li class="pull-right">
                                 <a class="btn btn-outline btn-danger btn-task-delete" data-uid="{{ object.id }}" data-name="{{ object.name }}">
                                     <i class="fa fa-trash-o"></i>删除
                                 </a>
                             </li>
+                            {% endif %}
                         </ul>
                     </div>
                     <div class="tab-content">
