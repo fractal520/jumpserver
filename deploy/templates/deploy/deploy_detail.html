@@ -108,11 +108,20 @@
                                                         <option value="{{asset.id}}">{{asset.hostname}}</option>
                                                         {% endfor %}
                                                     </select>
-                                                    <label>java_opts</label>
-                                                    <input type="text-center" name="java_opts"/>
-                                                    <label>dloader_path</label>
+                                                </td> 
+                                            </tr>
+                                            <tr>
+                                                <td colspan="2" class="no-borders">
+                                                    <label>java_opts:</label>
+                                                    <input type="text-center" name="java_opts"/> 
+                                                    
+                                                </td> 
+                                            </tr>
+                                            <tr>
+                                                <td colspan="2" class="no-borders">
+                                                    <label>dloader_path:</label>
                                                     <input type="text-center" name="dloader_path"/>
-                                                    <input type="hidden" name="app_name" value="{{ result.app_name }}" />
+                                                    <input type="hidden" name="app_name" value="{{ result.app_name }}" />   
                                                 </td> 
                                             </tr>
                                             <tr>

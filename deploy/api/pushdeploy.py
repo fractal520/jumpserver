@@ -38,6 +38,8 @@ def deploy_file_to_asset(request):
     logger.debug(request.GET)
     host = request.GET.get('task_host')
     app_name = request.GET.get('app_name')
+    java_opts = request.GET.get('java_opts')
+    dloader_path = request.GET.get('dloader_path')
     try:
         asset = Asset.objects.get(id=host)
     except ObjectDoesNotExist as error:
@@ -59,9 +61,12 @@ def deploy_file_to_asset(request):
     #     logger.info('增量打包')
     #     pack_result = pack_up_deploy_file(app_name)
     # else:
-    if not check_result[0]['ok']:
-        logger.info("应用启动文件不存在，需要推送应用启动文件")
-        task = push_app_startup_config_file(asset, app_name)
+    if not check_result[0]['ok'] or java_opts or dloader_path:
+        if not check_result[0]['ok']:
+            logger.info("应用启动文件不存在，需要推送应用启动文件")
+        if java_opts or dloader_path:
+            logger.info("输入了java-opts，重新推送启动文件")
+        task = push_app_startup_config_file(asset, app_name, java_opts=java_opts, dloader_path=dloader_path)
         try:
             if task:
                 task.run()

@@ -128,6 +128,8 @@ def backup_asset_app_file(asset, app_name):
 def backup_asset_app_file_util(asset, task_name, app_name):
     from ops.utils import update_or_create_ansible_task
     version = get_last_version(app_name)
+    logger.debug(task_name)
+    logger.debug(version)
     if not version:
         logger.info("no version history found {0}".format(app_name))
         return False
@@ -245,6 +247,8 @@ def push_app_startup_config_file(asset, app_name, java_opts=None, dloader_path=N
         java_opts = DEFAULT_JAVA_OPTS
     if not dloader_path:
         dloader_path = DEFAULT_DLOADER_PATH
+    logger.debug(java_opts)
+    logger.debug(dloader_path)
     try:
         ansible_role = AnsibleRole.objects.get(name='addsvapp')
     except BaseException as error:
