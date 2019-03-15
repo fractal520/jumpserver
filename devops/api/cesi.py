@@ -1,10 +1,13 @@
 from urllib import request
 import http.cookiejar
 import json
+
+from django.conf import settings
+
 from common.utils import get_logger
 
 logger = get_logger('jumpserver')
-cesi_url = "127.0.0.1:5001"
+cesi_url = settings.CESI_URL
 
 
 class CesiAPI(object):
@@ -19,8 +22,8 @@ class CesiAPI(object):
     def login(self):
         cesi_login_url = "http://{}/api/v2/auth/login/".format(cesi_url)
         post_data = {
-            "username": "admin",
-            "password": "admin"
+            "username": settings.CESI_USER,
+            "password": settings.CESI_PASS
         }
         textmod = json.dumps(post_data).encode("utf-8")
         req = self.request.Request(url=cesi_login_url, data=textmod, headers=self.header)

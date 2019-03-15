@@ -108,7 +108,10 @@
                                                         <option value="{{asset.id}}">{{asset.hostname}}</option>
                                                         {% endfor %}
                                                     </select>
-                                                    <!--<input type="text-center" name="task_host"/>-->
+                                                    <label>java_opts</label>
+                                                    <input type="text-center" name="java_opts"/>
+                                                    <label>dloader_path</label>
+                                                    <input type="text-center" name="dloader_path"/>
                                                     <input type="hidden" name="app_name" value="{{ result.app_name }}" />
                                                 </td> 
                                             </tr>
@@ -194,6 +197,7 @@
                  }, function(){
                     var loadShowTime = 600;
                     var data = $('.deploy-form').serializeArray();
+                    console.log(data)
                     showLoading('.sa-warning')
                     $.ajax({
                         type: "GET",

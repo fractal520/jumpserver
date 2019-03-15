@@ -238,17 +238,24 @@ def rollback_check_backup_file_exist_util(asset, task_name, app_name, version):
     return simple_result
 
 
-def push_app_startup_config_file(asset, app_name):
+def push_app_startup_config_file(asset, app_name, java_opts=None, dloader_path=None):
+    DEFAULT_JAVA_OPTS = "-ms1024m -mx1024m -Xmn256m -Djava.awt.headless=true -XX:MaxPermSize=128m"
+    DEFAULT_DLOADER_PATH = "-Dloader.path=lib/"
+    if not java_opts:
+        java_opts = DEFAULT_JAVA_OPTS
+    if not dloader_path:
+        dloader_path = DEFAULT_DLOADER_PATH
     try:
         ansible_role = AnsibleRole.objects.get(name='addsvapp')
     except BaseException as error:
-        logger.error(error)
+        logger.debug(error)
+        logger.error("请线安装addsvapp的play role!")
         return False
     assets = Asset.objects.filter(hostname=asset.hostname)
     return create_playbook_task(
         assets=assets,
         task_name="push_app_startup_config_file",
-        extra_vars={'APP_NAME': app_name},
+        extra_vars={'APP_NAME': app_name, 'JAVA_OPTS': java_opts, 'DLOADER_PATH': dloader_path},
         description="push_{}_startup_config_file to {}".format(app_name, asset.hostname),
         ansible_role=ansible_role,
         run_as_admin=True,

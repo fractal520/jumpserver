@@ -35,6 +35,7 @@ def get_host_admin(request):
 
 def deploy_file_to_asset(request):
     # get information from request and get target host from DB
+    logger.debug(request.GET)
     host = request.GET.get('task_host')
     app_name = request.GET.get('app_name')
     try:
