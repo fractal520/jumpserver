@@ -1,7 +1,6 @@
 from django.shortcuts import get_object_or_404
 from rest_framework.generics import ListAPIView, RetrieveAPIView
 from rest_framework.response import Response
-from rest_framework import status
 from assets.serializers import AssetGrantedSerializer
 from assets.models import Asset
 from users.models import User

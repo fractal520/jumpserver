@@ -2,7 +2,6 @@ from __future__ import unicode_literals
 
 import logging
 
-from django.core.exceptions import ImproperlyConfigured
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
 from django.utils.translation import ugettext as _

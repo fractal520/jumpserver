@@ -7,8 +7,6 @@ from rest_framework.response import Response
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 from django.conf import settings
-from django.db import IntegrityError
-from django.shortcuts import get_object_or_404
 
 from devops.serializers import TaskReadSerializer, TaskSerializer, AnsibleRoleSerializer, TaskHistorySerializer
 from devops.models import AnsibleRole, PlayBookTask, TaskHistory
