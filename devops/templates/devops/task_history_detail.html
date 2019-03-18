@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block custom_head_css_js %}
+    <link href="{% static 'css/plugins/select2/select2.min.css' %}" rel="stylesheet">
+    <link href="{% static "css/plugins/sweetalert/sweetalert.css" %}" rel="stylesheet">
+    <script src="{% static 'js/plugins/select2/select2.full.min.js' %}"></script>
+    <script src="{% static "js/plugins/sweetalert/sweetalert.min.js" %}"></script>
+{% endblock %}
+{% block content %}
+    <div class="wrapper wrapper-content animated fadeInRight">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="ibox float-e-margins">
+                    <div class="panel-options">
+                        <ul class="nav nav-tabs">
+                           <li class="active">
+                                <a href="#" class="text-center"><i class="fa fa-laptop"></i> {% trans 'Role detail' %} </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="tab-content">
+                        <div class="col-sm-7" style="padding-left: 0">
+                            <div class="ibox float-e-margins">
+                                <div class="ibox-title">
+                                    <span class="label"><b>{{ object.name }}</b></span>
+                                    <div class="ibox-tools">
+                                        <a class="collapse-link">
+                                            <i class="fa fa-chevron-up"></i>
+                                        </a>
+                                        <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                                            <i class="fa fa-wrench"></i>
+                                        </a>
+                                        <ul class="dropdown-menu dropdown-user">
+                                        </ul>
+                                        <a class="close-link">
+                                            <i class="fa fa-times"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="ibox-content">
+                                    <table class="table">
+                                        <tbody>
+                                        <tr class="no-borders-tr">
+                                            <td width="20%">{% trans 'ID' %}:</td>
+                                            <td><b>{{ object.id }}</b></td>
+                                        </tr>
+                                        <tr>
+                                            <td width="20%">{% trans 'Name' %}:</td>
+                                            <td><b>{{ object.task.name }}</b></td>
+                                        </tr>                       
+                                        <tr>
+                                            <td width="20%">{% trans 'Date created' %}:</td>
+                                            <td><b>{{ object.create_time }}</b></td>
+                                        </tr>
+                                        <tr>
+                                            <td width="20%">详细{% trans 'Info' %}:</td>
+                                            <td style="word-wrap:break-word;word-break:break-all;" width="100px";><b>{{ object.result_info }}</b></td>
+                                        </tr>              
+                                        <tr>
+                                            <td width="20%">简要{% trans 'Info' %}:</td>
+                                            <td style="word-wrap:break-word;word-break:break-all;" width="100px";><b>{{ object.result_summary }}</b></td>
+                                        </tr>    
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div> 
+                        <div class="col-sm-5" style="padding-left: 0;padding-right: 0">
+                            <div class="panel panel-danger">
+                                <div class="panel-heading">
+                                    <i class="fa fa-info-circle"></i> {% trans 'Last run failed hosts' %}
+                                </div>
+                                <div class="panel-body">
+                                    <table class="table">
+                                        <tbody>
+                                            {% for asset in object.failed_host %}
+                                                <li><b>{{ asset }}</b></li>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <div class="panel panel-primary">
+                                <div class="panel-heading">
+                                    <i class="fa fa-info-circle"></i> {% trans 'Last run success hosts' %}
+                                </div>
+                                <div class="panel-body">
+                                    <table class="table">
+                                        <tbody>
+                                            {% for asset in object.success_host %}
+                                                <li><b>{{ asset }}</b></li>
+                                            {% endfor %}                                            
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block custom_foot_js %}
+<script>
+</script>
+{% endblock %}

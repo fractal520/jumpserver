@@ -1,0 +1,69 @@
+{% extends '_base_create_update.html' %}
+{% load static %}
+{% load bootstrap3 %}
+{% load i18n %}
+{% load asset_tags %}
+{% load common_tags %}
+
+{% block custom_head_css_js_create %}
+    <link href="{% static "css/plugins/inputTags.css" %}" rel="stylesheet">
+    <script src="{% static "js/plugins/inputTags.jquery.min.js" %}"></script>
+{% endblock %}
+{% block form %}
+    <form action="" method="post" class="form-horizontal">
+    {% if form.non_field_errors %}
+         <div class="alert alert-danger">
+             {{ form.non_field_errors }}
+         </div>
+    {% endif %}
+    {% csrf_token %}
+    <h3>{% trans 'Basic' %}</h3>
+    {% bootstrap_field form.name layout="horizontal" %}
+    {% bootstrap_field form.desc layout="horizontal" %}
+    {% bootstrap_field form.run_as_admin layout="horizontal" %}
+    {% bootstrap_field form.assets layout="horizontal" %}
+    {% bootstrap_field form.extra_vars layout="horizontal" %}
+    {% if request.user.is_superuser %}
+        {% bootstrap_field form.ansible_role layout="horizontal" %}
+        {% bootstrap_field form.playbook_path layout="horizontal" %}
+    {% endif %}
+    <div class="hr-line-dashed"></div>
+    <div class="form-group">
+        <div class="col-sm-4 col-sm-offset-2">
+            <button class="btn btn-white" type="reset">{% trans 'Reset' %}</button>
+            <button id="submit_button" class="btn btn-primary" type="submit">{% trans 'Submit' %}</button>
+            {% if request.user.is_superuser %}
+                <button class="btn btn-default btn-reset-playbook" type="button" style="width: 33%;">重置playbook</button>
+            {% endif %}
+    </div>
+    </form>
+{% endblock %}
+
+{% block custom_foot_js %}
+    <script>
+    function format(item) {
+        var group = item.element.parentElement.label;
+        return group + ':' + item.text;
+    }
+    $(document).ready(function () {
+        console.log("{{ object.id }}")
+        $('.select2').select2({
+            allowClear: true
+        });
+        $(".labels").select2({
+            allowClear: true,
+            templateSelection: format
+        });
+    })
+    $('.btn-reset-playbook').click(function () {
+        toastr.info("重置中，请稍候。。。")
+        let the_url = "{% url 'api-devops:task-reset-playbook' pk=object.id %}";
+        APIUpdateAttr({
+            url: the_url,
+            method: 'GET',
+            success_message: "重置成功",
+            fail_message: "重置失败,请检查日志。"
+        })
+    });
+    </script>
+{% endblock %}

@@ -1,46 +1,52 @@
 # encoding: utf-8
 import os
-import json
+import time
 from django.conf import settings
 from common.utils import get_logger
-from ops.ansible.runner import get_default_options, PlayBookRunner
-from ops.inventory import JMSInventory
+from .models import AnsibleRole, PlayBookTask
 
 logger = get_logger('jumpserver')
-playbook_dir = os.path.join(settings.PROJECT_DIR, 'data', 'playbooks')
-
-if not os.path.isdir(playbook_dir):
-    os.makedirs(playbook_dir)
 
 
-def create_playbook_task(asset, playbook_name=None, extra_vars=None):
+def create_playbook_task(
+        assets,
+        task_name="",
+        extra_vars=None,
+        created_by="System",
+        description="",
+        ansible_role=None,
+        run_as_admin=False,
+        run_as=None
+    ):
 
     # 判断是否传入playbook_name
-    if not playbook_name:
-        logger.error("playbook_name can't be None.")
+    if not ansible_role:
+        logger.error("ansible role can't be None.")
         return False
 
-    playbook_path = os.path.join(playbook_dir, playbook_name)
-    logger.debug(playbook_path)
+    if not task_name:
+        task_name = ansible_role
 
-    # 判断playbook是否存在
-    if not os.path.exists(playbook_path):
-        raise FileNotFoundError('Please check playbook_path {}.'.format(playbook_name))
+    defaults = {
+        'name': task_name,
+        'created_by': created_by,
+        'desc': description,
+        'ansible_role': ansible_role,
+        'run_as_admin': run_as_admin,
+        'run_as': run_as,
+        'extra_vars': extra_vars
+    }
 
-    # 获取默认options
-    options = get_default_options()
-    # 修改默认options中的playbook_path
-    options = options._replace(playbook_path=playbook_path)
+    PlayBookTask.objects.update_or_create(name=task_name, defaults=defaults)
+    task = PlayBookTask.objects.get(name=task_name)
+    task.assets.set(assets)
+    task.save()
 
-    # 使用JMSInventory构建inventory
-    inventory = JMSInventory(hostname_list=[asset.fullname], run_as_admin=True, run_as=None, become_info=None)
+    return task
 
-    # 构建出runner
-    runner = PlayBookRunner(inventory=inventory, options=options)
 
-    # 如果传入了额外变量则加到runner里
-    if extra_vars:
-        runner.variable_manager.extra_vars = extra_vars
-        logger.debug(json.dumps(runner.variable_manager.get_vars()))
+# 将timestamp转换成当地时间字符串格式
+def translate_timestamp(timestamp):
 
-    return runner
+    time_array = time.localtime(timestamp)
+    return time.strftime("%Y-%m-%d %H:%M:%S", time_array)

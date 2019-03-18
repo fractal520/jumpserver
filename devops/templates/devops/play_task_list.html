@@ -1,0 +1,239 @@
+{% extends '_base_list.html' %}
+{% load i18n static %}
+
+{% block content_left_head %}
+    <div class="uc pull-left m-l-5 m-r-5">
+        {% if request.user.is_superuser %}
+            <a href="{% url 'devops:task-create' %}" class="btn btn-sm btn-primary">
+                {% trans "Create Task" %}
+            </a>
+        {% endif %}
+    </div>{% endblock %}
+{% block table_search %}{% endblock %}
+
+{% block table_container %}
+    <table class="table table-striped table-bordered table-hover" id="task_table">
+        <thead>
+        <tr>
+            <th class="text-center">{% trans 'Id' %}</th>
+            <th class="text-center">{% trans 'Name' %}</th>
+            <th class="text-center">{% trans 'Descrption' %}</th>
+            <th class="text-center">{% trans 'Ansible Role' %}</th>
+            <th class="text-center">{% trans 'Action' %}</th>
+        </tr>
+        </thead>
+    </table>
+
+    <!-- TaskDetailModal -->
+    <div class="modal fade" id="TaskDetailModal" tabindex="-1" role="dialog" aria-labelledby="TaskDetailModalLabel">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title" id="myModalLabel">Task Detail</h4>
+          </div>
+          <div class="modal-body">
+              <div class="ibox-content" style="background-color: inherit">
+                  <table class="table">
+                      <tbody id="task_detail_tbody"><tr class="no-borders-tr">
+                      </tr></tbody>
+                  </table>
+              </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-warning btn-reset-playbook">ResetPlayBook</button>
+            <button type="button" class="btn btn-primary" data-dismiss="modal">Confirm</button>
+          </div>
+        </div>
+      </div>
+    </div>
+{% endblock %}
+{% block content_bottom_left %}
+{% endblock %}
+
+
+{% block custom_foot_js %}
+
+    <script src="{% static "js/plugins/layer/layer.js" %}"></script>
+    <script>
+        $(document).ready(function () {
+            let options = {
+                ele: $('#task_table'),
+                columnDefs: [
+                    {
+                        targets: 1,
+                        /**
+                         *
+                         * @param td  行元素
+                         * @param cellData  数据值
+                         * @param rowData  该条记录值
+                         */
+                        createdCell: function (td, cellData, rowData) {
+                            var detail_btn = '<a href="{% url "devops:task-detail" pk=DEFAULT_PK %}" class="btn-detail" data-uid="99991937" data-name="99991938">'.replace('99991937', rowData.id).replace('99991938', rowData.name) + cellData + '</a>';
+                            $(td).html(detail_btn.replace('{{ DEFAULT_PK }}', rowData.id));
+                        }
+                    },
+                    {
+                        targets: 3,
+                        createdCell: function(td, cellData, rowData){
+                            var role_detail_btn = '<a href="{% url "devops:role-detail" pk=DEFAULT_PK %}" class="btn-detail" data-uid="99991937" data-name="99991938">'.replace('99991937', rowData.ansible_role).replace('99991938', rowData.ansible_role).replace('{{DEFAULT_PK}}', rowData.ansible_role) + cellData + '</a>';
+                            $(td).html(role_detail_btn);
+                        }   
+                    },
+                    {
+                        targets: 4,
+                        createdCell: function (td, cellData, rowData) {
+                            let update_btn;
+                            let clone_btn;
+                            let del_btn;
+                            let exec_btn = '<a class="btn btn-xs btn-primary m-l-xs btn-task-exec" data-uid="99991937" data-name="99991938">{% trans "Execute" %}</a>'
+                                .replace('99991937', cellData)
+                                .replace('99991938', rowData.name);
+                            {% if request.user.is_superuser %}
+                                clone_btn = '<a href="{% url "devops:task-clone" pk=DEFAULT_PK %}" class="btn btn-xs btn-info">{% trans "Clone" %}</a>'.replace('{{ DEFAULT_PK }}', cellData);
+                                update_btn = '<a href="{% url "devops:task-update" pk=DEFAULT_PK %}" class="btn btn-xs m-l-xs btn-info">{% trans "Update" %}</a>'.replace('{{ DEFAULT_PK }}', cellData);
+
+                                del_btn = '<a class="btn btn-xs btn-danger m-l-xs btn-task-delete" data-uid="99991937" data-name="99991938">{% trans "Delete" %}</a>'
+                                    .replace('99991937', cellData)
+                                    .replace('99991938', rowData.name);
+
+                                $(td).html(clone_btn + update_btn + del_btn + exec_btn);
+                            {% else %}
+                                $(td).html(exec_btn);
+                            {% endif %}
+                        }
+                    }
+                ],
+                columns: [{data: 'id'}, {data: "name"}, {data: "desc"}, {data: "ansible_role_name"}, {data: 'id'}],
+                ajax_url: '{% url "api-devops:task-list" %}'
+            }
+            var TaskTable = jumpserver.initDataTable(options);
+
+            setTimeout(function () {
+                $("[data-toggle='tooltip']").tooltip();
+            }, 1500);
+
+        }).on('click', '.btn-task-delete', function () {
+                //确认删除
+                let $this = $(this);
+                let name = $this.data('name');
+                let uid = $this.data('uid');
+                let the_url = '{% url "api-devops:task-opt-detail" pk=DEFAULT_PK %}'.replace('{{ DEFAULT_PK }}', uid);
+                objectDelete($this, name, the_url);
+            }).on('click', '.btn-task-exec', function () {
+            //执行任务
+            let $this = $(this);
+            let uid = $this.data('uid');
+            executeTask(uid);
+        })
+
+        $('body').on('click', '.btn-detail', function () {
+            //task详情
+            let $this = $(this);
+            let uid = $this.data('uid');
+            //TaskDetail(uid);
+        });
+
+        function TaskDetail(uid){
+            //console.log(uid)
+            let id = uid
+            $('#TaskDetailModal').modal({show:true});
+            let the_url = '{% url "api-devops:task-detail" pk=DEFAULT_PK %}'.replace('{{ DEFAULT_PK }}', uid);
+            $.get(the_url, function(result){
+                //console.log(result)
+                var trs = '';
+                var desc = {
+                    "name": "{% trans 'Name' %}",
+                    "created_by": "{% trans 'Created by' %}",
+                    "date_created": "{% trans 'Date joined' %}",
+                    "desc": "{% trans 'Description' %}",
+                    "ansible_role_name": "{% trans 'Ansible Role' %}",
+                    "run_as_admin": "{% trans 'Run as admin' %}",
+                    "playbook_path": "{% trans 'Playbook Path' %}",
+                    "is_running": "{% trans 'Is running' %}",
+                    "extra_vars": "{% trans 'Extra Vars' %}",
+                    "assets": "{% trans 'Assets' %}"
+                };
+                for(var i in desc){
+
+                    if(i=='assets'){
+                        let the_url = '{% url "api-assets:asset-detail" pk=DEFAULT_PK %}'.replace('{{ DEFAULT_PK }}', result[i])
+                        $.ajax({
+                            type: 'get',
+                            url: the_url,
+                            async: false,
+                            success: function(data){
+                                result[i] = data.hostname+'('+data.ip+')';
+                            },
+                            error: function(){
+                                result[i] = "还没有添加运行主机"
+                            }
+                        });
+                    }
+
+                    trs += "<tr class='no-borders-tr'>\n" +
+                      "<td>"+ desc[i] + ":</td>"+
+                      "<td><b>"+ (result[i] === null?'':result[i]) + "</b></td>\n" +
+                      "</tr>";
+                }
+                $('#task_detail_tbody').html(trs)
+            });
+
+            $('body').on('click', '.btn-reset-playbook', function(){
+                var success_message = "success"
+                var error = "error"
+                var success = function () {
+                    setTimeout(function () {
+                        console.log("ok")
+                    }, 1000);
+                    window.location = "{% url 'devops:play-task-list' %}";
+                };
+                the_url = '{% url "api-devops:task-reset-playbook" pk=DEFAULT_PK %}'.replace('{{ DEFAULT_PK }}', id);
+                APIUpdateAttr({
+                    url: the_url,
+                    method: 'GET',
+                    success_message: success_message,
+                    error: error,
+                    success: success
+                });
+            })
+        }
+
+        function executeTask(id) {
+            let success_message = "执行成功"
+            let error = "未知错误"
+            let data = "请确认是否执行以及你十分清楚这个task执行后的结果!"
+
+            layer.open({
+                type: 1,
+                title: '请确认执行'
+                , content: data, area: ['500px']
+                , btn: ['确认', '关闭']
+                , zIndex: 500
+                , btnAlign: 'c' //按钮居中
+                , shade: 0 //不显示遮罩
+                , yes: function () {
+
+                    var the_url = '{% url "api-devops:task-run" pk=DEFAULT_PK %}'.replace('{{ DEFAULT_PK }}', id);
+                    var success = function () {
+                        setTimeout(function () {
+                            console.log("ok")
+                        }, 1000);
+                        window.location = "{% url 'devops:task-history' pk=DEFAULT_PK %}".replace('{{ DEFAULT_PK }}', id);
+                    };
+                    toastr.info("任务执行中，请稍候。。。")
+                    APIUpdateAttr({
+                        url: the_url,
+                        method: 'GET',
+                        success_message: success_message,
+                        error: error,
+                        success: success
+                    });
+                    layer.closeAll();
+                }, no: function () {
+                    layer.closeAll();
+                }
+            });
+        }
+    </script>
+{% endblock %}

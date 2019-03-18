@@ -1,0 +1,181 @@
+{% extends 'base.html' %}
+{% load i18n static %}
+{% block custom_head_css_js %}
+    <link href="{% static 'css/plugins/select2/select2.min.css' %}" rel="stylesheet">
+    <script src="{% static 'js/plugins/select2/select2.full.min.js' %}"></script>
+{% endblock %}
+{% block content %}
+    {% for host in  result.bound_asset.all %}
+       <div class="wrapper wrapper-content animated fadeInRight">
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="ibox float-e-margins">
+                        <div class="panel-options">
+                            <ul class="nav nav-tabs">
+                                <li class="active">
+                                    <a href="#" class="text-center"><i class="fa fa-laptop"></i> <b>{{ result.app_name }}</b> </a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="tab-content">
+                            <div class="col-sm-8" style="padding-left: 0;">
+                                <div class="ibox float-e-margins">
+                                    <div class="ibox-title">
+                                        <span class="label"><b>{{ host.hostname }}</b></span>
+                                        <div class="ibox-tools">
+                                            <a class="collapse-link">
+                                                <i class="fa fa-chevron-up"></i>
+                                            </a>
+                                            <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                                                <i class="fa fa-wrench"></i>
+                                            </a>
+                                            <ul class="dropdown-menu dropdown-user">
+                                            </ul>
+                                            <a class="close-link">
+                                                <i class="fa fa-times"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                    <div class="ibox-content">
+                                        <table class="table table-striped table-bordered table-hover" id="{{ host.id }}">
+                                            <thead>
+                                                <tr>
+                                                    <th><b>pid</b></th>
+                                                    <th><b>uptime</b></th>
+                                                    <th><b>status</b></th>
+                                                    <th><b>messages</b></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-4" style="padding-left: 0;padding-right: 0">
+                                <div class="panel panel-primary">
+                                    <div class="panel-heading">
+                                        <i class="fa fa-info-circle"></i> 操作框
+                                    </div>
+                                    <div class="panel-body">
+                                        <table>
+                                            <thead></thead>
+                                            <tbody>
+                                                <td class="{{ host.id }}">
+                                                    <a type="button" class="btn btn-success btn-start" href="javascript:void(0)">Start</a>
+                                                    <a type="button" class="btn btn-danger btn-stop" href="javascript:void(0)">Stop</a>
+                                                    <a type="button" class="btn btn-warning btn-restart" href="javascript:void(0)">Restart</a>
+                                                    <a type="button" class="btn btn-info btn-log" href="javascript:void(0)">Log</a>
+                                                </td>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+       </div>
+    {% endfor %}
+{% endblock %}
+{% block custom_foot_js %}
+<script>
+    jQuery(document).ready(function(){
+        //表格加载方法
+        var dynamic_status = function(x){
+
+            var name = "myTable"+x.host_id
+
+            window[name] = jQuery("#"+x.host_id).DataTable({
+                "searching": false,
+                "paging": false,
+                "lengthChange": false,
+                "processing": true,
+                "autoWidth": true,
+                "ordering": false,
+                ajax: {
+                    url: "{% url 'api-devops:supervisor-status' %}",
+                    type: "GET",
+                    data: function(d){
+                        d.app_id=x.app_id;
+                        d.host_id=x.host_id;
+                    }
+                },
+                columns : [
+                    {
+                        "data" : "pid"
+                    },
+                    {
+                        "data" : "uptime"
+                    },
+                    {
+                        "data" : "status"
+                    },
+                    {
+                        "data" : "messages"
+                    }
+                ]
+            });
+
+
+        }
+
+        //循环调用生成表格
+        {% for host in  result.bound_asset.all %}
+
+            var x = new Array();
+            x['host_id'] = '{{ host.id }}'
+            x['app_id'] = '{{ result.id }}'
+
+            dynamic_status(x)
+
+        {% endfor %}
+
+        $('body').on('click', '.btn-start', function(){
+            let app_id = '{{ result.id }}'
+            let host_id = $(this).parent().attr("class");
+            $.get("{% url 'api-devops:start_app' %}", {'app_id':app_id, 'host_id':host_id}, function(result){
+                console.log(result)
+                if(result.code==200){
+                    window.location.reload()
+                }
+                else{
+                    alert(result.message);
+                    window.location.reload();
+                }
+            });
+        });
+
+        $('body').on('click', '.btn-stop', function(){
+            let app_id = '{{ result.id }}'
+            let host_id = $(this).parent().attr("class");
+            $.get("{% url 'api-devops:stop_app' %}", {'app_id':app_id, 'host_id':host_id}, function(result){
+                console.log(result)
+                if(result.code==200){
+                    window.location.reload()
+                }
+                else{
+                    alert(result.message);
+                    window.location.reload();
+                }
+            });
+        });
+
+        $('body').on('click', '.btn-restart', function(){
+            let app_id = '{{ result.id }}'
+            let host_id = $(this).parent().attr("class");
+            $.get("{% url 'api-devops:restart_app' %}", {'app_id':app_id, 'host_id':host_id}, function(result){
+                console.log(result)
+                if(result.code==200){
+                    window.location.reload()
+                }
+                else{
+                    alert(result.message);
+                    window.location.reload();
+                }
+            });
+        });
+
+    });
+</script>
+{% endblock %}

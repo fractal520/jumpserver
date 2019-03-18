@@ -19,7 +19,7 @@
         <tbody>
           {% for deploy in deploys %}
             <tr>
-                <td><a href="javascript:void(0)">{{deploy.app_name}}</a></td>
+                <td><a href="{% url 'deploy:AppStatus' pk=deploy.pk %}">{{deploy.app_name}}</a></td>
                 <td>
                     {% if deploy.job_status %}
                         <i class="fa fa-check text-navy"></i>

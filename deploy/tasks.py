@@ -8,7 +8,11 @@ from django.core.cache import cache
 from django.utils import timezone
 from django.conf import settings
 from django.utils.translation import ugettext as _
+
+from assets.models import Asset
 from common.utils import get_logger
+from devops.utils import create_playbook_task
+from devops.models import AnsibleRole
 # from assets.models import AdminUser, Asset
 from .models import get_deploy_file_path, get_remote_data_path, get_version, get_deploy_jar_path, get_last_version, \
     save_backup_path, get_backup_path, get_version_path, get_backup_directory, update_deploy_info
@@ -58,10 +62,10 @@ def check_asset_file_exist(asset, app_name):
 @shared_task
 def check_asset_file_exist_util(asset, app_name, task_name):
     from ops.utils import update_or_create_ansible_task
-    logger.info('检查{0}是否已存在{1}应用文件'.format(asset.hostname, app_name))
+    logger.info('检查{0}是否已存在{1}应用启动文件'.format(asset.hostname, app_name))
     hosts = [asset.fullname]
     tasks = const.CHECK_FILE_TASK
-    tasks[0]['action']['args'] = "ls -la /data/{}".format(app_name)
+    tasks[0]['action']['args'] = "ls -la /etc/supervisor/config.d/{}.ini".format(app_name)
     task, create = update_or_create_ansible_task(
         task_name=task_name,
         hosts=hosts, tasks=tasks,
@@ -99,8 +103,8 @@ def push_build_file_to_asset_util(asset, task_name, app_name):
         get_remote_data_path(app_name)
     )
     tasks[5]['action']['args'] = "{0} {1}".format(CHOWN_SCRIPT_DIR, app_name)
-    tasks[6]['action']['args'] = "/etc/init.d/APP {0} {1}".format('stop', app_name)
-    tasks[7]['action']['args'] = "/etc/init.d/APP {0} {1}".format('start', app_name)
+    tasks[6]['action']['args'] = "supervisorctl {0} {1}".format('restart', app_name)
+    tasks[7]['action']['args'] = "supervisorctl {0} {1}".format('update', app_name)
     task, create = update_or_create_ansible_task(
         task_name=task_name,
         hosts=hosts, tasks=tasks,
@@ -124,6 +128,8 @@ def backup_asset_app_file(asset, app_name):
 def backup_asset_app_file_util(asset, task_name, app_name):
     from ops.utils import update_or_create_ansible_task
     version = get_last_version(app_name)
+    logger.debug(task_name)
+    logger.debug(version)
     if not version:
         logger.info("no version history found {0}".format(app_name))
         return False
@@ -232,3 +238,30 @@ def rollback_check_backup_file_exist_util(asset, task_name, app_name, version):
     logger.info(simple_result)
 
     return simple_result
+
+
+def push_app_startup_config_file(asset, app_name, java_opts=None, dloader_path=None):
+    DEFAULT_JAVA_OPTS = "-ms1024m -mx1024m -Xmn256m -Djava.awt.headless=true -XX:MaxPermSize=128m"
+    DEFAULT_DLOADER_PATH = "-Dloader.path=lib/"
+    if not java_opts:
+        java_opts = DEFAULT_JAVA_OPTS
+    if not dloader_path:
+        dloader_path = DEFAULT_DLOADER_PATH
+    logger.debug(java_opts)
+    logger.debug(dloader_path)
+    try:
+        ansible_role = AnsibleRole.objects.get(name='addsvapp')
+    except BaseException as error:
+        logger.debug(error)
+        logger.error("请线安装addsvapp的play role!")
+        return False
+    assets = Asset.objects.filter(hostname=asset.hostname)
+    return create_playbook_task(
+        assets=assets,
+        task_name="push_app_startup_config_file",
+        extra_vars={'APP_NAME': app_name, 'JAVA_OPTS': java_opts, 'DLOADER_PATH': dloader_path},
+        description="push_{}_startup_config_file to {}".format(app_name, asset.hostname),
+        ansible_role=ansible_role,
+        run_as_admin=True,
+        run_as=""
+    )

@@ -1,0 +1,151 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block custom_head_css_js %}
+    <link href="{% static 'css/plugins/select2/select2.min.css' %}" rel="stylesheet">
+    <link href="{% static "css/plugins/sweetalert/sweetalert.css" %}" rel="stylesheet">
+    <script src="{% static 'js/plugins/select2/select2.full.min.js' %}"></script>
+    <script src="{% static "js/plugins/sweetalert/sweetalert.min.js" %}"></script>
+{% endblock %}
+{% block content %}
+    <div class="wrapper wrapper-content animated fadeInRight">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="ibox float-e-margins">
+                    <div class="panel-options">
+                        <ul class="nav nav-tabs">
+                           <li class="active">
+                                <a href="{% url 'devops:task-detail' pk=object.pk %}" class="text-center"><i class="fa fa-laptop"></i> {% trans 'Task detail' %} </a>
+                            </li>
+                            <li>
+                                <a href="{% url 'devops:task-history' pk=object.pk %}" class="text-center"><i class="fa fa-laptop"></i> {% trans 'Run history' %} </a>
+                            </li>
+                            <li class="pull-right">
+                                <a class="btn btn-outline btn-default" href="{% url 'devops:task-update' pk=object.id %}"><i class="fa fa-edit"></i>更新</a>
+                            </li>
+                            {% if request.user.is_superuser %}
+                            <li class="pull-right">
+                                <a class="btn btn-outline btn-danger btn-task-delete" data-uid="{{ object.id }}" data-name="{{ object.name }}">
+                                    <i class="fa fa-trash-o"></i>删除
+                                </a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                    <div class="tab-content">
+                        <div class="col-sm-7" style="padding-left: 0">
+                            <div class="ibox float-e-margins">
+                                <div class="ibox-title">
+                                    <span class="label"><b>{{ object.name }}</b></span>
+                                    <div class="ibox-tools">
+                                        <a class="collapse-link">
+                                            <i class="fa fa-chevron-up"></i>
+                                        </a>
+                                        <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                                            <i class="fa fa-wrench"></i>
+                                        </a>
+                                        <ul class="dropdown-menu dropdown-user">
+                                        </ul>
+                                        <a class="close-link">
+                                            <i class="fa fa-times"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="ibox-content">
+                                    <table class="table">
+                                        <tbody>
+                                        <tr class="no-borders-tr">
+                                            <td width="20%">{% trans 'ID' %}:</td>
+                                            <td><b>{{ object.id }}</b></td>
+                                        </tr>
+                                        <tr>
+                                            <td width="20%">{% trans 'Name' %}:</td>
+                                            <td><b>{{ object.name }}</b></td>
+                                        </tr>
+                                        <tr>
+                                            <td width="20%">{% trans 'Ansible Role' %}:</td>
+                                            <td><b>{{ object.ansible_role.name }}</b></td>
+                                        </tr>
+                                        <tr>
+                                            <td width="20%">{% trans 'Ansible Playbook' %}:</td>
+                                            <td style="word-wrap:break-word;word-break:break-all;" width="100px";><b>{{ object.playbook_path }}</b></td>
+                                        </tr>
+                                        <tr>
+                                            <td>{% trans 'Date created' %}:</td>
+                                            <td><b>{{ object.date_created }}</b></td>
+                                        </tr>
+                                        <tr>
+                                            <td>{% trans 'Create by' %}:</td>
+                                            <td><b>{{ object.created_by }}</b></td>
+                                        </tr>
+                                        <tr>
+                                            <td>{% trans 'Description' %}:</td>
+                                            <td><b>{{ object.desc }}</b></td>
+                                        </tr>
+                                        <tr>
+                                            <td width="20%">运行主机:</td>
+                                            <td>
+                                                {% for asset in object.assets.all %}
+                                                    <li><b>{{ asset.hostname }}</b></li>
+                                                {% endfor %}
+                                            </td>
+                                        </tr>                                         
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-5" style="padding-left: 0;padding-right: 0">
+                            <div class="panel panel-danger">
+                                <div class="panel-heading">
+                                    <i class="fa fa-info-circle"></i> {% trans 'Last run failed hosts' %}
+                                </div>
+                                <div class="panel-body">
+                                    <table class="table">
+                                        <tbody>
+                                            {% for asset in object.taskhistory_set.last.failed_host %}
+                                                <li><b>{{ asset }}</b></li>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <div class="panel panel-primary">
+                                <div class="panel-heading">
+                                    <i class="fa fa-info-circle"></i> {% trans 'Last run success hosts' %}
+                                </div>
+                                <div class="panel-body">
+                                    <table class="table">
+                                        <tbody>
+                                            {% for asset in object.taskhistory_set.last.success_host %}
+                                                <li><b>{{ asset }}</b></li>
+                                            {% endfor %}                                            
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block custom_foot_js %}
+<script>
+    $('body').on('click', '.btn-task-delete', function () {
+        //确认删除
+        let $this = $(this);
+        let name = $this.data('name');
+        let uid = $this.data('uid');
+        let the_url = '{% url "api-devops:task-opt-detail" pk=DEFAULT_PK %}'.replace('{{ DEFAULT_PK }}', uid);
+        let redirect_url = '{% url "devops:play-task-list" %}'
+        objectDelete($this, name, the_url, redirect_url);
+        setTimeout(function () {
+            console.log("ok")
+        }, 1000);
+    })
+</script>
+{% endblock %}

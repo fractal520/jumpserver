@@ -1,7 +1,8 @@
 # encoding: utf-8
-from .models.deploy_list import DeployList
+
 import tarfile
 import os
+from .models.deploy_list import DeployList
 
 
 def pack_up_deploy_file(app_name, only_jar=True):
