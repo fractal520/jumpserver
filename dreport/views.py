@@ -74,18 +74,21 @@ class CityRecord(AdminUserRequiredMixin, ListView):
         """
         d = timezone.datetime.now()
         if d.month == 1:
-            last_month = d.replace(year=d.year-1, month=12)
+            # last_month = d.replace(year=d.year-1, month=12)
+            pass
         else:
-            last_month = timezone.datetime.strftime(d.replace(month=d.month-1), "%Y-%m-%d")
+            # last_month = timezone.datetime.strftime(d.replace(month=d.month-1), "%Y-%m-%d")
+            pass
 
-        queryset = CityPauseRecord.objects.filter(risk_date__gte=last_month)
+        # queryset = CityPauseRecord.objects.filter(risk_date__gte=last_month)
+        queryset = CityPauseRecord.objects.all()
         ordering = self.get_ordering()
         if ordering:
             if isinstance(ordering, str):
                 ordering = (ordering,)
             queryset = queryset.order_by(*ordering)
 
-        return queryset
+        return queryset[0:150]
 
 
 # 熔断记录更新视图

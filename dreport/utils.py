@@ -134,21 +134,19 @@ class RiskRecord(object):
             month = parm.split('-')[1]
             records = CityPauseRecord.objects.filter(
                 risk_date__month=month,
-                risk_date__year=year,
-                city__city_type__exact="CORPORATION"
+                risk_date__year=year
             )
             filename = '{}年{}月熔断记录'.format(year, month)
-            ordering = '-risk_date_time'
         else:
             print(parm)
             print(time_quantum)
             filename = parm.get('start-date')+'至'+parm.get('end-date')+'熔断记录'
             records = CityPauseRecord.objects.filter(
                 risk_date__gte=parm.get('start-date'),
-                risk_date__lte=parm.get('end-date'),
-                city__city_type__exact="CORPORATION"
+                risk_date__lte=parm.get('end-date')
             )
-            ordering = '-risk_date_time'
+
+        ordering = '-risk_date_time'
 
         week_dict = {
                      'Monday': '星期一', 'Tuesday': '星期二',
@@ -160,8 +158,10 @@ class RiskRecord(object):
         records = records.order_by(ordering)
         workbook = xlwt.Workbook(encoding='utf-8')
         worksheet = workbook.add_sheet('records')
-        titlestyle = xlwt.easyxf('pattern: pattern solid, fore_colour dark_green_ega;')
-        name_list = ['编号', '城市', 'IP', '月 周', '故障日期', '星期', '故障时间', '恢复时间', '故障时长', '备注']
+        worksheet.col(2).width = 128 * 20
+        worksheet.col(7).width = 512 * 20
+        titlestyle = xlwt.easyxf('pattern: pattern solid, fore_colour gold;', 'font: bold on;')
+        name_list = ['编号', '城市',  '故障日期', '星期', '故障时间', '恢复时间', '故障时长', '备注']
 
         colume_count = 0
         row_count = 0
@@ -178,18 +178,16 @@ class RiskRecord(object):
             worksheet.write(row_count, 0, count)
             count += 1
             worksheet.write(row_count, 1, record.city.name)
-            worksheet.write(row_count, 2, '')
-            worksheet.write(row_count, 3, '')
-            worksheet.write(row_count, 4, datetime.strftime(record.risk_date, "%Y/%m/%d"))
-            worksheet.write(row_count, 5, week_dict.get(datetime.strftime(record.risk_date, "%A")))
-            worksheet.write(row_count, 6, datetime.strftime(record.risk_date_time.astimezone(), "%H:%M"))
-            worksheet.write(row_count, 7, datetime.strftime(record.recovery_date_time.astimezone(), "%H:%M"))
+            worksheet.write(row_count, 2, datetime.strftime(record.risk_date, "%Y/%m/%d"))
+            worksheet.write(row_count, 3, week_dict.get(datetime.strftime(record.risk_date, "%A")))
+            worksheet.write(row_count, 4, datetime.strftime(record.risk_date_time.astimezone(), "%H:%M"))
+            worksheet.write(row_count, 5, datetime.strftime(record.recovery_date_time.astimezone(), "%H:%M"))
             worksheet.write(
                 row_count,
-                8,
+                6,
                 str(round((record.recovery_date_time - record.risk_date_time).seconds / 60))+'分钟'
             )
-            worksheet.write(row_count, 9, record.remark)
+            worksheet.write(row_count, 7, record.remark)
             row_count += 1
 
         workbook.save(os.path.join(save_address, filename + '.xls'))
