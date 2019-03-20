@@ -136,12 +136,15 @@
             let host_id = $(this).parent().attr("class");
             $.get("{% url 'api-devops:start_app' %}", {'app_id':app_id, 'host_id':host_id}, function(result){
                 console.log(result)
+                var table = $('#'+host_id).DataTable();
                 if(result.code==200){
-                    window.location.reload()
+                    table.ajax.reload();
+                    //window.location.reload()
                 }
                 else{
                     alert(result.message);
-                    window.location.reload();
+                    table.ajax.reload();
+                    //window.location.reload();
                 }
             });
         });
@@ -151,12 +154,15 @@
             let host_id = $(this).parent().attr("class");
             $.get("{% url 'api-devops:stop_app' %}", {'app_id':app_id, 'host_id':host_id}, function(result){
                 console.log(result)
+                var table = $('#'+host_id).DataTable();
                 if(result.code==200){
-                    window.location.reload()
+                    table.ajax.reload();
+                    //window.location.reload()
                 }
                 else{
                     alert(result.message);
-                    window.location.reload();
+                    table.ajax.reload();
+                    //window.location.reload();
                 }
             });
         });
@@ -166,12 +172,15 @@
             let host_id = $(this).parent().attr("class");
             $.get("{% url 'api-devops:restart_app' %}", {'app_id':app_id, 'host_id':host_id}, function(result){
                 console.log(result)
+                var table = $('#'+host_id).DataTable();
                 if(result.code==200){
-                    window.location.reload()
+                    table.ajax.reload();
+                    //window.location.reload()
                 }
                 else{
                     alert(result.message);
-                    window.location.reload();
+                    table.ajax.reload();
+                    //window.location.reload();
                 }
             });
         });
