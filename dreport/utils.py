@@ -159,9 +159,10 @@ class RiskRecord(object):
         workbook = xlwt.Workbook(encoding='utf-8')
         worksheet = workbook.add_sheet('records')
         worksheet.col(2).width = 128 * 20
+        worksheet.col(6).width = 168 * 20
         worksheet.col(7).width = 512 * 20
         titlestyle = xlwt.easyxf('pattern: pattern solid, fore_colour gold;', 'font: bold on;')
-        name_list = ['编号', '城市',  '故障日期', '星期', '故障时间', '恢复时间', '故障时长', '备注']
+        name_list = ['编号', '城市',  '故障日期', '星期', '故障时间', '恢复时间', '故障时长(分钟)', '备注']
 
         colume_count = 0
         row_count = 0
@@ -185,7 +186,7 @@ class RiskRecord(object):
             worksheet.write(
                 row_count,
                 6,
-                str(round((record.recovery_date_time - record.risk_date_time).seconds / 60))+'分钟'
+                round((record.recovery_date_time - record.risk_date_time).seconds / 60)
             )
             worksheet.write(row_count, 7, record.remark)
             row_count += 1
