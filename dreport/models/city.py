@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-#
+# author: niko
 import uuid
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
@@ -95,10 +95,10 @@ class CityPauseRecord(models.Model):
     risk_date = models.DateField(null=True)
     recovery_date = models.DateField(null=True, blank=True)
     risk_date_time = models.DateTimeField(null=False)
-    recovery_date_time = models.DateTimeField(null=True, blank=True)
-    risk_date_time_edit = models.DateTimeField(null=True, blank=True)
+    recovery_date_time = models.DateTimeField(null=True, blank=True, verbose_name="恢复时间")
+    risk_date_time_edit = models.DateTimeField(null=True, blank=True, verbose_name="熔断时间")
     log_name = models.CharField(max_length=256, null=False, default='')
-    remark = models.CharField(max_length=256, default='', blank=True)
+    remark = models.CharField(max_length=256, default='', blank=True, verbose_name="备注")
     risk_time = models.TimeField(null=True)
     risk_level = models.CharField(max_length=128, choices=RISK_LEVEL, null=True, blank=True, default=None, verbose_name="熔断记录等级")
 

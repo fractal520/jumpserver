@@ -50,7 +50,7 @@ class RecordUpdateForm(OrgModelForm):
         fields = ['recovery_date_time', 'remark', 'recovery_date', 'risk_level']
         widgets = {
             'risk_level': forms.Select(attrs={
-                'class': 'select2', 'data-placeholder': _('risk_level')
+                'class': 'select2', 'data-placeholder': _('请选择')
             })
         }
         labels = {}
