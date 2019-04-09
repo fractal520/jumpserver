@@ -161,7 +161,10 @@ class RiskRecord(object):
         worksheet.col(2).width = 128 * 20
         worksheet.col(6).width = 168 * 20
         worksheet.col(7).width = 512 * 20
-        titlestyle = xlwt.easyxf('pattern: pattern solid, fore_colour gold;', 'font: bold on;')
+        titlestyle = xlwt.easyxf('pattern: pattern solid, fore_colour gray25;', 'font: bold on;')
+        alert_style = xlwt.easyxf('pattern: pattern solid, fore_colour red;', 'font: bold on;')
+        warning_style = xlwt.easyxf('pattern: pattern solid, fore_colour yellow;', 'font: bold on;')
+        info_style = xlwt.easyxf('pattern: pattern solid, fore_colour pale_blue;', 'font: bold on;')
         name_list = ['编号', '城市',  '故障日期', '星期', '故障时间', '恢复时间', '故障时长(分钟)', '备注']
 
         colume_count = 0
@@ -176,19 +179,30 @@ class RiskRecord(object):
         for record in records:
             if not record.recovery_date_time:
                 continue
-            worksheet.write(row_count, 0, count)
+
+            if record.risk_level == 'Alert':
+                default_style = alert_style
+            elif record.risk_level == 'Warning':
+                default_style = warning_style
+            elif record.risk_level == 'Info':
+                default_style = info_style
+            else:
+                default_style = xlwt.easyxf()
+
+            worksheet.write(row_count, 0, count, default_style)
             count += 1
-            worksheet.write(row_count, 1, record.city.name)
-            worksheet.write(row_count, 2, datetime.strftime(record.risk_date, "%Y/%m/%d"))
-            worksheet.write(row_count, 3, week_dict.get(datetime.strftime(record.risk_date, "%A")))
-            worksheet.write(row_count, 4, datetime.strftime(record.risk_date_time.astimezone(), "%H:%M"))
-            worksheet.write(row_count, 5, datetime.strftime(record.recovery_date_time.astimezone(), "%H:%M"))
+            worksheet.write(row_count, 1, record.city.name, default_style)
+            worksheet.write(row_count, 2, datetime.strftime(record.risk_date, "%Y/%m/%d"), default_style)
+            worksheet.write(row_count, 3, week_dict.get(datetime.strftime(record.risk_date, "%A")), default_style)
+            worksheet.write(row_count, 4, datetime.strftime(record.risk_date_time.astimezone(), "%H:%M"), default_style)
+            worksheet.write(row_count, 5, datetime.strftime(record.recovery_date_time.astimezone(), "%H:%M"), default_style)
             worksheet.write(
                 row_count,
                 6,
-                round((record.recovery_date_time - record.risk_date_time).seconds / 60)
+                round((record.recovery_date_time - record.risk_date_time).seconds / 60),
+                default_style
             )
-            worksheet.write(row_count, 7, record.remark)
+            worksheet.write(row_count, 7, record.remark, default_style)
             row_count += 1
 
         workbook.save(os.path.join(save_address, filename + '.xls'))
