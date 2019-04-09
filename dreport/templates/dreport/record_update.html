@@ -26,6 +26,9 @@
     </dl>
     {% bootstrap_field form.recovery_date_time layout="horizontal" %}
     {% bootstrap_field form.remark layout="horizontal" %}
+    {% if object.city.name == '万通平台' %}
+        {% bootstrap_field form.risk_level layout="horizontal" %}
+    {% endif %}
     <div class="hr-line-dashed"></div>
     <div class="form-group">
         <div class="col-sm-4 col-sm-offset-2">

@@ -83,6 +83,13 @@ class CityMonthRecord(models.Model):
 
 # 城市熔断记录
 class CityPauseRecord(models.Model):
+
+    RISK_LEVEL = (
+        ("Alert", "影响交易"),
+        ("Warning", "影响运营及可能影响交易"),
+        ("Info", "其他")
+    )
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4)
     city = models.ForeignKey(City, on_delete=models.PROTECT, null=False, verbose_name=_("City Name"))
     risk_date = models.DateField(null=True)
@@ -93,6 +100,7 @@ class CityPauseRecord(models.Model):
     log_name = models.CharField(max_length=256, null=False, default='')
     remark = models.CharField(max_length=256, default='', blank=True)
     risk_time = models.TimeField(null=True)
+    risk_level = models.CharField(max_length=128, choices=RISK_LEVEL, null=True, blank=True, default=None, verbose_name="熔断记录等级")
 
     def __str__(self):
         return '{0}_{1}'.format(self.city.name, self.risk_date_time)
