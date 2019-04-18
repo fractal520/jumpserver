@@ -54,15 +54,68 @@
                     {% else %}
                     <a href="{% url 'deploy:DeployRollback' pk=deploy.pk %}" class="btn btn-xs btn-danger" disabled="disabled">回滚</a>
                     {% endif %}
+                    <a href="#" class="btn btn-xs btn-primary btn-log">构建信息</a>
                 </td>
             </tr>
           {% endfor %}
         </tbody>
     </table>
 </div>
+
+<div class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" id="consoleModal">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">构建信息</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row pre-scrollable">
+                    <ul class="list-group" id="console_list">
+                    </ul>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 {% endblock %}
 {% block custom_foot_js %}
 <script>
+
+$('body').on('click', '.btn-log', function(){
+    $('#consoleModal').modal('show')
+    let id = $(this).parent().attr("id");
+    //console.log(id)
+    let the_url = '{% url "api-deploy:console_log" pk=DEFAULT_PK %}'.replace('{{ DEFAULT_PK }}', id);
+    $.ajax({
+        type: "GET",
+        dataType: "json",
+        url: the_url,
+        contentType: "application/x-www-form-urlencoded",
+        success: function(result){
+            //console.log(result)
+            var html = ''
+            for(var i in result.message){
+                //console.log(result.message[i])
+                html = html + '<li class="list-group-item">' + result.message[i] + '</li>'
+            }
+            $('#console_list').append(html)
+        },
+        error: function(){
+            alert('error')
+        }
+    });
+
+});
+
+$('#consoleModal').on('hide.bs.modal', function(e){
+    $('.list-group-item').remove();
+})
+
 jQuery(document).ready(function(){
     $('#deploy_table').DataTable();
 

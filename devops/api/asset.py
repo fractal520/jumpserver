@@ -64,7 +64,7 @@ class GetSupervisorStatusApi(RetrieveAPIView):
         app = DeployList.objects.get(id=app_id)
         asset = Asset.objects.get(id=host_id)
         cesi = CesiAPI()
-        cesi.login()
+        # cesi.login()
         result = cesi.get_process(node_name=asset.hostname, process_name=app.app_name)
         if not result[0]:
             return Response(dict(data=[{
@@ -109,7 +109,7 @@ class StartAppApi(RetrieveAPIView):
     @staticmethod
     def start_app(hostname, app_name):
         cesi = CesiAPI()
-        cesi.login()
+        # cesi.login()
         return cesi.start_process(node_name=hostname, process_name=app_name)
 
     def retrieve(self, request, *args, **kwargs):
@@ -137,7 +137,7 @@ class StopAppApi(RetrieveAPIView):
     @staticmethod
     def stop_app(hostname, app_name):
         cesi = CesiAPI()
-        cesi.login()
+        # cesi.login()
         return cesi.stop_process(node_name=hostname, process_name=app_name)
 
     def retrieve(self, request, *args, **kwargs):
@@ -165,7 +165,7 @@ class ReStartAppApi(RetrieveAPIView):
     @staticmethod
     def restart_app(hostname, app_name):
         cesi = CesiAPI()
-        cesi.login()
+        # cesi.login()
         return cesi.restart_process(node_name=hostname, process_name=app_name)
 
     def retrieve(self, request, *args, **kwargs):
@@ -183,3 +183,28 @@ class ReStartAppApi(RetrieveAPIView):
             return Response(dict(code=200, message=result['message']))
         else:
             return Response(dict(code=400, message=""))
+
+
+class GetAPPLogApi(RetrieveAPIView):
+
+    queryset = DeployList.objects.all()
+    permission_classes = (IsValidUser,)
+
+    @staticmethod
+    def get_log(hostname, app_name):
+        cesi = CesiAPI()
+        return cesi.read_process_log(hostname, app_name)
+
+    def retrieve(self, request, *args, **kwargs):
+
+        asset = Asset.objects.get(id=request.GET.get('host_id'))
+        app = DeployList.objects.get(id=request.GET.get('app_id'))
+
+        try:
+            result = GetAPPLogApi.get_log(hostname=asset.hostname, app_name=app.app_name)
+            result = eval(result, {'true': 0, 'false': 1})
+            logs = result["logs"]["stdout"]
+            return Response(dict(code=200, message=logs))
+        except BaseException as error:
+            logger.error(error)
+            return Response(dict(code=400, message=str(error)))

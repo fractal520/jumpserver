@@ -2,7 +2,8 @@ from django.urls import path
 
 from .. import views
 from ..api import pushdeploy
-from deploy.api import rollback, polling
+from deploy.api import rollback, polling, GetBuildConsoleLogApiView
+
 
 app_name = 'deploy'
 
@@ -14,4 +15,5 @@ urlpatterns = [
     path('get_version_history/', pushdeploy.get_version_history, name='get_version_history'),
     path('rollback/', rollback, name='rollback'),
     path('polling/', polling, name='polling'),
+    path('app/<uuid:pk>/console_log', GetBuildConsoleLogApiView.as_view(), name='console_log')
 ]

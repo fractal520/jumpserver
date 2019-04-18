@@ -18,6 +18,7 @@ class CesiAPI(object):
         self.request = request
         self.opener = self.request.build_opener(request.HTTPCookieProcessor(self.cj), self.request.HTTPHandler)
         self.request.install_opener(self.opener)
+        self.login()
 
     def login(self):
         cesi_login_url = "http://{}/api/v2/auth/login/".format(cesi_url)
