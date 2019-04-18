@@ -102,7 +102,7 @@
                                             <label for="id_task_host">请选择需要升级的服务器</label>
                                             <select name="task_host" class="select2 form-control" id="id_task_host">
                                                 {% for asset in result.bound_asset.all %}
-                                                <option value="{{asset.id}}">{{asset.hostname}}</option>
+                                                <option value="{{asset.id}}">{{asset}}</option>
                                                 {% endfor %}
                                             </select>           
                                         </div>
