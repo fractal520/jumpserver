@@ -43,6 +43,13 @@ ROLLBACK_TASK = [
             "module": "script",
             "args": "",
         }
+    },
+    {
+        "name": "shell restart app",
+        "action": {
+            "module": "shell",
+            "args": "",
+        }
     }
 
 ]

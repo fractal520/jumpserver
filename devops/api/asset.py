@@ -200,13 +200,11 @@ class GetAPPLogApi(RetrieveAPIView):
         asset = Asset.objects.get(id=request.GET.get('host_id'))
         app = DeployList.objects.get(id=request.GET.get('app_id'))
 
-        result = GetAPPLogApi.get_log(hostname=asset.hostname, app_name=app.app_name)
-
-        result = eval(result, {'true': 0, 'false': 1})
-
-        logs = result["logs"]["stdout"]
-
-        for log in logs:
-            print(log)
-
-        return Response(dict(code=200, message=logs))
+        try:
+            result = GetAPPLogApi.get_log(hostname=asset.hostname, app_name=app.app_name)
+            result = eval(result, {'true': 0, 'false': 1})
+            logs = result["logs"]["stdout"]
+            return Response(dict(code=200, message=logs))
+        except BaseException as error:
+            logger.error(error)
+            return Response(dict(code=400, message=str(error)))

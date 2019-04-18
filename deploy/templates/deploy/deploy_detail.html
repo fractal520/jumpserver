@@ -97,41 +97,26 @@
                                     <i class="fa fa-info-circle"></i> 操作框
                                 </div>
                                 <div class="panel-body">
-                                    <table class="table group_edit" id="table-clusters">
-                                        <tbody>
-                                        <form class="deploy-form">
-                                            <tr>
-                                                <td colspan="2" class="no-borders">
-                                                    <label>请选择需要升级的服务器:</label>
-                                                    <select name="task_host">
-                                                        {% for asset in result.bound_asset.all %}
-                                                        <option value="{{asset.id}}">{{asset.hostname}}</option>
-                                                        {% endfor %}
-                                                    </select>
-                                                </td> 
-                                            </tr>
-                                            <tr>
-                                                <td colspan="2" class="no-borders">
-                                                    <label>java_opts:</label>
-                                                    <input type="text-center" name="java_opts"/> 
-                                                    
-                                                </td> 
-                                            </tr>
-                                            <tr>
-                                                <td colspan="2" class="no-borders">
-                                                    <label>dloader_path:</label>
-                                                    <input type="text-center" name="dloader_path"/>
-                                                    <input type="hidden" name="app_name" value="{{ result.app_name }}" />   
-                                                </td> 
-                                            </tr>
-                                            <tr>
-                                                <td colspan="2" class="no-borders">
-                                                    <button type="button" class="btn btn-primary btn-sm btn-deploy-per" id="">{% trans 'Confirm' %}</button>
-                                                </td>
-                                            </tr>
-                                        </form>
-                                        </tbody>
-                                    </table>
+                                    <form class="deploy-form">
+                                        <div class="form-group">
+                                            <label for="id_task_host">请选择需要升级的服务器</label>
+                                            <select name="task_host" class="select2 form-control" id="id_task_host">
+                                                {% for asset in result.bound_asset.all %}
+                                                <option value="{{asset.id}}">{{asset.hostname}}</option>
+                                                {% endfor %}
+                                            </select>           
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="java_opts">JAVA OPTIONS</label>
+                                            <input type="text" class="form-control" name="java_opts" id="java_opts" placeholder="default null" /> 
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="dloader_path">DLOADER PATH</label>
+                                            <input type="text" class="form-control" name="dloader_path" id="dloader_path" placeholder="default lib/" /> 
+                                        </div>                                 
+                                        <input type="hidden" name="app_name" value="{{ result.app_name }}" />   
+                                        <button type="button" class="btn btn-primary btn-deploy-per" id="">{% trans 'Confirm' %}</button>
+                                    </form>
                                 </div>
                             </div>
                         </div>

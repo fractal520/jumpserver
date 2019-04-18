@@ -188,6 +188,8 @@ def rollback_asset_app_version_util(asset, task_name, app_name, version):
         app_name
     )
 
+    tasks[4]['action']['args'] = "supervisorctl {0} {1}".format("restart", app_name)
+
     task, create = update_or_create_ansible_task(
         task_name=task_name,
         hosts=hosts, tasks=tasks,
@@ -241,8 +243,8 @@ def rollback_check_backup_file_exist_util(asset, task_name, app_name, version):
 
 
 def push_app_startup_config_file(asset, app_name, java_opts=None, dloader_path=None):
-    DEFAULT_JAVA_OPTS = "-ms1024m -mx1024m -Xmn256m -Djava.awt.headless=true -XX:MaxPermSize=128m"
-    DEFAULT_DLOADER_PATH = "-Dloader.path=lib/"
+    DEFAULT_JAVA_OPTS = ""
+    DEFAULT_DLOADER_PATH = "lib/"
     if not java_opts:
         java_opts = DEFAULT_JAVA_OPTS
     if not dloader_path:

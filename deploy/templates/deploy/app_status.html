@@ -57,15 +57,28 @@
                                         <i class="fa fa-info-circle"></i> 操作框
                                     </div>
                                     <div class="panel-body">
-                                        <table>
+                                        <table class="table">
                                             <thead></thead>
                                             <tbody>
-                                                <td class="{{ host.id }}">
-                                                    <a type="button" class="btn btn-success btn-start" href="javascript:void(0)">Start</a>
-                                                    <a type="button" class="btn btn-danger btn-stop" href="javascript:void(0)">Stop</a>
-                                                    <a type="button" class="btn btn-warning btn-restart" href="javascript:void(0)">Restart</a>
-                                                    <a type="button" class="btn btn-info btn-log" href="javascript:void(0)">Log</a>
-                                                </td>
+                                                <tr class="no-borders-tr">
+                                                    <td class="{{ host.id }}">
+                                                        <a type="button" class="btn btn-success btn-start" href="javascript:void(0)">Start</a>
+                                                        <a type="button" class="btn btn-danger btn-stop" href="javascript:void(0)">Stop</a>
+                                                        <a type="button" class="btn btn-warning btn-restart" href="javascript:void(0)">Restart</a>
+                                                        <a type="button" class="btn btn-info btn-log" href="javascript:void(0)">Log</a>
+                                                    </td>
+                                                </tr>
+                                                <tr class="no-borders-tr">
+                                                    <td width="50%">自动刷新
+                                                        <div class="onoffswitch">
+                                                            <input type="checkbox" class="onoffswitch-checkbox" id="{{ host.hostname }}" value="" host-id="{{ host.id }}">
+                                                            <label class="onoffswitch-label" for="{{ host.hostname }}">
+                                                                <span class="onoffswitch-inner"></span>
+                                                                <span class="onoffswitch-switch"></span>
+                                                            </label>
+                                                        </div>
+                                                    </td>
+                                                </tr>
                                             </tbody>
                                         </table>
                                     </div>
@@ -99,7 +112,6 @@
 {% endblock %}
 {% block custom_foot_js %}
 <script>
-
     function GetLogger(app_id, host_id){
         $.get("{% url 'api-devops:get_log' %}", {'app_id':app_id, 'host_id':host_id}, function(result){
             if(result.code==200){
@@ -115,6 +127,12 @@
             }
         });
     }
+
+    function ReloadTable(host_id){
+        var table = $('#'+host_id).DataTable();
+        table.ajax.reload();
+    }
+
 
     $('body').on('click', '.btn-refresh', function(){
         let app_id = '{{ result.id }}'
@@ -135,6 +153,19 @@
         $('body').find('.logger').remove();
     });
 
+    $('.onoffswitch input[type=checkbox]').on('click', function(){
+        if($(this).is(':checked')){
+            let host_id = $(this).attr("host-id");
+            //setInterval(ReloadTable(host_id),500);
+            let tf = setInterval(function(){ReloadTable(host_id)},5000);
+            $(this).attr("value", tf)
+        }else{
+            let tf = $(this).attr("value")
+            clearInterval(tf);
+        }
+    });
+
+
     jQuery(document).ready(function(){
         //表格加载方法
         var dynamic_status = function(x){
@@ -145,7 +176,7 @@
                 "searching": false,
                 "paging": false,
                 "lengthChange": false,
-                "processing": true,
+                "processing": false,
                 "autoWidth": true,
                 "ordering": false,
                 ajax: {
@@ -190,7 +221,6 @@
             let app_id = '{{ result.id }}'
             let host_id = $(this).parent().attr("class");
             $.get("{% url 'api-devops:start_app' %}", {'app_id':app_id, 'host_id':host_id}, function(result){
-                console.log(result)
                 var table = $('#'+host_id).DataTable();
                 if(result.code==200){
                     table.ajax.reload();
@@ -208,7 +238,6 @@
             let app_id = '{{ result.id }}'
             let host_id = $(this).parent().attr("class");
             $.get("{% url 'api-devops:stop_app' %}", {'app_id':app_id, 'host_id':host_id}, function(result){
-                console.log(result)
                 var table = $('#'+host_id).DataTable();
                 if(result.code==200){
                     table.ajax.reload();
@@ -226,7 +255,6 @@
             let app_id = '{{ result.id }}'
             let host_id = $(this).parent().attr("class");
             $.get("{% url 'api-devops:restart_app' %}", {'app_id':app_id, 'host_id':host_id}, function(result){
-                console.log(result)
                 var table = $('#'+host_id).DataTable();
                 if(result.code==200){
                     table.ajax.reload();
