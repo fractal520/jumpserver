@@ -98,3 +98,16 @@ class AppStatusView(LoginRequiredMixin, DetailView):
         }
         kwargs.update(context)
         return super().get_context_data(**kwargs)
+
+
+class DeployHistoryView(LoginRequiredMixin, DetailView):
+    model = DeployList
+    template_name = 'deploy/deploy_history.html'
+
+    def get_context_data(self, **kwargs):
+        context = {
+            'app': _('deploy'),
+            'action': _('DeployHistory'),
+        }
+        kwargs.update(context)
+        return super().get_context_data(**kwargs)

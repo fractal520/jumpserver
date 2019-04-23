@@ -1,11 +1,16 @@
 from django.urls import path
 
+from rest_framework import routers
+
 from .. import views
 from ..api import pushdeploy
-from deploy.api import rollback, polling, GetBuildConsoleLogApiView
+from deploy.api import rollback, polling, GetBuildConsoleLogApiView, DeployHistoryViewSet
 
 
 app_name = 'deploy'
+
+router = routers.DefaultRouter()
+router.register('history', DeployHistoryViewSet, 'history')
 
 urlpatterns = [
     path('get_jenkins_all/', views.get_jenkins_all, name='get_jenkins_all'),
