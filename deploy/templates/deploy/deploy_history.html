@@ -43,7 +43,7 @@
                                     </div>
                                 </div>
                                 <div class="ibox-content">
-                                    <table class="table table-hover " id="task-history-list-table" >
+                                    <table class="table table-hover " id="deploy-history-list-table" >
                                         <thead>
                                             <tr>
                                                 <th class="text-center">
@@ -73,7 +73,23 @@
         jQuery(document).ready(function(){
 
             console.log('deploy history')
-            
+
+            function initTable() {
+                var options = {
+                    ele: $('#deploy-history-list-table'),
+                    buttons: [],
+                    order: [],
+                    select: [],
+                    ajax_url: '{% url "api-deploy:history-list" %}?app={{ object.pk }}',
+                    columns: [{data: function(){return ""}}, {data: "deploy_time"}, {data: "result"}, {data: 'asset'}, {data: 'version'}]
+                };
+                jumpserver.initDataTable(options);
+        }
+            $(document).ready(function () {
+                initTable();
+            });
+
+
         });
     </script>
 {% endblock %}

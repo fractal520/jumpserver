@@ -22,3 +22,5 @@ urlpatterns = [
     path('polling/', polling, name='polling'),
     path('app/<uuid:pk>/console_log', GetBuildConsoleLogApiView.as_view(), name='console_log')
 ]
+
+urlpatterns += router.urls

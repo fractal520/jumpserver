@@ -2,7 +2,7 @@
 
 from rest_framework import viewsets
 
-from deploy.models import DeployRecord
+from deploy.models import DeployRecord, DeployList
 from deploy.serializers import DeployHistorySerializer
 from common.permissions import IsValidUser
 
@@ -15,7 +15,7 @@ class DeployHistoryViewSet(IsValidUser, viewsets.ModelViewSet):
     def get_queryset(self):
         app_id = self.request.query_params.get('app')
         if app_id:
-            app = DeployRecord.objects.filter(id=app_id)
+            app = DeployList.objects.filter(id=app_id)
             self.queryset = self.queryset.filter(app_name__in=app)
 
         return self.queryset
