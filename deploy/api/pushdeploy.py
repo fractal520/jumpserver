@@ -88,15 +88,20 @@ def deploy_file_to_asset(request):
     if task[1]['dark']:
         job.published_status = False
         job.save()
-        add_version_list(app_name, version_status=False)
+        # 生成版本号
+        version = add_version_list(app_name, version_status=False)
         logger.error('发布失败，请查看错误信息 {0}'.format(task[1]['dark']))
+        # 发布记录
+        DeployRecord.add_record(asset, app_name, version, result=False)
         return JsonResponse(dict(code=400, error=task[1]['dark']))
     elif task[0]['ok']:
         job.published_time = timezone.now()
         job.published_status = True
         job.save()
+        # 生成版本号
         version = add_version_list(app_name)
         logger.info('应用{0}成功发布到{1}'.format(app_name, asset.hostname))
+        # 发布记录
         try:
             DeployRecord.add_record(asset, app_name, version)
         except BaseException as error:
