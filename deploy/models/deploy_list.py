@@ -72,6 +72,7 @@ class DeployVersion(models.Model):
     version_status = models.BooleanField(default=True)
     version = models.CharField(max_length=1024, null=True)
     backup_file_path = models.CharField(max_length=1024, null=True)
+    assets = models.ManyToManyField(Asset, blank=True, verbose_name=_("Assets"))
 
 
 def get_deploy_file_path(app_name):
@@ -340,8 +341,3 @@ class DeployRecord(models.Model):
             result=result
         )
         return True
-
-
-class DeployAsset(Asset):
-    # version = models.ForeignKey(DeployVersion, on_delete=models.PROTECT, null=True, blank=True, verbose_name="版本")
-    version = models.ManyToManyField(DeployVersion, null=True, blank=True, verbose_name="版本")
