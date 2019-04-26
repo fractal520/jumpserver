@@ -106,12 +106,19 @@ def get_version_path(app_name, version):
     return v.version_path
 
 
-def get_last_version(app_name):
+def get_last_version(app_name, asset):
     app = DeployList.objects.get(app_name=app_name)
-    version_path = DeployVersion.objects.filter(app_name_id=app.id, symbol=True)
+
+    try:
+        version_path = asset.deployversion_set.filter(app_name=app)[0]
+    except BaseException as error:
+        logger.error(error)
+        version_path = DeployVersion.objects.filter(app_name_id=app.id, symbol=True)
+
     try:
         version = version_path[0].version_path.split('/')[-1]
     except BaseException as error:
+        logger.error(error)
         return False
     return version
 
@@ -296,13 +303,15 @@ def get_app_id(app_name):
     return app.id
 
 
-def get_backup_path(app_name, version):
+def get_backup_path(app_name, asset):
+    app = DeployList.objects.get(app_name=app_name)
     try:
-        data = DeployVersion.objects.get(app_name=get_app_id(app_name), version=version)
+        # data = DeployVersion.objects.get(app_name=get_app_id(app_name), version=version)
+        version = asset.deployversion_set.filter(app_name=app)[0]
     except ObjectDoesNotExist as error:
         return error
 
-    return data.backup_file_path
+    return version.backup_file_path
 
 
 def get_backup_directory(app_name, version):

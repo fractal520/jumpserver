@@ -127,7 +127,7 @@ def backup_asset_app_file(asset, app_name):
 @shared_task
 def backup_asset_app_file_util(asset, task_name, app_name):
     from ops.utils import update_or_create_ansible_task
-    version = get_last_version(app_name)
+    version = get_last_version(app_name, asset)
     logger.debug(task_name)
     logger.debug(version)
     if not version:
@@ -215,7 +215,7 @@ def rollback_check_backup_file_exist(asset, app_name, version):
 def rollback_check_backup_file_exist_util(asset, task_name, app_name, version):
     from ops.utils import update_or_create_ansible_task
     simple_result = None
-    backup_path = get_backup_path(app_name, version)
+    backup_path = get_backup_path(app_name, asset)
     if not backup_path:
         return False
     tasks = const.CHECK_FILE_TASK
