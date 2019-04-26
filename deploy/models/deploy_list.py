@@ -340,3 +340,8 @@ class DeployRecord(models.Model):
             result=result
         )
         return True
+
+
+class DeployAsset(Asset):
+    # version = models.ForeignKey(DeployVersion, on_delete=models.PROTECT, null=True, blank=True, verbose_name="版本")
+    version = models.ManyToManyField(DeployVersion, null=True, blank=True, verbose_name="版本")
