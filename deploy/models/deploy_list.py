@@ -72,6 +72,7 @@ class DeployVersion(models.Model):
     version_status = models.BooleanField(default=True)
     version = models.CharField(max_length=1024, null=True)
     backup_file_path = models.CharField(max_length=1024, null=True)
+    assets = models.ManyToManyField(Asset, blank=True, verbose_name=_("Assets"))
 
 
 def get_deploy_file_path(app_name):
@@ -105,12 +106,21 @@ def get_version_path(app_name, version):
     return v.version_path
 
 
-def get_last_version(app_name):
+def get_last_version(app_name, asset):
     app = DeployList.objects.get(app_name=app_name)
-    version_path = DeployVersion.objects.filter(app_name_id=app.id, symbol=True)
+
+    try:
+        version_path = asset.deployversion_set.filter(app_name=app)
+        logger.info('获取到资产{}对应版本'.format(asset.hostname))
+    except BaseException as error:
+        logger.error(error)
+        version_path = DeployVersion.objects.filter(app_name_id=app.id, symbol=True)
+
     try:
         version = version_path[0].version_path.split('/')[-1]
+        logger.info('{}'.format(version))
     except BaseException as error:
+        logger.error(error)
         return False
     return version
 
@@ -296,12 +306,15 @@ def get_app_id(app_name):
 
 
 def get_backup_path(app_name, version):
+    # app = DeployList.objects.get(app_name=app_name)
     try:
-        data = DeployVersion.objects.get(app_name=get_app_id(app_name), version=version)
+        # data = DeployVersion.objects.get(app_name=get_app_id(app_name), version=version)
+        version = DeployVersion.objects.get(app_name=get_app_id(app_name), version=version)
+        logger.info('获取备份版本{}'.format(version))
     except ObjectDoesNotExist as error:
         return error
 
-    return data.backup_file_path
+    return version.backup_file_path
 
 
 def get_backup_directory(app_name, version):

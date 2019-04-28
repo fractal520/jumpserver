@@ -79,7 +79,7 @@ class DeployRollbackView(LoginRequiredMixin, DetailView):
         context = {
             'app': _('deploy'),
             'action': _('Rollback'),
-            'version': DeployVersion.objects.filter(app_name_id=self.object.id).order_by('-create_time')[:5]
+            'version': DeployVersion.objects.filter(app_name_id=self.object.id, version_status=True).order_by('-create_time')[:5]
         }
         kwargs.update(context)
         return super().get_context_data(**kwargs)
@@ -95,6 +95,19 @@ class AppStatusView(LoginRequiredMixin, DetailView):
         context = {
             'app': _('deploy'),
             'action': _('AppStatus'),
+        }
+        kwargs.update(context)
+        return super().get_context_data(**kwargs)
+
+
+class DeployHistoryView(LoginRequiredMixin, DetailView):
+    model = DeployList
+    template_name = 'deploy/deploy_history.html'
+
+    def get_context_data(self, **kwargs):
+        context = {
+            'app': _('deploy'),
+            'action': _('DeployHistory'),
         }
         kwargs.update(context)
         return super().get_context_data(**kwargs)

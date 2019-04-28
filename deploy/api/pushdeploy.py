@@ -4,13 +4,13 @@ from django.utils import timezone
 from django.core import serializers
 
 from ..models import DeployList, DeployVersion, add_version_list, turn_build_file_to_deploy, DeployRecord
-from assets.models import AdminUser, Asset
+from assets.models import Asset
 from common.utils import get_logger
 from django.http import JsonResponse, HttpResponse
 from django.core.exceptions import ObjectDoesNotExist
 from deploy.tasks import test_ansible_ping, push_build_file_to_asset_manual, \
     backup_asset_app_file, check_asset_file_exist, push_app_startup_config_file
-from ..util import pack_up_deploy_file
+from ..util import pack_up_deploy_file, add_asset_version, clean_asset_version
 
 
 logger = get_logger('jumpserver')
@@ -78,8 +78,10 @@ def deploy_file_to_asset(request):
     pack_result = pack_up_deploy_file(app_name, only_jar=False)
 
     if not pack_result:
-        add_version_list(app_name, version_status=False)
+        version = add_version_list(app_name, version_status=False)
         logger.error('文件打包失败')
+        clean_asset_version(asset, DeployList.objects.get(app_name=app_name))
+        add_asset_version(asset, version.version)
         return JsonResponse(dict(code=400, error='文件打包失败'))
 
     # use ansible to push APP to remote host
@@ -88,17 +90,26 @@ def deploy_file_to_asset(request):
     if task[1]['dark']:
         job.published_status = False
         job.save()
-        add_version_list(app_name, version_status=False)
+        # 生成版本号
+        version = add_version_list(app_name, version_status=False)
         logger.error('发布失败，请查看错误信息 {0}'.format(task[1]['dark']))
+        # 发布记录
+        clean_asset_version(asset, DeployList.objects.get(app_name=app_name))
+        add_asset_version(asset, version.version)
+        DeployRecord.add_record(asset, app_name, version, result=False)
         return JsonResponse(dict(code=400, error=task[1]['dark']))
     elif task[0]['ok']:
         job.published_time = timezone.now()
         job.published_status = True
         job.save()
+        # 生成版本号
         version = add_version_list(app_name)
         logger.info('应用{0}成功发布到{1}'.format(app_name, asset.hostname))
+        # 发布记录
         try:
             DeployRecord.add_record(asset, app_name, version)
+            clean_asset_version(asset, DeployList.objects.get(app_name=app_name))
+            add_asset_version(asset, version.version)
         except BaseException as error:
             logger.error(error)
         return JsonResponse(dict(code=200, task=task))
