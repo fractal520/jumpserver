@@ -16,6 +16,6 @@ class DeployHistoryViewSet(IsValidUser, viewsets.ModelViewSet):
         app_id = self.request.query_params.get('app')
         if app_id:
             app = DeployList.objects.filter(id=app_id)
-            self.queryset = self.queryset.filter(app_name__in=app)
+            self.queryset = self.queryset.filter(app_name__in=app).order_by("-deploy_time")
 
         return self.queryset

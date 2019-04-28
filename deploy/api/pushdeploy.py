@@ -81,7 +81,7 @@ def deploy_file_to_asset(request):
         version = add_version_list(app_name, version_status=False)
         logger.error('文件打包失败')
         clean_asset_version(asset, DeployList.objects.get(app_name=app_name))
-        add_asset_version(asset, version)
+        add_asset_version(asset, version.version)
         return JsonResponse(dict(code=400, error='文件打包失败'))
 
     # use ansible to push APP to remote host
@@ -95,7 +95,7 @@ def deploy_file_to_asset(request):
         logger.error('发布失败，请查看错误信息 {0}'.format(task[1]['dark']))
         # 发布记录
         clean_asset_version(asset, DeployList.objects.get(app_name=app_name))
-        add_asset_version(asset, version)
+        add_asset_version(asset, version.version)
         DeployRecord.add_record(asset, app_name, version, result=False)
         return JsonResponse(dict(code=400, error=task[1]['dark']))
     elif task[0]['ok']:
@@ -109,7 +109,7 @@ def deploy_file_to_asset(request):
         try:
             DeployRecord.add_record(asset, app_name, version)
             clean_asset_version(asset, DeployList.objects.get(app_name=app_name))
-            add_asset_version(asset, version)
+            add_asset_version(asset, version.version)
         except BaseException as error:
             logger.error(error)
         return JsonResponse(dict(code=200, task=task))

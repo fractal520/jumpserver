@@ -46,6 +46,7 @@ def clean_asset_version(asset, app):
 
 
 def add_asset_version(asset, version):
+    logger.debug(version)
     try:
         version = DeployVersion.objects.get(version=version)
         version.assets.add(asset)
