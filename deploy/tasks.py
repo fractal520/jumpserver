@@ -13,6 +13,7 @@ from assets.models import Asset
 from common.utils import get_logger
 from devops.utils import create_playbook_task
 from devops.models import AnsibleRole
+from devops.tasks import run_ansible_task
 # from assets.models import AdminUser, Asset
 from .models import get_deploy_file_path, get_remote_data_path, get_version, get_deploy_jar_path, get_last_version, \
     save_backup_path, get_backup_path, get_version_path, get_backup_directory, update_deploy_info
@@ -112,9 +113,9 @@ def push_build_file_to_asset_util(asset, task_name, app_name):
         options=const.TASK_OPTIONS, run_as_admin=True, created_by='System'
     )
 
-    result = task.run()
-
-    return result
+    # result = task.run()
+    result = run_ansible_task(str(task.id))
+    return result, task.get_latest_adhoc()
 
 
 # backup function #

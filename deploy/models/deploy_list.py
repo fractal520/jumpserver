@@ -9,6 +9,8 @@ from django.utils.translation import ugettext_lazy as _
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from ..pjenkins.exec_jenkins import JenkinsWork
 from assets.models import Asset
+from users.models import User
+from ops.models import AdHocRunHistory
 from common.utils import get_logger
 from datetime import datetime
 
@@ -339,17 +341,21 @@ class DeployRecord(models.Model):
     version = models.ForeignKey(DeployVersion, on_delete=models.PROTECT, null=True, verbose_name=_("App version"))
     deploy_time = models.DateTimeField(auto_now_add=True)
     result = models.BooleanField(default=True)
+    deploy_user = models.ForeignKey(User, on_delete=models.PROTECT, null=True, verbose_name=_("User"))
+    history = models.ForeignKey(AdHocRunHistory, on_delete=models.CASCADE, null=True, verbose_name=_("History"))
 
     def __str__(self):
         return "{}-{} to {}".format(self.deploy_time, self.version.version, self.asset.hostname)
 
     @classmethod
-    def add_record(cls, asset, app_name, version, result=True):
+    def add_record(cls, asset, app_name, version, result=True, user=None, history=None):
         app = DeployList.objects.get(app_name=app_name)
         DeployRecord.objects.create(
             asset=asset,
             app_name=app,
             version=version,
-            result=result
+            result=result,
+            deploy_user=user,
+            history=history
         )
         return True
