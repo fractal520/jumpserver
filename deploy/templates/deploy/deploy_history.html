@@ -84,11 +84,20 @@
                     select: [],
                     ajax_url: '{% url "api-deploy:history-list" %}?app={{ object.pk }}',
                     columnDefs: [
-                    {targets: 6, createdCell: function (td, cellData) {
-                        var detail_btn = '<a class="btn btn-xs btn-primary m-l-xs btn-run" href="{% url 'ops:adhoc-history-detail' pk=DEFAULT_PK %}">{% trans "Detail" %}</a>'.replace('{{ DEFAULT_PK }}', cellData);
+                        {targets: 2, createdCell: function (td, cellData) {
                             if (cellData) {
-                               $(td).html(detail_btn);
+                                let html = '<i class="fa fa-check text-navy"></i>';
+                                $(td).html(html);
+                            }else {
+                                let html = '<i class="fa fa-times text-danger"></i>';
+                                $(td).html(html);
                             }
+                        }},
+                        {targets: 6, createdCell: function (td, cellData) {
+                            var detail_btn = '<a class="btn btn-xs btn-primary m-l-xs btn-run" href="{% url 'ops:adhoc-history-detail' pk=DEFAULT_PK %}">{% trans "Detail" %}</a>'.replace('{{ DEFAULT_PK }}', cellData);
+                                if (cellData) {
+                                   $(td).html(detail_btn);
+                                }
                         }}
                     ],
                     columns: [
