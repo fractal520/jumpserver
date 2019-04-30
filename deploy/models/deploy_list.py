@@ -353,7 +353,7 @@ class DeployRecord(models.Model):
         return "{}-{} to {}".format(self.deploy_time, self.version.version, self.asset.hostname)
 
     @classmethod
-    def add_record(cls, asset, app_name, version, result=True, user=None, history=None):
+    def add_record(cls, asset, app_name, version, result=True, user=None, history=None, record_type="DEPLOY"):
         app = DeployList.objects.get(app_name=app_name)
         DeployRecord.objects.create(
             asset=asset,
@@ -361,6 +361,7 @@ class DeployRecord(models.Model):
             version=version,
             result=result,
             deploy_user=user,
-            history=history
+            history=history,
+            record_type=record_type,
         )
         return True

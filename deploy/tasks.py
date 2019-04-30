@@ -204,7 +204,7 @@ def rollback_asset_app_version_util(asset, task_name, app_name, version):
         update_deploy_info(app_name, deploy_file_path)
 
     # logger.info(result[0]['ok'])
-    return result
+    return result, task.get_latest_adhoc()
 
 
 # rollback check backupfile exist
@@ -240,7 +240,7 @@ def rollback_check_backup_file_exist_util(asset, task_name, app_name, version):
 
     logger.info(simple_result)
 
-    return simple_result
+    return simple_result, task.get_latest_adhoc()
 
 
 def push_app_startup_config_file(asset, app_name, java_opts=None, dloader_path=None):
