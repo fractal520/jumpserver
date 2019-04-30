@@ -1,6 +1,6 @@
 # encoding: utf-8
 
-from deploy.models import DeployList, DeployRecord
+from deploy.models import DeployList, DeployRecord, DeployVersion
 from assets.models import Asset
 from django.http import JsonResponse
 from django.core.exceptions import ObjectDoesNotExist
@@ -25,13 +25,13 @@ def rollback(request):
     last_backup_history = last_backup_adhoc.latest_history
     if exist_result == 'not':
         logger.error('{0}{1}备份文件不存在'.format(app_name, version))
-        DeployRecord.add_record(asset, app_name, version, user=request.user, history=last_backup_history,
-                                record_type="ROLLBACK", result=False)
+        DeployRecord.add_record(asset, app_name, DeployVersion.objects.get(version=version),
+                                user=request.user, history=last_backup_history, record_type="ROLLBACK", result=False)
         return JsonResponse(dict(code=400, error='{0}{1}备份文件不存在'.format(app_name, version)))
     if not exist_result:
         logger.error('{0}{1}回滚发生未知错误'.format(app_name, version))
-        DeployRecord.add_record(asset, app_name, version, user=request.user, history=last_backup_history,
-                                record_type="ROLLBACK", result=False)
+        DeployRecord.add_record(asset, app_name, DeployVersion.objects.get(version=version),
+                                user=request.user, history=last_backup_history, record_type="ROLLBACK", result=False)
         return JsonResponse(dict(code=400, error='unknown error'))
 
     # 获取回滚运行结果和历史记录
@@ -40,8 +40,8 @@ def rollback(request):
 
     if result[0]['failed']:
         logger.error("回滚,错误信息:{0}".format(result[0]['failed']))
-        DeployRecord.add_record(asset, app_name, version, user=request.user, history=last_history,
-                                record_type="ROLLBACK", result=False)
+        DeployRecord.add_record(asset, app_name, DeployVersion.objects.get(version=version), user=request.user,
+                                history=last_history,record_type="ROLLBACK", result=False)
         return JsonResponse(dict(code=400, error=str(result[0]['failed'])))
 
     if not clean_asset_version(asset, DeployList.objects.get(app_name=app_name)) or not add_asset_version(asset, version):
@@ -49,6 +49,7 @@ def rollback(request):
 
     # 发布记录和日志
     logger.info('{0} {1}成功回滚到{2}'.format(asset.hostname, app_name, version))
-    DeployRecord.add_record(asset, app_name, version, user=request.user, history=last_history, record_type="ROLLBACK")
+    DeployRecord.add_record(asset, app_name, DeployVersion.objects.get(version=version), user=request.user,
+                            history=last_history, record_type="ROLLBACK")
 
     return JsonResponse(dict(code=200, msg=str(result)))
