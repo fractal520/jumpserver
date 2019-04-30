@@ -235,7 +235,8 @@ def rollback_check_backup_file_exist_util(asset, task_name, app_name, version):
         logger.error(result[1]['dark'])
         return False
     if result[0]['ok']:
-        simple_result = result[0]['ok'][asset.fullname]['CHECK_FILE_EXIST']['stdout']
+        logger.debug(result[0]['ok'])
+        simple_result = result[0]['ok'][asset.fullname]['检查文件是否存在']['stdout']
 
     logger.info(simple_result)
 

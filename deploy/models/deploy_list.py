@@ -343,6 +343,11 @@ class DeployRecord(models.Model):
     result = models.BooleanField(default=True)
     deploy_user = models.ForeignKey(User, on_delete=models.PROTECT, null=True, verbose_name=_("User"))
     history = models.ForeignKey(AdHocRunHistory, on_delete=models.CASCADE, null=True, verbose_name=_("History"))
+    record_type = models.CharField(
+        choices=(("DEPLOY", "发布"), ("ROLLBACK", "回滚")),
+        max_length=128,
+        default="DEPLOY"
+    )
 
     def __str__(self):
         return "{}-{} to {}".format(self.deploy_time, self.version.version, self.asset.hostname)

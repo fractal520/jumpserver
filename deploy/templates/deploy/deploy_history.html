@@ -53,6 +53,7 @@
                                                 <th>{% trans 'Status' %}</th>
                                                 <th>{% trans 'Asset' %}</th>
                                                 <th>{% trans 'Version' %}</th>
+                                                <th>{% trans 'Type' %}</th>
                                                 <th>{% trans 'User' %}</th>
                                                 <th>{% trans 'History' %}</th>
                                             </tr>
@@ -93,7 +94,7 @@
                                 $(td).html(html);
                             }
                         }},
-                        {targets: 6, createdCell: function (td, cellData) {
+                        {targets: 7, createdCell: function (td, cellData) {
                             var detail_btn = '<a class="btn btn-xs btn-primary m-l-xs btn-run" href="{% url 'ops:adhoc-history-detail' pk=DEFAULT_PK %}">{% trans "Detail" %}</a>'.replace('{{ DEFAULT_PK }}', cellData);
                                 if (cellData) {
                                    $(td).html(detail_btn);
@@ -106,6 +107,7 @@
                         {data: "result"},
                         {data: 'asset'},
                         {data: 'version'},
+                        {data: 'record_type'},
                         {data: 'deploy_user'},
                         {data:'history'}
                         ]
