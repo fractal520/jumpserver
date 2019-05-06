@@ -17,35 +17,35 @@ TEST_CONN_TASKS = [
 
 ROLLBACK_TASK = [
     {
-        "name": "shell script compress backup.",
+        "name": "正在执行解压文件脚本",
         "action": {
             "module": "script",
             "args": "",
         }
     },
     {
-        "name": "remove link",
+        "name": "移除当前软连接",
         "action": {
             "module": "file",
             "args": "",
         }
     },
     {
-        "name": "create old_version link",
+        "name": "创建回滚版本软连接",
         "action": {
             "module": "file",
             "args": "",
         }
     },
     {
-        "name": "shell script change owner.",
+        "name": "修改文件所属权",
         "action": {
             "module": "script",
             "args": "",
         }
     },
     {
-        "name": "shell restart app",
+        "name": "重启应用",
         "action": {
             "module": "shell",
             "args": "",
@@ -56,7 +56,7 @@ ROLLBACK_TASK = [
 
 CHECK_FILE_TASK = [
     {
-        "name": "CHECK_FILE_EXIST",
+        "name": "检查文件是否存在",
         "action": {
             "module": "shell",
             "args": ""
@@ -67,7 +67,7 @@ CHECK_FILE_TASK = [
 
 BACKUP_FILE = [
     {
-        "name": "backup asset app file",
+        "name": "备份资产应用文件",
         "action": {
             "module": "script",
             "args": ""
@@ -78,56 +78,56 @@ BACKUP_FILE = [
 
 COPY_FILE_TO_TASK = [
     {
-        "name": "create dir script",
+        "name": "执行目录创建脚本",
         "action": {
             "module": "script",
             "args": ""
         }
     },
     {
-        "name": "copy tar file to asset",
+        "name": "开始发送打包文件",
         "action": {
             "module": "copy",
             "args": ""
         }
     },
     {
-        "name": "remove link",
+        "name": "移除当前软连接",
         "action": {
             "module": "file",
             "args": "",
         }
     },
     {
-        "name": "compress tar script",
+        "name": "执行解压文件脚本",
         "action": {
             "module": "script",
             "args": ""
         }
     },
     {
-        "name": "create new link",
+        "name": "新建软连接",
         "action": {
             "module": "file",
             "args": "",
         }
     },
     {
-        "name": "script",
+        "name": "修改文件所属权",
         "action": {
             "module": "script",
             "args": "",
         }
     },
     {
-        "name": "shell",
+        "name": "重启应用",
         "action": {
             "module": "shell",
             "args": "",
         }
     },
     {
-        "name": "shell",
+        "name": "更新SuperVisor配置文件",
         "action": {
             "module": "shell",
             "args": "",

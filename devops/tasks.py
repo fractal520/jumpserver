@@ -5,6 +5,7 @@ from celery import shared_task, subtask
 from django.utils.translation import ugettext as _
 from django.conf import settings
 from common.utils import get_logger, get_object_or_none
+from ops.models import Task
 from devops.utils import create_playbook_task
 from devops import const
 from devops.models import PlayBookTask
@@ -77,3 +78,20 @@ def reset_task_playbook_path(tid):
     else:
         logger.error('Reset playbook path failed!')
         return False
+
+
+@shared_task
+def run_ansible_task(tid, callback=None, **kwargs):
+    """
+    :param tid: is the tasks serialized data
+    :param callback: callback function name
+    :return:
+    """
+    task = get_object_or_none(Task, id=tid)
+    if task:
+        result = task.run()
+        if callback is not None:
+            subtask(callback).delay(result, task_name=task.name)
+        return result
+    else:
+        logger.error("No task found")

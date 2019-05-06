@@ -13,6 +13,7 @@ from assets.models import Asset
 from common.utils import get_logger
 from devops.utils import create_playbook_task
 from devops.models import AnsibleRole
+from devops.tasks import run_ansible_task
 # from assets.models import AdminUser, Asset
 from .models import get_deploy_file_path, get_remote_data_path, get_version, get_deploy_jar_path, get_last_version, \
     save_backup_path, get_backup_path, get_version_path, get_backup_directory, update_deploy_info
@@ -112,9 +113,9 @@ def push_build_file_to_asset_util(asset, task_name, app_name):
         options=const.TASK_OPTIONS, run_as_admin=True, created_by='System'
     )
 
-    result = task.run()
-
-    return result
+    # result = task.run()
+    result = run_ansible_task(str(task.id))
+    return result, task.get_latest_adhoc()
 
 
 # backup function #
@@ -203,7 +204,7 @@ def rollback_asset_app_version_util(asset, task_name, app_name, version):
         update_deploy_info(app_name, deploy_file_path)
 
     # logger.info(result[0]['ok'])
-    return result
+    return result, task.get_latest_adhoc()
 
 
 # rollback check backupfile exist
@@ -234,11 +235,12 @@ def rollback_check_backup_file_exist_util(asset, task_name, app_name, version):
         logger.error(result[1]['dark'])
         return False
     if result[0]['ok']:
-        simple_result = result[0]['ok'][asset.fullname]['CHECK_FILE_EXIST']['stdout']
+        logger.debug(result[0]['ok'])
+        simple_result = result[0]['ok'][asset.fullname]['检查文件是否存在']['stdout']
 
     logger.info(simple_result)
 
-    return simple_result
+    return simple_result, task.get_latest_adhoc()
 
 
 def push_app_startup_config_file(asset, app_name, java_opts=None, dloader_path=None):

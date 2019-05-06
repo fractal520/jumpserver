@@ -9,6 +9,9 @@ class DeployHistorySerializer(serializers.ModelSerializer):
     asset = serializers.SerializerMethodField()
     app_name = serializers.SerializerMethodField()
     version = serializers.SerializerMethodField()
+    deploy_user = serializers.SerializerMethodField()
+    history = serializers.SerializerMethodField()
+    record_type = serializers.SerializerMethodField()
 
     class Meta:
         model = DeployRecord
@@ -25,3 +28,21 @@ class DeployHistorySerializer(serializers.ModelSerializer):
     @staticmethod
     def get_version(obj):
         return obj.version.version
+
+    @staticmethod
+    def get_deploy_user(obj):
+        try:
+            return obj.deploy_user.name
+        except AttributeError as error:
+            return None
+
+    @staticmethod
+    def get_history(obj):
+        try:
+            return obj.history.id
+        except AttributeError as error:
+            return None
+
+    @staticmethod
+    def get_record_type(obj):
+        return obj.get_record_type_display()

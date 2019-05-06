@@ -85,7 +85,9 @@ def deploy_file_to_asset(request):
         return JsonResponse(dict(code=400, error='文件打包失败'))
 
     # use ansible to push APP to remote host
-    task = push_build_file_to_asset_manual(asset, app_name)
+    task, last_adhoc = push_build_file_to_asset_manual(asset, app_name)
+    last_history = last_adhoc.latest_history
+    logger.debug(last_history)
     job = DeployList.objects.get(app_name=app_name)
     if task[1]['dark']:
         job.published_status = False
@@ -96,7 +98,7 @@ def deploy_file_to_asset(request):
         # 发布记录
         clean_asset_version(asset, DeployList.objects.get(app_name=app_name))
         add_asset_version(asset, version.version)
-        DeployRecord.add_record(asset, app_name, version, result=False)
+        DeployRecord.add_record(asset, app_name, version, result=False, user=request.user, history=last_history)
         return JsonResponse(dict(code=400, error=task[1]['dark']))
     elif task[0]['ok']:
         job.published_time = timezone.now()
@@ -105,9 +107,15 @@ def deploy_file_to_asset(request):
         # 生成版本号
         version = add_version_list(app_name)
         logger.info('应用{0}成功发布到{1}'.format(app_name, asset.hostname))
+
+        try:
+            logger.debug(request.user)
+        except BaseException as error:
+            logger.debug(error)
+
         # 发布记录
         try:
-            DeployRecord.add_record(asset, app_name, version)
+            DeployRecord.add_record(asset, app_name, version, user=request.user, history=last_history)
             clean_asset_version(asset, DeployList.objects.get(app_name=app_name))
             add_asset_version(asset, version.version)
         except BaseException as error:
