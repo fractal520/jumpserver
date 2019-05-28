@@ -32,7 +32,7 @@
                 <td>{{deploy.published_time}}</td>
                 <td>
                     {% for asset in deploy.bound_asset.all %}
-                    <li>{{asset.hostname}}</li>
+                    <li><a class="asset_detail" asset-id="{{asset.id}}" data-toggle="modal" data-target="#user_asset_detail_modal" tabindex="0">{{asset.hostname}}</a></li>
                     {% endfor %}
                 </td>
                 <td id="{{deploy.id}}">
@@ -81,7 +81,7 @@
         </div>
     </div>
 </div>
-
+{% include 'assets/_user_asset_detail_modal.html' %}
 {% endblock %}
 {% block custom_foot_js %}
 <script>
@@ -115,6 +115,45 @@ $('body').on('click', '.btn-log', function(){
 $('#consoleModal').on('hide.bs.modal', function(e){
     $('.list-group-item').remove();
 })
+
+//asset detail modal
+$('body').on('click', '.asset_detail', function(){
+    var asset_id = this.getAttribute("asset-id");
+    $.ajax({
+        type: "GET",
+        dataType: "json",
+        url: "{% url 'api-perms:my-assets' %}",
+        contentType: "application/x-www-form-urlencoded",
+        success: function (result){
+            var data = result;
+            var trs = '';
+            var desc = {
+                'hostname': "{% trans 'Hostname' %}",
+                'ip': "{% trans 'IP' %}",
+                'port': "{% trans 'Port' %}",
+                'protocol': "{% trans 'Protocol' %}",
+                'platform': "{% trans 'Platform' %}",
+                'os': "{% trans 'OS' %}",
+                'system_users_join': "{% trans 'System user' %}",
+                'domain': "{% trans 'Domain' %}",
+                'is_active': "{% trans 'Is active' %}",
+                'comment': "{% trans 'Comment' %}"
+                {#'date_joined': "{% trans 'Date joined' %}",#}
+            };
+            $.each(data, function(index, value){
+                if(value.id === asset_id){
+                    for(var i in desc){
+                        trs += "<tr class='no-borders-tr'>\n" +
+                          "<td>"+ desc[i] + ":</td>"+
+                          "<td><b>"+ (value[i] === null?'':value[i]) + "</b></td>\n" +
+                          "</tr>";
+                    }
+                }
+            });
+            $('#asset_detail_tbody').html(trs)
+        }
+    });
+});
 
 jQuery(document).ready(function(){
     $('#deploy_table').DataTable();
