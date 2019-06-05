@@ -5,6 +5,7 @@ from .. import views
 app_name = 'devops'
 
 urlpatterns = [
+    path('devops/index/', views.DevOpsIndexView.as_view(), name='index'),
     path('app-form/', views.UserAssetListView.as_view(), name='app-form'),
     path('devops/play-task-list/', views.PlayBookListView.as_view(), name='play-task-list'),
     path('devops/play-task/create', views.TaskCreateView.as_view(), name='task-create'),
