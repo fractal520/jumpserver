@@ -28,6 +28,17 @@ class DevOpsIndexView(LoginRequiredMixin, TemplateView):
         return super().get_context_data(**kwargs)
 
 
+class FileCheckListView(LoginRequiredMixin, TemplateView):
+    template_name = 'devops/file_list.html'
+
+    def get_context_data(self, **kwargs):
+        context = {
+            'action': _('对账文件检查状态'),
+        }
+        kwargs.update(context)
+        return super().get_context_data(**kwargs)
+
+
 class UserAssetListView(LoginRequiredMixin, TemplateView):
     template_name = 'devops/user_asset_list.html'
 
