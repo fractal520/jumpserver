@@ -3,7 +3,7 @@
 import json
 import requests as Requests
 
-from rest_framework.generics import RetrieveAPIView, CreateAPIView, GenericAPIView, RetrieveDestroyAPIView
+from rest_framework.generics import RetrieveAPIView, CreateAPIView, GenericAPIView
 from rest_framework.response import Response
 
 from common.permissions import IsValidUser
@@ -57,8 +57,8 @@ class DeleteFileCheckJobAPIView(GenericAPIView):
 
     def get(self, request, *args, **kwargs):
         job_id = kwargs.get('pk')
-        the_url = "http://10.128.1.197:5050/api/delete/job/{}".format(job_id)
+        the_url = "http://127.0.0.1:5050/api/delete/job/{}".format(job_id)
         response = Requests.get(url=the_url)
         code = response.status_code
-        msg = response.text
+        msg = json.loads(response.text).get('msg')
         return Response(dict(code=code, msg=msg))
