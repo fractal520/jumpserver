@@ -47,9 +47,7 @@
                 <li class=""><a href="{% url 'devops:play-task-list' %}">PlayBook任务列表</a></li>
                 <li class="active"><a href="{% url 'devops:filecheck' %}">对账文件检查状态</a></li>
                 <li class="divider"></li>
-                {% if request.user.is_superuser %}
                 <li><a id="btn-create-form" href="javascript:void(0)" class="btn-create-form" data-toggle="modal" data-target="#FileCheckCreateModal">创建文件检查任务</a></li>
-                {% endif %}
             </ul>
         </div>
     </div>
