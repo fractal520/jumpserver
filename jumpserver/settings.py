@@ -64,6 +64,7 @@ INSTALLED_APPS = [
     'common.apps.CommonConfig',
     'terminal.apps.TerminalConfig',
     'audits.apps.AuditsConfig',
+    'dbops.apps.DbopsConfig',
     'deploy.apps.DeployConfig',
     'dreport.apps.DreportConfig',
     'devops.apps.DevopsConfig',
