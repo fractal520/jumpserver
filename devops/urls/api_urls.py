@@ -21,6 +21,9 @@ urlpatterns = [
     path('tasks/<uuid:pk>/run/', api.TaskRun.as_view(), name='task-run'),
     path('tasks/<uuid:pk>/reset_playbook/', api.TaskResetPlayBook.as_view(), name='task-reset-playbook'),
     path('roles/zip/install/', api.InstallZipRoleView.as_view(), name='role-zip-install'),
+    path('file_check_job/list/', api.CheckFileListAPIView.as_view(), name='file_check_list'),
+    path('file_check_job/add/', api.CreateFileCheckJobAPIView.as_view(), name='file_check_add'),
+    path('file_check_job/delete/<pk>', api.DeleteFileCheckJobAPIView.as_view(), name='file_check_delete'),
 ]
 
 urlpatterns += router.urls

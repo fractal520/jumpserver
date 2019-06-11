@@ -1,0 +1,64 @@
+# encoding: utf-8
+
+import json
+import requests as Requests
+
+from rest_framework.generics import RetrieveAPIView, CreateAPIView, GenericAPIView, RetrieveDestroyAPIView
+from rest_framework.response import Response
+
+from common.permissions import IsValidUser
+from assets.models import Asset
+
+
+class CheckFileListAPIView(RetrieveAPIView):
+
+    queryset = None
+    permission_classes = (IsValidUser,)
+
+    def retrieve(self, request, *args, **kwargs):
+        response = Requests.get(url="http://127.0.0.1:5050/api/list/run/jobs")
+        data = response.json()
+        data = data.get('data')
+        data_list = []
+        for key, value in data.items():
+            value['job_id'] = key
+            data_list.append(value)
+        return Response(data_list)
+
+
+class CreateFileCheckJobAPIView(CreateAPIView):
+
+    queryset = None
+    permission_classes = (IsValidUser,)
+
+    def post(self, request, *args, **kwargs):
+        code = 200
+        msg = ""
+        for key, value in request.data.items():
+            if not value:
+                code = 400
+                msg += "\n{}不能为空".format(key)
+        if code != 200:
+            return Response(dict(code=code, msg=msg))
+        else:
+            data = {key: value for key, value in request.data.items()}
+            data.pop('csrfmiddlewaretoken')
+            asset = Asset.objects.get(id=data.get('asset_id'))
+            data["node_ip"] = asset.ip
+            response = Requests.post(url="http://127.0.0.1:5050/api/add/job/", json=json.dumps(data))
+            msg = json.loads(response.text).get('msg')
+            return Response(dict(code=response.status_code, msg=msg))
+
+
+class DeleteFileCheckJobAPIView(GenericAPIView):
+
+    queryset = None
+    permission_classes = (IsValidUser,)
+
+    def get(self, request, *args, **kwargs):
+        job_id = kwargs.get('pk')
+        the_url = "http://10.128.1.197:5050/api/delete/job/{}".format(job_id)
+        response = Requests.get(url=the_url)
+        code = response.status_code
+        msg = response.text
+        return Response(dict(code=code, msg=msg))

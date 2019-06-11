@@ -17,6 +17,28 @@ from devops.models import PlayBookTask, TaskHistory
 logger = logging.getLogger(__name__)
 
 
+class DevOpsIndexView(LoginRequiredMixin, TemplateView):
+    template_name = 'devops/devops_index.html'
+
+    def get_context_data(self, **kwargs):
+        context = {
+            'action': _('任务中心'),
+        }
+        kwargs.update(context)
+        return super().get_context_data(**kwargs)
+
+
+class FileCheckListView(LoginRequiredMixin, TemplateView):
+    template_name = 'devops/file_list.html'
+
+    def get_context_data(self, **kwargs):
+        context = {
+            'action': _('对账文件检查状态'),
+        }
+        kwargs.update(context)
+        return super().get_context_data(**kwargs)
+
+
 class UserAssetListView(LoginRequiredMixin, TemplateView):
     template_name = 'devops/user_asset_list.html'
 
@@ -35,7 +57,7 @@ class PlayBookListView(LoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = {
             'app': _('Devops'),
-            'action': _('My Play'),
+            'action': _('Playbook任务列表'),
         }
         kwargs.update(context)
         return super().get_context_data(**kwargs)
