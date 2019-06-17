@@ -19,9 +19,9 @@ class SqlOrder(models.Model):
     ]
 
     status_items = [
-        (0, '未执行'),
-        (1, '驳回'),
-        (2, '执行中'),
+        (0, '未审核'),
+        (1, '已驳回'),
+        (2, '未执行'),
         (3, '执行成功'),
         (4, '执行失败'),
     ]
@@ -46,7 +46,7 @@ class SqlRecord(models.Model):
     '''
     SQL执行记录表
     '''
-    workid = models.CharField(max_length=50)
+    work_id = models.CharField(max_length=50)
     state = models.CharField(max_length=100)  # 执行状态
     sql = models.TextField()
     sequence = models.CharField(max_length=50)

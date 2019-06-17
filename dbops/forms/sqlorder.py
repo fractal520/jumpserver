@@ -23,6 +23,8 @@ class SqlUpdateForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user')
         super().__init__(*args, **kwargs)
+        self.initial['type'] = 1
+        self.initial['backup'] = 1
 
     def save(self, commit=True):
         instance = super().save(commit=False)

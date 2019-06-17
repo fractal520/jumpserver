@@ -63,5 +63,12 @@ class SqlExecDetail(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         qs = super().get_queryset()
-        workid = self.kwargs.get('pk')
-        return qs.filter(workid=workid)
+        work_id = self.kwargs.get('pk')
+        return qs.filter(work_id=work_id)
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = {
+            'work_id': self.kwargs.get('pk')
+        }
+        kwargs.update(context)
+        return super().get_context_data(**kwargs)
