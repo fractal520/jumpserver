@@ -3,6 +3,7 @@
 import json
 import requests as Requests
 
+from django.conf import settings
 from rest_framework.generics import RetrieveAPIView, CreateAPIView, GenericAPIView
 from rest_framework.response import Response
 
@@ -16,7 +17,7 @@ class CheckFileListAPIView(RetrieveAPIView):
     permission_classes = (IsValidUser,)
 
     def retrieve(self, request, *args, **kwargs):
-        response = Requests.get(url="http://127.0.0.1:5050/api/list/run/jobs")
+        response = Requests.get(url="http://{}/api/list/run/jobs".format(settings.RDM_URL))
         data = response.json()
         data = data.get('data')
         data_list = []
@@ -45,7 +46,7 @@ class CreateFileCheckJobAPIView(CreateAPIView):
             data.pop('csrfmiddlewaretoken')
             asset = Asset.objects.get(id=data.get('asset_id'))
             data["node_ip"] = asset.ip
-            response = Requests.post(url="http://127.0.0.1:5050/api/add/job/", json=json.dumps(data))
+            response = Requests.post(url="http://{}/api/add/job/".format(settings.RDM_URL), json=json.dumps(data))
             msg = json.loads(response.text).get('msg')
             return Response(dict(code=response.status_code, msg=msg))
 
@@ -57,7 +58,7 @@ class DeleteFileCheckJobAPIView(GenericAPIView):
 
     def get(self, request, *args, **kwargs):
         job_id = kwargs.get('pk')
-        the_url = "http://127.0.0.1:5050/api/delete/job/{}".format(job_id)
+        the_url = "http://{}/api/delete/job/{}".format(settings.RDM_URL, job_id)
         response = Requests.get(url=the_url)
         code = response.status_code
         msg = json.loads(response.text).get('msg')
