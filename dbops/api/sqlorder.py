@@ -7,18 +7,21 @@ from rest_framework.generics import UpdateAPIView
 from rest_framework.response import Response
 from dbops.lib import call_inception
 from apps.common.utils import get_logger
-from common.permissions import IsValidUser
 from dbops.models.dbinfo import DbInfo
 from dbops.task import ExecSql
 from dbops.models.sqlinfo import SqlOrder, SqlRecord
 from dbops.genrollbacksql import GenRollBackSql
 from dbops.serializer import SqlOrderSerializers
 import traceback
+from common.permissions import IsOrgAdminOrAppUser, IsValidUser
+
 
 logger = get_logger('jumpserver')
 
 
 class Check(APIView):
+
+    permission_classes = (IsValidUser, )
 
     def post(self, request):
         try:
@@ -47,6 +50,8 @@ class Check(APIView):
 
 
 class Audit(UpdateAPIView):
+
+    permission_classes = (IsValidUser,)
     queryset = SqlOrder.objects.all()
     serializer_class = SqlOrderSerializers
     lookup_field = 'work_id'
@@ -59,6 +64,9 @@ class Audit(UpdateAPIView):
 
 
 class Exec(APIView):
+
+    permission_classes = (IsValidUser,)
+
     def get(self, request, pk):
         work_id = pk
         sqlorder = SqlOrder.objects.filter(work_id=work_id).first()
@@ -81,6 +89,9 @@ class Exec(APIView):
 
 
 class RollBack(APIView):
+
+    permission_classes = (IsValidUser,)
+
     def get(self, request, pk):
         work_id = pk
         db = SqlOrder.objects.filter(work_id=work_id).first().dbinfo.db_name
