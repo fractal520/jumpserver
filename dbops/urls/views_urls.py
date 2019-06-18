@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, re_path
 
 from .. import views
 
@@ -10,5 +10,5 @@ urlpatterns = [
     path('sqlordercreate/', views.SqlOrderCreate.as_view(), name='sqlordercreate'),
     path('sqlorderlist/', views.SqlOrderList.as_view(), name='sqlorderlist'),
     path('sqlexeclist/', views.SqlExecList.as_view(), name='sqlexeclist'),
-    path(r'^sqlexecdetail/(?P<pk>[0-9]+)/$', views.SqlExecDetail.as_view(), name='sqlexecdetail'),
+    re_path(r'^sqlexecdetail/(?P<pk>[0-9]+)/$', views.SqlExecDetail.as_view(), name='sqlexecdetail'),
 ]

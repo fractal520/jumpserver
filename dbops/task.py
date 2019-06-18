@@ -15,8 +15,7 @@ class ExecSql(threading.Thread):
         self.exec_user = exec_user
         self.work_id = work_id
         self.sqlorder = SqlOrder.objects.filter(work_id=work_id).first()
-        print(str(self.sqlorder))
-        print("type exec_user is " + str(type(exec_user)))
+
     def run(self):
         self.execute()
 
@@ -39,7 +38,7 @@ class ExecSql(threading.Thread):
                     if i['errlevel'] != 0:
                         SqlOrder.objects.filter(work_id=self.work_id).update(status=4)
                     SqlRecord.objects.get_or_create(
-                        workid=self.work_id,
+                        work_id=self.work_id,
                         state=i['stagestatus'],
                         sql=i['sql'],
                         sequence=i['sequence'],

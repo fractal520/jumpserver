@@ -13,24 +13,17 @@ class Inception(object):
         self.con = object
 
     def __enter__(self):
-        logger.info('aaaa')
         inception_info = InceptionInfo.objects.first()
-        logger.info(vars(inception_info))
-        logger.info("port:" + str(type(inception_info.port)) + inception_info.port)
         port = int(inception_info.port)
-        logger.info("port:" + str(type(port)) + str(port))
         self.con = pymysql.connect(host=inception_info.host,
                                    user=inception_info.user,
                                    passwd=inception_info.password,
                                    port=port,
                                    db='',
                                    charset='utf8')
-        logger.info('pymysql')
-        logger.info(self.con)
         return self
 
     def GenerateStatements(self, Sql: str = '', Type: str = '', backup=None):
-        logger.info("Inception.__dict__" + str(self.__dict__))
         if Sql[-1] == ';':
             Sql = Sql.rstrip(';')
         elif Sql[-1] == '；':
