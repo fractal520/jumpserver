@@ -1,0 +1,110 @@
+{% extends '_base_create_update.html' %}
+{% load static %}
+{% load bootstrap3 %}
+{% load i18n %}
+{% load asset_tags %}
+{% load common_tags %}
+
+{% block custom_head_css_js_create %}
+    <link href="{% static "css/plugins/inputTags.css" %}" rel="stylesheet">
+    <script src="{% static "js/plugins/inputTags.jquery.min.js" %}"></script>
+{% endblock %}
+{% block form %}
+    <form action="" method="post" class="form-horizontal">
+    {% if form.non_field_errors %}
+         <div class="alert alert-danger">
+             {{ form.non_field_errors }}
+         </div>
+    {% endif %}
+    {% csrf_token %}
+    <div class="form-group col-md-4">
+        {% bootstrap_field form.dbinfo layout="horizontal" %}
+        {% bootstrap_field form.type layout="horizontal" %}
+        {% bootstrap_field form.backup layout="horizontal" %}
+        {% bootstrap_field form.text layout="horizontal" %}
+        <button class="btn btn-danger col-sm-offset-2" type="reset">清除</button>
+        <button id="check_sql" class="btn btn-warning" type="button">检测</button>
+        <button id="submit_button" class="btn btn-primary" type="submit" disabled="disabled">提交</button>
+    </div>
+    <div class="form-group col-md-8">
+        {% bootstrap_field form.sql layout="horizontal" %}
+        <div class="hr-line-dashed"></div>
+    </div>
+    <div>
+    <table class="table table-striped table-bordered table-hover " id="check_table" >
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>错误等级</th>
+                <th>阶段状态</th>
+                <th>错误信息</th>
+                <th>当前检查的sql</th>
+                <th>预计影响的行数</th>
+            </tr>
+        </thead>
+        <tbody id="check_table_body">
+        </tbody>
+    </table>
+    </div>
+    </form>
+{% endblock %}
+
+{% block custom_foot_js %}
+    <script>
+    function format(item) {
+        var group = item.element.parentElement.label;
+        return group + ':' + item.text;
+    }
+    $(document).ready(function () {
+        $('.select2').select2({
+            allowClear: true
+        });
+        $(".labels").select2({
+            allowClear: true,
+            templateSelection: format
+        });
+    })
+
+    $(document).ready(function () {
+        $("#check_sql").click(function(){
+            var id=$("select[name='dbinfo']").val();
+            var sql = $("textarea[name='sql']").val();
+            var data = {id:id, sql:sql};
+            console.log(data);
+            $.ajax({
+                type: "POST",
+                contentType: "application/json; charset=utf-8",
+                url: "{% url 'api-dbops:check' %}",
+                data: JSON.stringify(data),
+                success:function (data) {
+                    console.log(data)
+                    if (data.status===200) {
+                        var html = '';
+                        res = data.result;
+                        var sub = 0
+                        for (var i = 0; i < res.length; i++) {
+                            html = html + '<tr>';
+                            html = html + '<td>' + res[i].ID + '</td>';
+                            html = html + '<td>' + res[i].errlevel + '</td>';
+                            html = html + '<td>' + res[i].stagestatus + '</td>';
+                            html = html + '<td>' + res[i].errormessage + '</td>';
+                            html = html + '<td>' + res[i].sql + '</td>';
+                            html = html + '<td>' + res[i].affected_rows + '</td>';
+                            html = html + '</tr>';
+
+                            if(res[i].errlevel != 0){ sub += 1}
+                        }
+                        $('#check_table_body').html(html);
+                        if(sub === 0){
+                            $("#submit_button").attr('disabled',false);
+                        } else{
+                            $("#submit_button").attr('disabled',true);
+                        }
+                    }
+                }
+            });
+        });
+    });
+
+    </script>
+{% endblock %}

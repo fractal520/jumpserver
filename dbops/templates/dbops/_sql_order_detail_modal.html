@@ -1,0 +1,27 @@
+{% extends '_modal.html' %}
+{% load i18n %}
+{% load static %}
+<style>
+    .modal-body {
+        background-color: white !important;
+    }
+</style>
+{% block modal_id %}sql_order_detail_modal{% endblock %}
+
+{% block modal_title %}SQL任务详情{% endblock %}
+
+{% block modal_body %}
+    <div class="ibox-content" style="background-color: inherit">
+        <table class="table">
+            <tbody id="sql_order_detail_tbody">
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
+
+{% block modal_button %}
+    <button class="btn btn-warning btn-sql-reject" type="button" disabled="disabled">驳回</button>
+    <button class="btn btn-info btn-sql-agree" type="button" disabled="disabled">同意</button>
+    <button class="btn btn-success btn-sql-exec" type="button" disabled="disabled">执行</button>
+    <button data-dismiss="modal" class="btn btn-white" type="button">{% trans "Close" %}</button>
+{% endblock %}

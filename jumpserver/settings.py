@@ -64,6 +64,7 @@ INSTALLED_APPS = [
     'common.apps.CommonConfig',
     'terminal.apps.TerminalConfig',
     'audits.apps.AuditsConfig',
+    'dbops.apps.DbopsConfig',
     'deploy.apps.DeployConfig',
     'dreport.apps.DreportConfig',
     'devops.apps.DevopsConfig',
@@ -504,3 +505,6 @@ ROUTING_INSPECTION_FILE_SAVE = CONFIG.ROUTING_INSPECTION_FILE_SAVE
 CESI_URL = CONFIG.CESI_URL
 CESI_USER = CONFIG.CESI_USER
 CESI_PASS = CONFIG.CESI_PASS
+
+# 对账文件管理系统地址
+RDM_URL = CONFIG.RDM_URL

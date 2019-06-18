@@ -1,0 +1,21 @@
+{% extends '_base_list.html' %}
+{% block content_left_head %}
+    <div class="uc pull-left m-l-5 m-r-5">
+        <div class="btn-group">
+            <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">功能列表
+                <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu" role="menu">
+                <li class="active"><a href="{% url 'devops:index' %}">任务中心</a></li>
+                <li class=""><a href="{% url 'devops:play-task-list' %}">PlayBook任务列表</a></li>
+                <li class="divider"></li>
+                <li><a href="javascript:void(0)" class="">创建任务</a></li>
+                <li><a href="javascript:void(0)" class="">功能2</a></li>
+            </ul>
+        </div>
+    </div>
+{% endblock %}
+{% block table_search %}{% endblock %}
+{% block table_container %}{% endblock %}
+{% block content_bottom_left %}{% endblock %}
+{% block custom_foot_js %}{% endblock %}

@@ -1,0 +1,30 @@
+{% extends '_base_list.html' %}
+{% load i18n static %}
+{% block table_search %}{% endblock %}
+{% block content_left_head %}<a class="btn btn-xs btn-info btn-update">数据库信息</a>{% endblock %}
+{% block table_container %}
+<div id="dbinfo">
+    <table class="table table-striped table-bordered table-hover " id="deploy_table" >
+        <thead>
+            <tr>
+                <th>库名</th>
+                <th>实例名</th>
+                <th>IP地址</th>
+                <th>端口号</th>
+            </tr>
+        </thead>
+        <tbody>
+          {% for db in dbs %}
+            <tr>
+                <td>{{db.db_name}}</td>
+                <td>{{db.instance_name}}</td>
+                <td>{{db.ip}}</td>
+                <td>{{db.port}}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+{% block custom_foot_js %}
+{% endblock %}
