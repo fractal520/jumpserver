@@ -96,6 +96,11 @@ class TaskUpdateAssetsView(TaskUpdateView):
     template_name = 'devops/task_update_assets.html'
     form_class = TaskUpdateAssetsForm
 
+    def get_form(self, form_class=None):
+        if form_class is None:
+            form_class = self.get_form_class()
+        return form_class(self.request, **self.get_form_kwargs())
+
 
 class TaskCloneView(SuperUserRequiredMixin, RedirectView):
     url = reverse_lazy('devops:play-task-list')

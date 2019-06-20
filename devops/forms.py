@@ -4,6 +4,7 @@ from django import forms
 from django.utils.translation import gettext_lazy as _
 from .models import *
 from orgs.mixins import OrgModelForm
+from perms.utils import AssetPermissionUtil
 
 
 class TaskForm(forms.ModelForm):
@@ -50,6 +51,14 @@ class TaskUpdateForm(OrgModelForm):
 
 
 class TaskUpdateAssetsForm(OrgModelForm):
+
+    def __init__(self, request, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        util = AssetPermissionUtil(request.user)
+        _assets = util.get_assets_direct()
+        al = [asset.id for asset in _assets.keys()]
+        self.fields['assets'].queryset = self.fields['assets'].queryset.filter(id__in=al)
+
     class Meta:
         model = PlayBookTask
         fields = ['name', 'desc', 'extra_vars', 'assets']
