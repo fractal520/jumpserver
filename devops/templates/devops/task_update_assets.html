@@ -1,5 +1,9 @@
 {% extends 'devops/task_update.html' %}
-
+{% load static %}
+{% load bootstrap3 %}
+{% load i18n %}
+{% load asset_tags %}
+{% load common_tags %}
 {% block form %}
     <form action="" method="post" class="form-horizontal">
         {% if form.non_field_errors %}
