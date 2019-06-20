@@ -49,6 +49,23 @@ class TaskUpdateForm(OrgModelForm):
         }
 
 
+class TaskUpdateAssetsForm(OrgModelForm):
+    class Meta:
+        model = PlayBookTask
+        fields = ['name', 'desc', 'extra_vars', 'assets']
+        widgets = {
+            'assets': forms.SelectMultiple(attrs={
+                'class': 'select2', 'data-placeholder': _('assets')
+            })
+        }
+        labels = {
+            'name': '任务名称',
+            'desc': '任务描述',
+            'extra_vars': '额外变量',
+            'assets': '运行主机',
+        }
+
+
 class AnsibleRoleUpdateForm(OrgModelForm):
     class Meta:
         model = AnsibleRole
