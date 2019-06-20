@@ -92,6 +92,11 @@ class TaskUpdateView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
         return super(TaskUpdateView, self).get_context_data(**kwargs)
 
 
+class TaskUpdateAssetsView(TaskUpdateView):
+    template_name = 'devops/task_update_assets.html'
+    form_class = TaskUpdateAssetsForm
+
+
 class TaskCloneView(SuperUserRequiredMixin, RedirectView):
     url = reverse_lazy('devops:play-task-list')
 
