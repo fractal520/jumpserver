@@ -30,6 +30,7 @@ class UserGrantedAssetsApi(ListAPIView):
             set_to_root_org()
 
     def get_queryset(self):
+        term = self.request.GET.get('term', None)
         self.change_org_if_need()
         user_id = self.kwargs.get('pk', '')
         queryset = []
@@ -43,7 +44,11 @@ class UserGrantedAssetsApi(ListAPIView):
         for k, v in util.get_assets().items():
             system_users_granted = [s for s in v if s.protocol == k.protocol]
             k.system_users_granted = system_users_granted
-            queryset.append(k)
+            if term:
+                if term in k.hostname or term in k.ip:
+                    queryset.append(k)
+            else:
+                queryset.append(k)
         return queryset
 
     def get_permissions(self):
