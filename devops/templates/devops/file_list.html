@@ -240,10 +240,11 @@
                 dropdownParent:$("#FileCheckCreateModal"),
                 //ajax查询all assets
                 ajax: {
-                    url: '{% url 'api-assets:asset-list' %}',
+                    url: '{% url 'api-devops:my-assets' %}',
                     dataType: 'json',
                     crossDomain: true,
                     processResults: function (data) {
+                        console.log(data);
                         let results = $(data).each(function (index, element) {
                             element.text = element.hostname + "(" + element.ip + ")"
                         });

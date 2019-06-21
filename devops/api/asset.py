@@ -11,6 +11,7 @@ from orgs.utils import set_to_root_org
 from devops.api.cesi import CesiAPI
 from  devops.utils import translate_timestamp
 from common.utils import get_logger
+from assets.api import AssetViewSet
 
 logger = get_logger('jumpserver')
 
@@ -208,3 +209,7 @@ class GetAPPLogApi(RetrieveAPIView):
         except BaseException as error:
             logger.error(error)
             return Response(dict(code=400, message=str(error)))
+
+
+class DevOpsAssetViewSet(AssetViewSet):
+    permission_classes = (IsValidUser,)

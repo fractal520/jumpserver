@@ -5,6 +5,7 @@ from .. import api
 app_name = 'devops'
 
 router = routers.DefaultRouter()
+router.register('ops-assets', api.AssetViewSet, 'ops-assets')
 router.register('tasks-opt', api.TaskOperationViewSet, 'task-opt')
 router.register('roles', api.AnsibleRoleViewSet, 'role')
 router.register('task', api.TaskViewSet, 'task')
