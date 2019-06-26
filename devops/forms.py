@@ -128,7 +128,7 @@ class FileCheckUpdateForm(forms.Form):
 
     def _asset_choice(self):
         util = AssetPermissionUtil(self.user)
-        _assets = util.get_assets_direct()
+        _assets = util.get_assets()
         choice = [('', '----')]
         for asset in _assets.keys():
             choice = choice + [(str(asset.id), "{}({})".format(asset.ip, asset.hostname))]
