@@ -1,6 +1,5 @@
 from __future__ import unicode_literals
 
-import logging
 import json
 import requests as Requests
 
@@ -13,11 +12,12 @@ from django.conf import settings
 
 from assets.models import *
 from common.permissions import SuperUserRequiredMixin, IsValidUser
+from common.utils import get_logger
 from .forms import *
 from devops.models import PlayBookTask, TaskHistory
 # Create your views here.
 
-logger = logging.getLogger(__name__)
+logger = get_logger('jumpserver')
 
 
 class DevOpsIndexView(LoginRequiredMixin, TemplateView):
@@ -214,12 +214,13 @@ class FileCheckFormView(FormView):
         node = Asset.objects.filter(id=data.pop('asset')).first()
         data['node_ip'] = node.ip
         data['asset_id'] = str(node.id)
-
-        print(data)
-        response = Requests.post(url=url, json=json.dumps(data))
-        print(response.text)
-        print(response.status_code)
-        return True
+        try:
+            response = Requests.post(url=url, json=json.dumps(data))
+            logger.info(response.text)
+            return response
+        except BaseException as e:
+            logger.error(str(e))
+            return False
 
     def get_form(self, form_class=None):
         if form_class is None:
@@ -240,5 +241,5 @@ class FileCheckFormView(FormView):
         return kwargs
 
     def form_valid(self, form):
-        self.update_job(form.cleaned_data)
-        return super(FileCheckFormView, self).form_valid(form)
+        if self.update_job(form.cleaned_data):
+            return super(FileCheckFormView, self).form_valid(form)
