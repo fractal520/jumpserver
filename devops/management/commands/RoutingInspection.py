@@ -59,7 +59,8 @@ def genrate_routing_record(result):
     for hostname, value in result[0]['ok'].items():
         facts = value['setup']['ansible_facts']
         ansible_uptime_seconds = str(dtime.timedelta(seconds=facts.get('ansible_uptime_seconds')))
-        cpu_processor_count = facts.get('ansible_processor_count')
+        # cpu_processor_count = facts.get('ansible_processor_count')
+        cpu_processor_count = "{}*{}".format(facts.get('ansible_processor_count'), facts.get('ansible_processor_cores'))
         hostname = facts.get('ansible_hostname')
         IP = facts.get('ansible_default_ipv4').get('address')
         mb_total = facts.get('ansible_memory_mb').get('real').get('total')
