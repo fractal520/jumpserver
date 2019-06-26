@@ -176,7 +176,9 @@
                     }},
                     {targets :12, createdCell: function (td, cellData) {
                         let delete_btn = '<a class="btn btn-xs btn-danger m-l-xs btn-delete" href="javascript:void(0)" job_id="99999">{% trans "Delete" %}</a>'.replace("99999", cellData);
-                        $(td).html(delete_btn);
+                        let update_btn = '<a href="{% url "devops:filecheck-update" pk=DEFAULT_PK %}" class="btn btn-xs btn-primary m-l-xs btn-role-update">{% trans "Update" %}</a>'.replace('{{ DEFAULT_PK }}', cellData);
+                        //console.log(cellData);
+                        $(td).html(delete_btn + update_btn);
                     }}
                 ]
             };
@@ -186,18 +188,21 @@
         $("body").on('click', '.btn-delete', function () {
             let job_id = $(this).attr('job_id');
             console.log(job_id);
-            let the_url ="{% url 'api-devops:file_check_delete' pk=DEFAULT_PK %}".replace('{{ DEFAULT_PK }}', job_id);
-            $.ajax({
-                url: the_url,
-                async: false,
-                type: 'GET',
-                dataType: 'json',
-                contentType: "application/x-www-form-urlencoded",
-                success: function (result) {
-                    alert(result.msg);
-                    window.location.reload()
-                }
-            });
+            if(confirm("确定该删除任务?")){
+                //确认后的任务
+                let the_url ="{% url 'api-devops:file_check_delete' pk=DEFAULT_PK %}".replace('{{ DEFAULT_PK }}', job_id);
+                $.ajax({
+                    url: the_url,
+                    async: false,
+                    type: 'GET',
+                    dataType: 'json',
+                    contentType: "application/x-www-form-urlencoded",
+                    success: function (result) {
+                        alert(result.msg);
+                        window.location.reload()
+                    }
+                });
+            }
         });
 
         $("body").on('click', '.btn-create-job', function(){

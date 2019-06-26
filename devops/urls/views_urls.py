@@ -8,6 +8,7 @@ urlpatterns = [
     path('devops/index/', views.DevOpsIndexView.as_view(), name='index'),
     path('app-form/', views.UserAssetListView.as_view(), name='app-form'),
     path('filecheck/', views.FileCheckListView.as_view(), name='filecheck'),
+    path('filecheck/update/<pk>', views.FileCheckFormView.as_view(), name='filecheck-update'),
     path('devops/play-task-list/', views.PlayBookListView.as_view(), name='play-task-list'),
     path('devops/play-task/create', views.TaskCreateView.as_view(), name='task-create'),
     path('devops/play-task/<uuid:pk>/update', views.TaskUpdateView.as_view(), name='task-update'),

@@ -1,12 +1,15 @@
 from __future__ import unicode_literals
 
 import logging
+import json
+import requests as Requests
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
 from django.utils.translation import ugettext as _
-from django.views.generic import TemplateView, CreateView, UpdateView, RedirectView, DetailView
+from django.views.generic import TemplateView, CreateView, UpdateView, RedirectView, DetailView, FormView
 from django.urls import reverse_lazy
+from django.conf import settings
 
 from assets.models import *
 from common.permissions import SuperUserRequiredMixin, IsValidUser
@@ -23,17 +26,6 @@ class DevOpsIndexView(LoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = {
             'action': _('任务中心'),
-        }
-        kwargs.update(context)
-        return super().get_context_data(**kwargs)
-
-
-class FileCheckListView(LoginRequiredMixin, TemplateView):
-    template_name = 'devops/file_list.html'
-
-    def get_context_data(self, **kwargs):
-        context = {
-            'action': _('对账文件检查状态'),
         }
         kwargs.update(context)
         return super().get_context_data(**kwargs)
@@ -192,3 +184,61 @@ class AnsibleRoleDetailView(IsValidUser, DetailView):
         }
         kwargs.update(context)
         return super().get_context_data(**kwargs)
+
+
+class FileCheckListView(LoginRequiredMixin, TemplateView):
+    template_name = 'devops/file_list.html'
+
+    def get_context_data(self, **kwargs):
+        context = {
+            'action': _('对账文件检查状态'),
+        }
+        kwargs.update(context)
+        return super().get_context_data(**kwargs)
+
+
+class FileCheckFormView(FormView):
+    template_name = 'devops/file_list_update.html'
+    form_class = FileCheckUpdateForm
+    success_url = reverse_lazy('devops:filecheck')
+
+    def get_job_detail(self, job_id):
+        url = "http://{}/api/job/detail/{}".format(settings.RDM_URL, job_id)
+        response = Requests.get(url=url)
+        data = response.json()
+        return data.get('data')
+
+    def update_job(self, data):
+        job_id = self.request.get_full_path_info().split('/')[-1]
+        url = "http://{}/api/update/job/{}".format(settings.RDM_URL, job_id)
+        node = Asset.objects.filter(id=data.pop('asset')).first()
+        data['node_ip'] = node.ip
+        data['asset_id'] = str(node.id)
+
+        print(data)
+        response = Requests.post(url=url, json=json.dumps(data))
+        print(response.text)
+        print(response.status_code)
+        return True
+
+    def get_form(self, form_class=None):
+        if form_class is None:
+            form_class = self.get_form_class()
+        return form_class(self.request, **self.get_form_kwargs())
+
+    def get_context_data(self, **kwargs):
+        context = super(FileCheckFormView, self).get_context_data(**kwargs)
+        return context
+
+    def get_form_kwargs(self):
+        kwargs = super(FileCheckFormView, self).get_form_kwargs()
+        data = self.request
+        job_id = data.get_full_path_info().split('/')[-1]
+        kwargs.update({
+            'job_data': self.get_job_detail(job_id),
+        })
+        return kwargs
+
+    def form_valid(self, form):
+        self.update_job(form.cleaned_data)
+        return super(FileCheckFormView, self).form_valid(form)
