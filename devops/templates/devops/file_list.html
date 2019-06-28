@@ -110,9 +110,16 @@
                         <input class="form-control" type="text" id="job_name" name="job_name"/>
                         <label for="trigger">触发器</label>
                         <select class="form-control" id="trigger" name="trigger">
+                            <option value="">----</option>
                             <option value="cron">定时任务</option>
                             <option value="interval">循环任务</option>
                         </select>
+
+                        <label for="crontab">时间表</label>
+                        <input class="form-control" placeholder="请输入例: */1 2,4,5 * * *" type="text" id="crontab" name="crontab" disabled="disabled"/>
+                        <label for="time">循环间隔</label>
+                        <input class="form-control" placeholder="请输入间隔时间 单位:分钟" type="text" id="time" name="time" disabled="disabled"/>
+
                         <label for="time_delta">文件日期时间差</label>
                         <select class="form-control" id="time_delta" name="time_delta">
                             <option value="0">当天</option>
@@ -141,6 +148,18 @@
 
 {% block custom_foot_js %}
     <script>
+        $('#trigger').on('change', function () {
+            if($('#trigger').val()==='cron'){
+                $('#crontab').removeAttr("disabled");
+                $('#time').attr("disabled","disabled");
+            }else if ($('#trigger').val()==='interval') {
+                $('#time').removeAttr("disabled");
+                $('#crontab').attr("disabled","disabled");
+            }else {
+                $('#crontab').attr("disabled","disabled");
+                $('#time').attr("disabled","disabled");
+            }
+        });
         $(document).ready(function () {
             $.fn.modal.Constructor.prototype.enforceFocus = function() {};
             var the_url = "{% url 'api-devops:file_check_list' %}";

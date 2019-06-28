@@ -98,7 +98,7 @@ class PlayBookTask(models.Model):
                 total_num += value['ok'] + value['failures'] + value['unreachable']
                 success_num += value['ok']
                 failed_num += value['failures']
-            print(total_num, '/', success_num, '/', failed_num)
+            # print(total_num, '/', success_num, '/', failed_num)
 
         if result and not error:
             if failed_num == 0:
@@ -144,6 +144,8 @@ class PlayBookTask(models.Model):
 
         # 判断playbook是否存在
         if not os.path.exists(self.playbook_path) or not os.path.isfile(self.playbook_path):
+            self.is_running = False
+            self.save()
             raise FileNotFoundError('Please check playbook_path {}.'.format(self.playbook_path))
 
         # 将playbook_path传入options
