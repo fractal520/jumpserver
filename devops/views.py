@@ -197,7 +197,7 @@ class FileCheckListView(LoginRequiredMixin, TemplateView):
         return super().get_context_data(**kwargs)
 
 
-class FileCheckFormView(FormView):
+class FileCheckFormView(IsValidUser, FormView):
     template_name = 'devops/file_list_update.html'
     form_class = FileCheckUpdateForm
     success_url = reverse_lazy('devops:filecheck')

@@ -94,6 +94,7 @@
                     {
                         targets: 4,
                         createdCell: function (td, cellData, rowData) {
+                            let running_span;
                             let update_btn;
                             let clone_btn;
                             let del_btn;
@@ -101,15 +102,26 @@
                                 .replace('99991937', cellData)
                                 .replace('99991938', rowData.name);
                             {% if request.user.is_superuser %}
-                                clone_btn = '<a href="{% url "devops:task-clone" pk=DEFAULT_PK %}" class="btn btn-xs btn-info">{% trans "Clone" %}</a>'.replace('{{ DEFAULT_PK }}', cellData);
-                                update_btn = '<a href="{% url "devops:task-update" pk=DEFAULT_PK %}" class="btn btn-xs m-l-xs btn-info">{% trans "Update" %}</a>'.replace('{{ DEFAULT_PK }}', cellData);
-                                del_btn = '<a class="btn btn-xs btn-danger m-l-xs btn-task-delete" data-uid="99991937" data-name="99991938">{% trans "Delete" %}</a>'
-                                    .replace('99991937', cellData)
-                                    .replace('99991938', rowData.name);
-                                $(td).html(clone_btn + update_btn + del_btn + exec_btn);
+                                if (rowData.is_running) {
+                                    running_span = '<span class="label label-warning">正在运行</span>';
+                                    $(td).html(running_span)
+                                }else {
+                                    clone_btn = '<a href="{% url "devops:task-clone" pk=DEFAULT_PK %}" class="btn btn-xs btn-info">{% trans "Clone" %}</a>'.replace('{{ DEFAULT_PK }}', cellData);
+                                    update_btn = '<a href="{% url "devops:task-update" pk=DEFAULT_PK %}" class="btn btn-xs m-l-xs btn-info">{% trans "Update" %}</a>'.replace('{{ DEFAULT_PK }}', cellData);
+                                    del_btn = '<a class="btn btn-xs btn-danger m-l-xs btn-task-delete" data-uid="99991937" data-name="99991938">{% trans "Delete" %}</a>'
+                                        .replace('99991937', cellData)
+                                        .replace('99991938', rowData.name);
+                                    $(td).html(clone_btn + update_btn + del_btn + exec_btn);
+                                }
+
                             {% else %}
-                                update_btn = '<a href="{% url "devops:task-update-assets" pk=DEFAULT_PK %}" class="btn btn-xs m-l-xs btn-info">{% trans "Update" %}</a>'.replace('{{ DEFAULT_PK }}', cellData);
-                                $(td).html(update_btn + exec_btn);
+                                if (rowData.is_running) {
+                                    running_span = '<span class="label label-warning">正在运行</span>';
+                                    $(td).html(running_span)
+                                }else {
+                                    update_btn = '<a href="{% url "devops:task-update-assets" pk=DEFAULT_PK %}" class="btn btn-xs m-l-xs btn-info">{% trans "Update" %}</a>'.replace('{{ DEFAULT_PK }}', cellData);
+                                    $(td).html(update_btn + exec_btn);
+                                }
                             {% endif %}
                         }
                     }
@@ -229,7 +241,7 @@
                         setTimeout(function () {
                             console.log("ok")
                         }, 1000);
-                        window.location = "{% url 'devops:task-history' pk=DEFAULT_PK %}".replace('{{ DEFAULT_PK }}', id);
+                        window.location = "{% url 'devops:play-task-list' %}";
                     };
                     toastr.info("任务执行中，请稍候。。。")
                     APIUpdateAttr({
