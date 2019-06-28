@@ -1,6 +1,7 @@
 import uuid
 import json
 import os
+import datetime
 import yaml
 from django.db import models
 from django.conf import settings
@@ -91,6 +92,7 @@ class PlayBookTask(models.Model):
         total_num = 0
         success_num = 0
         failed_num = 0
+        summery_result = ""
 
         if result:
 
@@ -98,7 +100,28 @@ class PlayBookTask(models.Model):
                 total_num += value['ok'] + value['failures'] + value['unreachable']
                 success_num += value['ok']
                 failed_num += value['failures']
-            # print(total_num, '/', success_num, '/', failed_num)
+
+            plays = result.get('plays')
+
+            for play in plays:
+                tasks = play.get('tasks')
+                for task in tasks:
+                    # print(task)
+                    title = 'Task: ' + task.get('task')['name']
+                    summery_result += title
+                    print(title)
+                    hosts = task.get('hosts')
+                    for hostname, r in hosts.items():
+                        if r.get('stderr'):
+                            error_msg = r.get('stderr')
+                            line = "{}:{}\n".format(hostname, error_msg[0:100])
+                        elif r.get('stdout'):
+                            line = "{}:{}...\n".format(hostname, r.get('stdout')[0:50])
+                        else:
+                            line = "{}:{}\n".format(hostname, "sucess")
+                        if not r.get('skipped_reason'):
+                            summery_result += line
+                            print(line)
 
         if result and not error:
             if failed_num == 0:
@@ -109,7 +132,7 @@ class PlayBookTask(models.Model):
                 id=hid,
                 task=self,
                 exe_result=exe_result,
-                result_info=json.dumps(result),
+                result_info=summery_result,
                 result_summary=json.dumps(result.get('stats')),
                 total_num=total_num,
                 success_num=success_num,
@@ -133,7 +156,8 @@ class PlayBookTask(models.Model):
         return self._run_only()
 
     def _run_only(self):
-
+        date_start = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        print("{} Start task: {}\r\n".format(date_start, self.name))
         self.is_running = True
         self.save()
 
@@ -146,6 +170,7 @@ class PlayBookTask(models.Model):
         if not os.path.exists(self.playbook_path) or not os.path.isfile(self.playbook_path):
             self.is_running = False
             self.save()
+            print("Role File Not Found!\nPlease check playbook_path: {}.".format(self.playbook_path))
             raise FileNotFoundError('Please check playbook_path {}.'.format(self.playbook_path))
 
         # 将playbook_path传入options
@@ -163,11 +188,16 @@ class PlayBookTask(models.Model):
             self.record(result)
             self.is_running = False
             self.save()
+            print(json.dumps(result.get('stats'), indent=4))
+            date_end = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            print("\r\n{} Task finished".format(date_end))
             return result
         except AnsibleError as e:
             self.record(error=True, result=str(e))
             self.is_running = False
             self.save()
+            date_end = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            print("\r\n{} Task finished".format(date_end))
             logger.warn("Failed run playbook {}, {}".format(self.name, e))
 
     def __str__(self):
