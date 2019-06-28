@@ -222,9 +222,9 @@
         }
 
         function executeTask(id) {
-            let success_message = "执行成功"
-            let error = "未知错误"
-            let data = "请确认是否执行以及你十分清楚这个task执行后的结果!"
+            let success_message = "执行成功";
+            let error = "未知错误";
+            let data = "请确认是否执行以及你十分清楚这个task执行后的结果!";
 
             layer.open({
                 type: 1,
@@ -237,13 +237,12 @@
                 , yes: function () {
 
                     var the_url = '{% url "api-devops:task-run" pk=DEFAULT_PK %}'.replace('{{ DEFAULT_PK }}', id);
-                    var success = function () {
-                        setTimeout(function () {
-                            console.log("ok")
-                        }, 1000);
-                        window.location = "{% url 'devops:play-task-list' %}";
+                    var success = function (data) {
+                        let task_id = data.task;
+                        let url = '{% url "ops:celery-task-log" pk=DEFAULT_PK %}'.replace("{{ DEFAULT_PK }}", task_id);
+                        window.open(url, '', 'width=800,height=600,left=400,top=400')
                     };
-                    toastr.info("任务执行中，请稍候。。。")
+                    toastr.info("任务执行中，请稍候。。。");
                     APIUpdateAttr({
                         url: the_url,
                         method: 'GET',
