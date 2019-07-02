@@ -1,4 +1,4 @@
-import time
+import re
 from django import forms
 from django.utils.translation import gettext_lazy as _
 from apps.common.utils import get_logger
@@ -30,7 +30,9 @@ class SqlUpdateForm(forms.ModelForm):
         instance = super().save(commit=False)
         instance.submit_user = self.user
         instance.work_id = workid()
-#       instance.insert_date = time.localtime(time.time())
+        sql = re.sub(r'；$', ';', instance.sql)
+        sql = re.sub(r'\s', ' ', sql)
+        instance.sql = sql
 
         if commit:
             instance.save()

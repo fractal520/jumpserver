@@ -42,16 +42,26 @@
                 url: the_url,
                 success:function (data) {
                     console.log("data is :"+ data);
+                    var sql = '';
                     var trs = '';
                     var desc = {
                         'db': "数据库",
                         'rollback_sql': "回滚语句",
                     };
                     for(var i in desc){
-                        trs += "<tr class='no-borders-tr'>\n" +
-                          "<td>"+ desc[i] + ":</td>"+
-                          "<td><b>"+ (data[i] === null?'':data[i]) + "</b></td>\n" +
-                          "</tr>";
+                        if (i === 'rollback_sql') {
+                            sql = data[i].join("<br/>");
+                            trs += "<tr class='no-borders-tr'>\n" +
+                              "<td>"+ desc[i] + ":</td>"+
+                              "<td><b>"+ sql + "</b></td>\n" +
+                              "</tr>";
+                        }
+                        else {
+                            trs += "<tr class='no-borders-tr'>\n" +
+                              "<td>"+ desc[i] + ":</td>"+
+                              "<td><b>"+ (data[i] === null?'':data[i]) + "</b></td>\n" +
+                              "</tr>";
+                        }
                     }
                     $('#sql_rollback__tbody').html(trs)
                     console.log(data);
