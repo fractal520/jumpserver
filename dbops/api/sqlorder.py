@@ -73,7 +73,7 @@ class Exec(APIView):
         data = {
             'work_id': sqlorder.work_id,
             'text': sqlorder.text,
-            'sql': sqlorder.sql,
+            'sql': sqlorder.sql.split(';'),
             'db': sqlorder.dbinfo.db_name,
             'status': sqlorder.get_status_display()
         }

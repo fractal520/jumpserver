@@ -8,7 +8,10 @@ from rest_framework.generics import RetrieveAPIView, CreateAPIView, GenericAPIVi
 from rest_framework.response import Response
 
 from common.permissions import IsValidUser
+from common.utils import get_logger
 from assets.models import Asset
+
+logger = get_logger("jumpserver")
 
 
 class CheckFileListAPIView(RetrieveAPIView):
@@ -33,6 +36,7 @@ class CreateFileCheckJobAPIView(CreateAPIView):
     permission_classes = (IsValidUser,)
 
     def post(self, request, *args, **kwargs):
+        logger.debug(request.data)
         code = 200
         msg = ""
         for key, value in request.data.items():
