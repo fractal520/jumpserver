@@ -43,17 +43,20 @@ def polling(request):
             if not is_first:
                 logger.debug('polling build_status RUNNING continue')
         if result['build_status'] == "FAILURE":
-            create_or_update([{
-                'name': result['app_name'],
-                'last_build_time': result['last_build_time'],
-                'build_console_output': result['build_console_output'],
-                'last_success_build_num': result['last_success_build_num'],
-                'last_build_num': result['last_build_num'],
-                'build_status': result['build_status']
+            if is_first:
+                logger.debug('polling {} build_status FAILURE continue'.format(app.app_name))
+            if not is_first:
+                create_or_update([{
+                    'name': result['app_name'],
+                    'last_build_time': result['last_build_time'],
+                    'build_console_output': result['build_console_output'],
+                    'last_success_build_num': result['last_success_build_num'],
+                    'last_build_num': result['last_build_num'],
+                    'build_status': result['build_status']
 
-            }])
-            return JsonResponse(dict(code=200, error="FAILURE"))
+                }])
+                return JsonResponse(dict(code=200, error="FAILURE"))
         polling_count += 1
-        sleep(2)
+        sleep(3)
 
     return JsonResponse(dict(code=200, data="TIME OUT FAILURE"))
