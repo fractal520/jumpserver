@@ -138,9 +138,13 @@ class TaskHistoryDetailView(IsValidUser, DetailView):
     template_name = 'devops/task_history_detail.html'
 
     def get_context_data(self, **kwargs):
+
+        hitory = self.get_object()
+        history_info = [line for line in hitory.result_info.split('\n')]
         context = {
             'app': _('devops'),
             'action': _('Task history detail'),
+            'history_info': history_info,
         }
         kwargs.update(context)
         return super().get_context_data(**kwargs)
@@ -197,7 +201,7 @@ class FileCheckListView(LoginRequiredMixin, TemplateView):
         return super().get_context_data(**kwargs)
 
 
-class FileCheckFormView(FormView):
+class FileCheckFormView(IsValidUser, FormView):
     template_name = 'devops/file_list_update.html'
     form_class = FileCheckUpdateForm
     success_url = reverse_lazy('devops:filecheck')
