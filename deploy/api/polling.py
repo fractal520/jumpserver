@@ -21,6 +21,7 @@ def polling(request):
     while polling_count < MAX_COUNT:
         print(polling_count)
         result = jw.collect_job(name=app.app_name)
+        logger.debug(result)
         print(result['build_status'])
         if result['build_status'] == "SUCCESS":
             if is_first:
