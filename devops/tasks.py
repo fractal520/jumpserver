@@ -1,14 +1,22 @@
 #  encoding: utf-8
 import os
 import json
+from datetime import datetime
+
 from celery import shared_task, subtask
 from django.utils.translation import ugettext as _
 from django.conf import settings
+
+from assets import const as assets_const
+from assets.models import Asset
 from common.utils import get_logger, get_object_or_none
 from ops.models import Task
-from devops.utils import create_playbook_task
+from ops.celery import app as celery_app
+from ops.celery.utils import register_as_period_task
+from devops.utils import create_playbook_task, genrate_routing_record, DataWriter
 from devops import const
 from devops.models import PlayBookTask
+
 
 logger = get_logger('jumpserver')
 playbook_dir = os.path.join(settings.PROJECT_DIR, 'data', 'playbooks')
@@ -95,3 +103,46 @@ def run_ansible_task(tid, callback=None, **kwargs):
         return result
     else:
         logger.error("No task found")
+
+
+@celery_app.task
+@register_as_period_task(crontab="0 1 * * *")
+def get_asset_hardware_info_util():
+    task_name = ("Daily routing inspection.Date: {}".format(datetime.now().strftime("%Y%m%d")))
+    if settings.PERIOD_TASK != "on":
+        logger.debug("Period task disabled, {} pass".format(task_name))
+        return
+    from ops.utils import update_or_create_ansible_task
+    hosts = [asset.fullname for asset in Asset.objects.all() if asset.is_active and asset.is_unixlike()]
+    tasks = assets_const.UPDATE_ASSETS_HARDWARE_TASKS
+
+    task, created = update_or_create_ansible_task(
+        task_name, hosts=hosts, tasks=tasks, pattern='all',
+        options=assets_const.TASK_OPTIONS, run_as_admin=True, created_by='System',
+    )
+
+    result = task.run()
+    data_list = genrate_routing_record(result)
+    if not data_list:
+        print('没有获取到巡检数据，请手动检查。')
+        logger.error('没有获取到巡检数据，请手动检查。')
+        return False
+    try:
+        DataWriter.local_save(data_list)
+        local_result = True
+    except FileNotFoundError as error:
+        local_result = None
+        print(str(error))
+        logger.error(str(error))
+
+    if local_result:
+        print('开始生成excel文件')
+        logger.info('开始生成excel文件')
+        try:
+            wb_path = DataWriter.remote_file_save(data_list)
+            print('生成成功，保存路径为{}。'.format(wb_path))
+            logger.info('生成成功，保存路径为{}。'.format(wb_path))
+        except BaseException as error:
+            logger.error(str(error))
+
+    return True
