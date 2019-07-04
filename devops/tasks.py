@@ -105,13 +105,21 @@ def run_ansible_task(tid, callback=None, **kwargs):
         logger.error("No task found")
 
 
+@shared_task
+def routing_inspection_manual():
+    return get_asset_hardware_info_util(manual=True)
+
+
 @celery_app.task
-@register_as_period_task(crontab="0 1 * * *")
-def get_asset_hardware_info_util():
+@register_as_period_task(crontab="0 2 * * *")
+def get_asset_hardware_info_util(manual):
     task_name = ("Daily routing inspection.Date: {}".format(datetime.now().strftime("%Y%m%d")))
-    if settings.PERIOD_TASK != "on":
-        logger.debug("Period task disabled, {} pass".format(task_name))
-        return
+    if manual:
+        pass
+    else:
+        if settings.PERIOD_TASK != "on":
+            logger.debug("Period task disabled, {} pass".format(task_name))
+            return
     from ops.utils import update_or_create_ansible_task
     hosts = [asset.fullname for asset in Asset.objects.all() if asset.is_active and asset.is_unixlike()]
     tasks = assets_const.UPDATE_ASSETS_HARDWARE_TASKS
