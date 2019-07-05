@@ -75,7 +75,9 @@
         var options = {
             ele: $('#task-history-list-table'),
             buttons: [],
-            order: [],
+            order: [
+                [1,"desc"]
+            ],
             select: [],
             columnDefs: [
                 {targets: 3, createdCell: function (td, cellData) {

@@ -15,6 +15,7 @@ from common.permissions import SuperUserRequiredMixin, IsValidUser
 from common.utils import get_logger
 from .forms import *
 from devops.models import PlayBookTask, TaskHistory
+from ops.views import TaskListView
 # Create your views here.
 
 logger = get_logger('jumpserver')
@@ -247,3 +248,9 @@ class FileCheckFormView(IsValidUser, FormView):
     def form_valid(self, form):
         if self.update_job(form.cleaned_data):
             return super(FileCheckFormView, self).form_valid(form)
+
+
+class RoutingInspectionListView(TaskListView):
+
+    def get_queryset(self):
+        return super(RoutingInspectionListView, self).get_queryset().filter(name__icontains="Daily routing inspection")
