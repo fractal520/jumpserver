@@ -20,4 +20,5 @@ urlpatterns = [
     path('devops/ansible-role-list/', views.AnsibleRoleView.as_view(), name='ansible-role-list'),
     path('devops/ansible-role/<pk>/', views.AnsibleRoleDetailView.as_view(), name='role-detail'),
     path('devops/ansible-role/<pk>/update', views.AnsibleRoleUpdateView.as_view(), name='ansible-role-update'),
+    path('devops/routing-inspection-list/', views.RoutingInspectionListView.as_view(), name='routing-inspection-list'),
 ]
