@@ -4,6 +4,7 @@ import json
 from datetime import datetime
 
 from celery import shared_task, subtask
+from celery.schedules import crontab
 from django.utils.translation import ugettext as _
 from django.conf import settings
 
@@ -112,7 +113,7 @@ def routing_inspection_manual():
 
 @celery_app.task
 @register_as_period_task(crontab="0 2 * * *")
-def get_asset_hardware_info_util(manual):
+def get_asset_hardware_info_util(manual=False):
     task_name = ("Daily routing inspection.Date: {}".format(datetime.now().strftime("%Y%m%d")))
     if manual:
         pass
@@ -154,3 +155,9 @@ def get_asset_hardware_info_util(manual):
             logger.error(str(error))
 
     return True
+
+
+@celery_app.task
+def test_func(x, y):
+    print('开始测试任务')
+    print(x + y)
