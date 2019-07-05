@@ -1,14 +1,17 @@
-from django.shortcuts import render, HttpResponse
-from django.contrib.auth.mixins import LoginRequiredMixin
+from datetime import datetime
+
 from django.utils.translation import ugettext as _
-from django.views.generic import ListView, UpdateView, DetailView, CreateView, DeleteView
+from django.views.generic import ListView, UpdateView, CreateView
 from django.urls import reverse_lazy
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils import timezone
-from datetime import datetime
+from django.conf import settings
+from django.db.models import Q
+
 from .models.city import CityMonthRecord, City, CityPauseRecord, CityWeekRecord
 from .forms import CityUpdateForm, CityCreateForm, RecordUpdateForm, CityRecordCreateForm
 from common.permissions import AdminUserRequiredMixin
+from common.mixins import DatetimeSearchMixin
 # Create your views here.
 
 
@@ -59,11 +62,13 @@ class CityMonthView(AdminUserRequiredMixin, ListView):
 
 
 # 全国熔断记录视图
-class CityRecord(AdminUserRequiredMixin, ListView):
+class CityRecord(AdminUserRequiredMixin, DatetimeSearchMixin, ListView):
+    paginate_by = settings.DISPLAY_PER_PAGE
     model = CityPauseRecord
     template_name = 'dreport/city_record.html'
     context_object_name = 'records'
     ordering = '-risk_date_time'
+    keyword = ''
 
     def get_queryset(self):
         """
@@ -81,14 +86,34 @@ class CityRecord(AdminUserRequiredMixin, ListView):
             pass
 
         # queryset = CityPauseRecord.objects.filter(risk_date__gte=last_month)
-        queryset = CityPauseRecord.objects.all()
+        self.queryset = CityPauseRecord.objects.all()
+        self.keyword = self.request.GET.get('keyword', '')
         ordering = self.get_ordering()
         if ordering:
             if isinstance(ordering, str):
                 ordering = (ordering,)
-            queryset = queryset.order_by(*ordering)
+            self.queryset = self.queryset.order_by(*ordering)
+            self.queryset = self.queryset.filter(
+                risk_date_time__gt=self.date_from,
+                risk_date_time__lt=self.date_to
+            )
+            if self.keyword:
+                self.queryset = self.queryset.filter(
+                    Q(city__name__icontains=self.keyword) | Q(remark__icontains=self.keyword)
+                )
+            print(self.keyword)
+        return self.queryset
 
-        return queryset[0:150]
+    def get_context_data(self, **kwargs):
+        context = {
+            'app': _('devops'),
+            'action': _('Record list'),
+            'date_from': self.date_from,
+            'date_to': self.date_to,
+            'keyword': self.keyword,
+        }
+        kwargs.update(context)
+        return super().get_context_data(**kwargs)
 
 
 # 熔断记录更新视图
