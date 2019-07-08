@@ -11,6 +11,7 @@ from django.utils.translation import ugettext as _
 
 from assets.models import Asset
 from common.utils import get_logger
+from deploy.util import after_deploy
 from devops.utils import create_playbook_task
 from devops.models import AnsibleRole
 from devops.tasks import run_ansible_task
@@ -81,13 +82,13 @@ def check_asset_file_exist_util(asset, app_name, task_name):
 
 # deploy function #
 @shared_task
-def push_build_file_to_asset_manual(asset, app_name):
+def push_build_file_to_asset_manual(asset, app_name, user):
     task_name = _("push {0} build file to {1} {2}".format(app_name, asset.hostname, timezone.localtime().strftime("[%Y-%m-%d %H:%M:%S]")))
-    return push_build_file_to_asset_util(asset, task_name, app_name)
+    return push_build_file_to_asset_util(asset, task_name, app_name, user)
 
 
 @shared_task
-def push_build_file_to_asset_util(asset, task_name, app_name):
+def push_build_file_to_asset_util(asset, task_name, app_name, user):
     from ops.utils import update_or_create_ansible_task
 
     hosts = [asset.fullname]
@@ -115,6 +116,9 @@ def push_build_file_to_asset_util(asset, task_name, app_name):
 
     # result = task.run()
     result = run_ansible_task(str(task.id))
+    if settings.DEPLOY_CELERY:
+        return after_deploy(result, task.get_latest_adhoc(), app_name, asset, user)
+
     return result, task.get_latest_adhoc()
 
 
