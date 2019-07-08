@@ -48,6 +48,12 @@ def collect_risk_util(asset, task_name, script_path):
 def collect_risk_as_period_task():
     from ops.utils import update_or_create_ansible_task
 
+    period_task = None
+
+    if not period_task:
+        print("collect_risk_as_period_task pass")
+        return
+
     try:
         rcs = Asset.objects.get(ip=settings.rcs_ip)
     except ObjectDoesNotExist as error:
