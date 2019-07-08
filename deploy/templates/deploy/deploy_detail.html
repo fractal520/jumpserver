@@ -229,17 +229,23 @@
 
         $('body').on('click', '.btn-deploy', function(){
             var data = $('.deploy-form').serializeArray();
-            console.log(data)
+            console.log(data);
             $.get("{% url 'api-deploy:deploy_file_to_asset' %}", data, function(result){
                 if(result.code==200) {
-                    console.log(result.task)
-                    alert("推送成功,请验证。")
+                    console.log(result.task);
+                    alert("推送成功,请验证。");
                     window.location.reload()
                 }
                 else if(result.code==400) {
-                    console.log(result.error)
-                    alert(result.error)
+                    console.log(result.error);
+                    alert(result.error);
                     window.location.reload()
+                }else if(result.code==201) {
+                    console.log(result.msg);
+                    alert(result.msg);
+                    let task_id = result.task;
+                    let url = '{% url "ops:celery-task-log" pk=DEFAULT_PK %}'.replace("{{ DEFAULT_PK }}", task_id);
+                    window.open(url, '', 'width=800,height=600,left=400,top=400')
                 }
             });
         });

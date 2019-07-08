@@ -4,7 +4,6 @@ from django.utils.translation import ugettext as _
 from django.views.generic import ListView, UpdateView, CreateView
 from django.urls import reverse_lazy
 from django.core.exceptions import ObjectDoesNotExist
-from django.utils import timezone
 from django.conf import settings
 from django.db.models import Q
 
@@ -71,21 +70,6 @@ class CityRecord(AdminUserRequiredMixin, DatetimeSearchMixin, ListView):
     keyword = ''
 
     def get_queryset(self):
-        """
-        Return the list of items for this view.
-
-        The return value must be an iterable and may be an instance of
-        `QuerySet` in which case `QuerySet` specific behavior will be enabled.
-        """
-        d = timezone.datetime.now()
-        if d.month == 1:
-            # last_month = d.replace(year=d.year-1, month=12)
-            pass
-        else:
-            # last_month = timezone.datetime.strftime(d.replace(month=d.month-1), "%Y-%m-%d")
-            pass
-
-        # queryset = CityPauseRecord.objects.filter(risk_date__gte=last_month)
         self.queryset = CityPauseRecord.objects.all()
         self.keyword = self.request.GET.get('keyword', '')
         ordering = self.get_ordering()
@@ -101,7 +85,6 @@ class CityRecord(AdminUserRequiredMixin, DatetimeSearchMixin, ListView):
                 self.queryset = self.queryset.filter(
                     Q(city__name__icontains=self.keyword) | Q(remark__icontains=self.keyword)
                 )
-            print(self.keyword)
         return self.queryset
 
     def get_context_data(self, **kwargs):
