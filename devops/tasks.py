@@ -114,7 +114,7 @@ def routing_inspection_manual():
 @celery_app.task
 @register_as_period_task(crontab="0 2 * * *")
 def get_asset_hardware_info_util(manual=False):
-    task_name = ("Daily routing inspection.Date: {}".format(datetime.now().strftime("%Y%m%d")))
+    task_name = ("Daily routing inspection as period task.Date: {}".format(datetime.now().strftime("%Y%m%d")))
     if manual:
         pass
     else:
