@@ -15,13 +15,18 @@ from common.permissions import IsOrgAdminOrAppUser, IsValidUser
 from common.utils import get_logger
 
 
-logger = get_logger(__file__)
+logger = get_logger("jumpserver")
 
 
 class PlayBookTaskListViewApi(ListAPIView):
-    queryset = PlayBookTask.objects.all()
+    # queryset = PlayBookTask.objects.all()
     permission_classes = (IsValidUser, )
     serializer_class = TaskReadSerializer
+
+    def get_queryset(self):
+        print(self.queryset)
+        logger.debug(self.queryset)
+        return self.queryset.filter(created_by__exact="System")
 
 
 class TaskOperationViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin,
@@ -63,11 +68,15 @@ class AnsibleRoleViewSet(mixins.ListModelMixin, mixins.DestroyModelMixin, viewse
 
 
 class TaskViewSet(viewsets.ModelViewSet):
-    queryset = PlayBookTask.objects.all()
+    queryset = PlayBookTask.objects.all().filter().exclude(created_by__iexact="System")
     serializer_class = TaskSerializer
     permission_classes = (IsValidUser,)
     label = None
     help_text = ''
+
+    def get_queryset(self):
+        logger.debug(self.queryset)
+        return super(TaskViewSet, self).get_queryset()
 
 
 class TaskRun(RetrieveAPIView):

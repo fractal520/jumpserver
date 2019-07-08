@@ -508,3 +508,6 @@ CESI_PASS = CONFIG.CESI_PASS
 
 # 对账文件管理系统地址
 RDM_URL = CONFIG.RDM_URL
+
+# 是执行否定时任务
+PERIOD_TASK = CONFIG.PERIOD_TASK or "off"
