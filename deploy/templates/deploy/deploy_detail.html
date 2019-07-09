@@ -174,9 +174,7 @@
                     $('.showSweetAlert').find('.loadword').remove();
                 }
             }
-        };
-
-        console.log('detail')
+        }
         $('body').on('click', '.btn-deploy-per', function(){
             swal({
                 title: "{% trans 'Are you sure?' %}",
@@ -220,35 +218,25 @@
                                     confirmButtonText: '确认',
                                     confirmButtonColor: '#4cd964',
                                 },function(){window.location.reload()})
+                            }else if(result.code==201) {
+                                hideLoading('.sa-warning');
+                                console.log(result.msg);
+                                swal({
+                                    title: "",
+                                    text: result.msg,
+                                    type: "success",
+                                    confirmButtonText: '确认',
+                                    confirmButtonColor: '#4cd964'
+                                });
+                                let task_id = result.task;
+                                let url = '{% url "ops:celery-task-log" pk=DEFAULT_PK %}'.replace("{{ DEFAULT_PK }}", task_id);
+                                window.open(url, '', 'width=800,height=600,left=400,top=400')
                             }
                         }
                     });
             });
         });
 
-
-        $('body').on('click', '.btn-deploy', function(){
-            var data = $('.deploy-form').serializeArray();
-            console.log(data);
-            $.get("{% url 'api-deploy:deploy_file_to_asset' %}", data, function(result){
-                if(result.code==200) {
-                    console.log(result.task);
-                    alert("推送成功,请验证。");
-                    window.location.reload()
-                }
-                else if(result.code==400) {
-                    console.log(result.error);
-                    alert(result.error);
-                    window.location.reload()
-                }else if(result.code==201) {
-                    console.log(result.msg);
-                    alert(result.msg);
-                    let task_id = result.task;
-                    let url = '{% url "ops:celery-task-log" pk=DEFAULT_PK %}'.replace("{{ DEFAULT_PK }}", task_id);
-                    window.open(url, '', 'width=800,height=600,left=400,top=400')
-                }
-            });
-        });
 
         var id = $("#deploy-version input[name='app-id']").val()
         console.log(id)

@@ -122,8 +122,10 @@ class DataWriter(object):
         host = '巡检记录'
         line_count = 1
         row_count = 0
+        # 表格首行字段定义
         name_list = ['ID', 'hostname', 'IPaddress', 'date', 'uptime', 'processor_count', 'Total_Mem', 'Used_mem',
                      'Free_mem']
+        # 表格相关设置
         workbook = xlwt.Workbook(encoding='utf-8')
         worksheet = workbook.add_sheet(host)
         worksheet.col(0).width = 1000
@@ -131,9 +133,11 @@ class DataWriter(object):
         worksheet.col(4).width = 4500
         titlestyle = xlwt.easyxf('pattern: pattern solid, fore_colour dark_green_ega;')
         warnstyle = xlwt.easyxf('pattern: pattern solid, fore_colour red;')
+        # 写首行字段
         for name in name_list:
             worksheet.write(0, row_count, name, titlestyle)
             row_count += 1
+        # 写巡检数据
         for line_dict in data_list:
             worksheet.write(line_count, 0, line_count)
             worksheet.write(line_count, 1, line_dict.get('hostname'))
@@ -180,12 +184,18 @@ class DataWriter(object):
                     print(e, line_dict.get('hostname'))
             line_count += 1
         wb_name = host+datetime.now().strftime('%Y%m%d')+'.xls'
-        wb_path = os.path.join(
-            ROUTING_INSPECTION_FILE_SAVE,
-            datetime.now().strftime("%Y"),
-            MONTH,
-            datetime.now().strftime("%Y%m%d"),
-            wb_name
+
+        # 生成当日归档目录路径
+        save_dir = os.path.join(
+                ROUTING_INSPECTION_FILE_SAVE, datetime.now().strftime("%Y"),
+                MONTH, datetime.now().strftime("%Y%m%d")
         )
+
+        # 判断该巡检归档目录是否存在如果不存在则自动创建
+        if not os.path.isdir(save_dir):
+            os.makedirs(save_dir, mode=0o755)
+
+        # 保存巡检归档表格
+        wb_path = os.path.join(save_dir, wb_name)
         workbook.save(wb_path)
         return wb_path
