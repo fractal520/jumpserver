@@ -86,8 +86,9 @@ def deploy_file_to_asset(request):
         return JsonResponse(dict(code=400, error='文件打包失败'))
 
     if settings.DEPLOY_CELERY:
-        tid = push_build_file_to_asset_manual.delay(asset, app_name, request.user)
-        return JsonResponse(dict(code=201, msg='任务后台执行中，请稍后查询发布历史', task=tid))
+        t = push_build_file_to_asset_manual.delay(asset, app_name, request.user)
+        print(t.id)
+        return JsonResponse(dict(code=201, msg='任务后台执行中，请稍后查询发布历史', task=t.id))
 
     # use ansible to push APP to remote host
     task, last_adhoc = push_build_file_to_asset_manual(asset, app_name, request.user)
