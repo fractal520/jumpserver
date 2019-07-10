@@ -1,0 +1,66 @@
+{% extends '_base_list.html' %}
+{% load i18n static %}
+{% block table_search %}{% endblock %}
+{% block content_left_head %}{% endblock %}
+{% block table_container %}
+    <table class="table table-striped table-bordered table-hover" id="task_table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>项目名称</th>
+                <th>项目描述</th>
+                <th>创建时间</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+    </table>
+{% endblock %}
+{% block custom_foot_js %}
+    <script>
+        jQuery(document).ready(function(){
+
+            let options = {
+                ele: $('#task_table'),
+                ajax_url: "{% url 'api-deploy:project_list' %}",
+                columnDefs: [
+                    {targets :4, createdCell: function (td, cellData) {
+                        let delete_btn = '<a class="btn btn-xs m-l-xs btn-danger btn-delete" href="javascript:void(0)" project_id="99999">删除</a>'.replace("99999", cellData);
+                        let update_btn = '<a class="btn btn-xs m-l-xs btn-primary" href="#">修改</a>';
+                        $(td).html(delete_btn + update_btn);
+                    }}
+                ],
+                columns: [
+                    {data: 'id'},
+                    {data: 'name'},
+                    {data: 'desc'},
+                    {data: 'create_time'},
+                    {data: 'id'}
+                ]
+            };
+            var TaskTable = jumpserver.initDataTable(options);
+
+        });
+
+        $("body").on('click', '.btn-delete', function () {
+            let project_id = $(this).attr('project_id');
+            if(confirm("确定该删除任务?")){
+                //确认后的任务
+                let the_url ="{% url 'api-deploy:project_delete' pk=DEFAULT_PK %}".replace('{{ DEFAULT_PK }}', project_id);
+                $.ajax({
+                    url: the_url,
+                    async: false,
+                    type: 'DELETE',
+                    dataType: 'json',
+                    contentType: "application/x-www-form-urlencoded",
+                    success: function (result) {
+                        window.location.reload()
+                    },
+                    error: function (result) {
+                        alert("Unknow Error")
+                    }
+                });
+            }
+        });
+
+    </script>
+{% endblock %}

@@ -60,6 +60,8 @@ class DeployList(models.Model):
     published_status = models.BooleanField(default=True)
     bound_asset = models.ManyToManyField('assets.Asset', blank=True, verbose_name=_("Assets"))
 
+    project = models.ForeignKey('deploy.Project', null=True, blank=True, verbose_name="项目", on_delete=models.SET_NULL)
+
     def __str__(self):
         return self.app_name
 
@@ -365,3 +367,18 @@ class DeployRecord(models.Model):
             record_type=record_type,
         )
         return True
+
+
+class Project(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4)
+    name = models.CharField(max_length=64, verbose_name="项目名称")
+    desc = models.TextField(null=True, blank=True, verbose_name="项目描述")
+    created_by = models.ForeignKey('users.User', null=True, blank=True, on_delete=models.DO_NOTHING, verbose_name='创建者')
+    create_time = models.DateTimeField(auto_now=True, verbose_name='创建时间')
+
+    class Meta:
+        verbose_name = "项目"
+        verbose_name_plural = verbose_name
+
+    def __str__(self):
+        return self.name

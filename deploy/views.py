@@ -1,4 +1,3 @@
-from django.shortcuts import render
 from django.utils.translation import ugettext as _
 from django.http import JsonResponse
 from django.views.generic import ListView, DetailView, UpdateView, TemplateView
@@ -7,7 +6,7 @@ from django.contrib.messages.views import SuccessMessageMixin
 from django.urls import reverse_lazy
 from common.utils import get_logger
 from .pjenkins.exec_jenkins import JenkinsWork
-from .models.deploy_list import DeployList, create_or_update, DeployVersion
+from .models.deploy_list import DeployList, create_or_update, DeployVersion, Project
 from .forms.deployapp import AppUpdateForm
 # Create your views here.
 
@@ -111,3 +110,16 @@ class DeployHistoryView(LoginRequiredMixin, DetailView):
         }
         kwargs.update(context)
         return super().get_context_data(**kwargs)
+
+
+class ProjectListView(LoginRequiredMixin, TemplateView):
+    model = Project
+    template_name = 'deploy/project_list.html'
+
+    def get_context_data(self, **kwargs):
+        context = {
+            'app': _('deploy'),
+            'action': _('Project'),
+        }
+        kwargs.update(context)
+        return super(ProjectListView, self).get_context_data(**kwargs)
