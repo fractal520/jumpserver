@@ -2,7 +2,7 @@
 
 from rest_framework import serializers
 
-from deploy.models import DeployRecord
+from deploy.models import DeployRecord, Project
 
 
 class DeployHistorySerializer(serializers.ModelSerializer):
@@ -46,3 +46,17 @@ class DeployHistorySerializer(serializers.ModelSerializer):
     @staticmethod
     def get_record_type(obj):
         return obj.get_record_type_display()
+
+
+class ProjectListSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Project
+        fields = '__all__'
+
+
+class ProjectCreateSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Project
+        fields = ['name', 'desc', 'created_by']

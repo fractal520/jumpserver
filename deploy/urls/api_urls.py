@@ -4,7 +4,8 @@ from rest_framework import routers
 
 from .. import views
 from ..api import pushdeploy
-from deploy.api import rollback, polling, GetBuildConsoleLogApiView, DeployHistoryViewSet
+from deploy.api import rollback, polling, GetBuildConsoleLogApiView, \
+    DeployHistoryViewSet, ProjectListView, ProjectCreateView, ProjectDestroyView, ProjectUpdateView
 
 
 app_name = 'deploy'
@@ -20,7 +21,11 @@ urlpatterns = [
     path('get_version_history/', pushdeploy.get_version_history, name='get_version_history'),
     path('rollback/', rollback, name='rollback'),
     path('polling/', polling, name='polling'),
-    path('app/<uuid:pk>/console_log', GetBuildConsoleLogApiView.as_view(), name='console_log')
+    path('app/<uuid:pk>/console_log', GetBuildConsoleLogApiView.as_view(), name='console_log'),
+    path('project/', ProjectListView.as_view(), name='project_list'),
+    path('project/create/', ProjectCreateView.as_view(), name='project_create'),
+    path('project/delete/<uuid:pk>', ProjectDestroyView.as_view(), name='project_delete'),
+    path('project/update/<uuid:pk>', ProjectUpdateView.as_view(), name='project_update'),
 ]
 
 urlpatterns += router.urls
