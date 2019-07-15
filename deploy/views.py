@@ -40,7 +40,6 @@ class DeployIndex(LoginRequiredMixin, ListView):
             'projects': Project.objects.all(),
             'project_name': Project.objects.get(id=self.project).name if self.project else None
         }
-        logger.debug(context)
         kwargs.update(context)
         return super().get_context_data(**kwargs)
 
