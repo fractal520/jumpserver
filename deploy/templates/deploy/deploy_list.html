@@ -156,7 +156,12 @@ $('body').on('click', '.asset_detail', function(){
 });
 
 jQuery(document).ready(function(){
-    $('#deploy_table').DataTable();
+    $('#deploy_table').DataTable({
+        "ordering":false,
+        "searching": false,
+        "paging": false,
+        "bInfo" : false
+    });
 
     function getJenkinsInfo(){
         var loadShowTime = 600;

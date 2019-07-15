@@ -19,6 +19,15 @@
     {% csrf_token %}
     <h3>{% trans 'Basic' %}</h3>
     {% bootstrap_field form.app_name layout="horizontal" %}
+    {% bootstrap_field form.project layout="horizontal" %}
+
+    <div class="form-group">
+        <div class="col-sm-4 col-sm-offset-2">
+            <a class="btn btn-info btn-project">项目管理</a>
+            <a class="btn btn-info btn-project-create">项目创建</a>
+        </div>
+    </div>
+    <div class="hr-line-dashed"></div>
     {% bootstrap_field form.bound_asset layout="horizontal" %}
     {% bootstrap_field form.job_status layout="horizontal" %}
     <div class="hr-line-dashed"></div>
@@ -29,6 +38,32 @@
         </div>
     </div>
     </form>
+
+<!-- Modal -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">Modal title</h4>
+            </div>
+            <form class="form-create" method="post">
+                {% csrf_token %}
+                <div class="modal-body form-group">
+                    <label for="name">项目名称</label>
+                    <input class="form-control" type="text" id="name" name="name"/>
+                    <label for="desc">项目描述</label>
+                    <input class="form-control" type="text" id="desc" name="desc"/>
+                </div>
+                <div class="modal-footer form-group">
+                    <button type="reset" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary btn-create">Save changes</button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block custom_foot_js %}
@@ -44,6 +79,33 @@
         $(".labels").select2({
             allowClear: true,
             templateSelection: format
+        });
+    });
+    $('body').on('click', '.btn-project', function () {
+        console.log('ToProjectView');
+        let the_url = "{% url 'deploy:ProjectList' %}";
+        window.location.href = the_url
+    })
+
+    $('.btn-project-create').click(function () {
+        $('#myModal').modal("show");
+        $('.btn-create').click(function () {
+            let form_data = $('.form-create').serializeArray();
+            console.log(form_data);
+            $.ajax({
+                url: "{% url 'api-deploy:project_create' %}",
+                async: false,
+                type: 'POST',
+                dataType: 'json',
+                contentType: "application/x-www-form-urlencoded",
+                data: form_data,
+                success: function (result) {
+                    window.location.reload()
+                },
+                error: function (result) {
+                    alert("Unknow Error")
+                }
+            });
         });
     })
     </script>
