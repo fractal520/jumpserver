@@ -18,6 +18,9 @@ class DeployIndex(LoginRequiredMixin, ListView):
     template_name = 'deploy/deploy_list.html'
     context_object_name = 'deploys'
 
+    def get_queryset(self):
+        return super(DeployIndex, self).get_queryset()
+
 
 def get_jenkins_all(request):
     jobs = JenkinsWork().collect_all_job()

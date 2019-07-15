@@ -1,6 +1,6 @@
 # encoding: utf-8
 
-from rest_framework.generics import ListAPIView, CreateAPIView, DestroyAPIView
+from rest_framework.generics import ListAPIView, CreateAPIView, DestroyAPIView, UpdateAPIView, RetrieveUpdateAPIView
 from rest_framework.response import Response
 
 from deploy.models import Project
@@ -32,4 +32,11 @@ class ProjectDestroyView(DestroyAPIView):
 
     queryset = Project.objects.all()
     permission_classes = (IsValidUser, )
+    serializer_class = ProjectListSerializer
+
+
+class ProjectUpdateView(RetrieveUpdateAPIView):
+
+    queryset = Project.objects.all()
+    permission_classes = (IsValidUser,)
     serializer_class = ProjectListSerializer
