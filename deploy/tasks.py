@@ -116,7 +116,7 @@ def push_build_file_to_asset_util(asset, task_name, app_name, user):
 
     # result = task.run()
     result = run_ansible_task(str(task.id))
-    if settings.DEPLOY_CELERY:
+    if settings.DEPLOY_CELERY == "on":
         return after_deploy(result, task.get_latest_adhoc(), app_name, asset, user)
 
     return result, task.get_latest_adhoc()
