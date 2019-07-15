@@ -1,6 +1,32 @@
 {% extends '_base_list.html' %}
 {% load i18n static %}
-{% block table_search %}{% endblock %}
+{% block table_search %}
+    <form id="search_form" method="get" action="" class="pull-right form-inline">
+        <div class="form-group">
+            <label for="id_select">所属项目</label>
+            <select class="form-control" name="project" id="id_select">
+                    <option value="">---</option>
+                {% for project in projects %}
+                    {% if project.name == project_name %}
+                        <option value="{{ project.id }}" selected="selected">{{ project.name }}</option>
+                    {% else %}
+                        <option value="{{ project.id }}">{{ project.name }}</option>
+                    {% endif %}
+                {% endfor %}
+            </select>
+        </div>
+        <div class="input-group">
+            <input type="text" class="form-control input-sm" name="keyword" placeholder="{% trans 'Search'  %}关键字" value="{{ keyword }}">
+        </div>
+        <div class="input-group">
+            <div class="input-group-btn">
+                <button id='search_btn' type="submit" class="btn btn-sm btn-primary">
+                    {% trans "Search"  %}
+                </button>
+            </div>
+        </div>
+    </form>
+{% endblock %}
 {% block content_left_head %}<a href="javascript:void(0)" class="btn btn-xs btn-info btn-update">获取Jenkins最新状态</a>{% endblock %}
 {% block table_container %}
 <div id="test1">
@@ -157,10 +183,15 @@ $('body').on('click', '.asset_detail', function(){
 
 jQuery(document).ready(function(){
     $('#deploy_table').DataTable({
-        "ordering":false,
         "searching": false,
         "paging": false,
-        "bInfo" : false
+        "bInfo" : false,
+        "order": [],
+        "columnDefs": [
+            { "orderable": false, "targets": 0 },
+            { "orderable": false, "targets": 5 },
+            { "orderable": false, "targets": 6 }
+        ]
     });
 
     function getJenkinsInfo(){
