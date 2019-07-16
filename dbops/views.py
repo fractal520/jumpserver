@@ -16,7 +16,7 @@ from .forms.sqlorder import SqlUpdateForm
 logger = get_logger('jumpserver')
 
 
-class Dbs(LoginRequiredMixin, ListView):
+class DbInfos(LoginRequiredMixin, ListView):
     model = DbInfo
     template_name = 'dbops/dbinfos.html'
     context_object_name = 'dbs'
