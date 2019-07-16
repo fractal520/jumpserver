@@ -116,11 +116,12 @@ def routing_inspection_manual():
 def get_asset_hardware_info_util(manual=False):
     task_name = ("Daily routing inspection as period task.Date: {}".format(datetime.now().strftime("%Y%m%d")))
     if manual:
-        pass
+        print('run task manual')
     else:
         if settings.PERIOD_TASK != "on":
+            print("Period task disabled, {} pass".format(task_name))
             logger.debug("Period task disabled, {} pass".format(task_name))
-            return
+            return "Period task disabled, {} pass".format(task_name)
     from ops.utils import update_or_create_ansible_task
     hosts = [asset.fullname for asset in Asset.objects.all() if asset.is_active and asset.is_unixlike()]
     tasks = assets_const.UPDATE_ASSETS_HARDWARE_TASKS

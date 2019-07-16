@@ -1,13 +1,13 @@
-from django.shortcuts import render
 from django.utils.translation import ugettext as _
 from django.http import JsonResponse
 from django.views.generic import ListView, DetailView, UpdateView, TemplateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
 from django.urls import reverse_lazy
+from django.db.models import Q
 from common.utils import get_logger
 from .pjenkins.exec_jenkins import JenkinsWork
-from .models.deploy_list import DeployList, create_or_update, DeployVersion
+from .models.deploy_list import DeployList, create_or_update, DeployVersion, Project
 from .forms.deployapp import AppUpdateForm
 # Create your views here.
 
@@ -18,6 +18,30 @@ class DeployIndex(LoginRequiredMixin, ListView):
     model = DeployList
     template_name = 'deploy/deploy_list.html'
     context_object_name = 'deploys'
+    keyword = ''
+    project = ''
+
+    def get_queryset(self):
+        self.keyword = self.request.GET.get('keyword', '')
+        self.project = self.request.GET.get('project', None)
+        self.queryset = super(DeployIndex, self).get_queryset()
+        if self.keyword:
+            self.queryset = self.queryset.filter(app_name__icontains=self.keyword)
+        if self.project:
+            self.queryset = self.queryset.filter(project__id=self.project)
+        return self.queryset
+
+    def get_context_data(self, **kwargs):
+
+        context = {
+            'app': _('deploy'),
+            'action': _('Record list'),
+            'keyword': self.keyword,
+            'projects': Project.objects.all(),
+            'project_name': Project.objects.get(id=self.project).name if self.project else None
+        }
+        kwargs.update(context)
+        return super().get_context_data(**kwargs)
 
 
 def get_jenkins_all(request):
@@ -111,3 +135,16 @@ class DeployHistoryView(LoginRequiredMixin, DetailView):
         }
         kwargs.update(context)
         return super().get_context_data(**kwargs)
+
+
+class ProjectListView(LoginRequiredMixin, TemplateView):
+    model = Project
+    template_name = 'deploy/project_list.html'
+
+    def get_context_data(self, **kwargs):
+        context = {
+            'app': _('deploy'),
+            'action': _('Project'),
+        }
+        kwargs.update(context)
+        return super(ProjectListView, self).get_context_data(**kwargs)
