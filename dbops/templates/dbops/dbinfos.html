@@ -8,7 +8,6 @@
         <thead>
             <tr>
                 <th>库名</th>
-                <th>实例名</th>
                 <th>IP地址</th>
                 <th>端口号</th>
             </tr>
@@ -17,7 +16,6 @@
           {% for db in dbs %}
             <tr>
                 <td>{{db.db_name}}</td>
-                <td>{{db.instance_name}}</td>
                 <td>{{db.ip}}</td>
                 <td>{{db.port}}</td>
             </tr>
