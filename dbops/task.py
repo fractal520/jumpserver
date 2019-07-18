@@ -10,16 +10,16 @@ logger = get_logger('jumpserver')
 
 class ExecSql(threading.Thread):
 
-    def __init__(self, work_id, exec_user):
+    def __init__(self, exec_user, sqlorder):
         super().__init__()
         self.exec_user = exec_user
-        self.work_id = work_id
-        self.sqlorder = SqlOrder.objects.filter(work_id=work_id).first()
+        self.sqlorder = sqlorder
 
     def run(self):
         self.execute()
 
     def execute(self):
+        work_id = self.sqlorder.work_id
         db = self.sqlorder.dbinfo
         sql = self.sqlorder.sql
         backup = self.sqlorder.backup
@@ -36,9 +36,9 @@ class ExecSql(threading.Thread):
                 res = f.Execute(sql=sql, backup=backup)
                 for i in res:
                     if i['errlevel'] != 0:
-                        SqlOrder.objects.filter(work_id=self.work_id).update(status=4)
+                        SqlOrder.objects.filter(work_id=work_id).update(status=4)
                     SqlRecord.objects.get_or_create(
-                        work_id=self.work_id,
+                        work_id=work_id,
                         state=i['stagestatus'],
                         sql=i['sql'],
                         sequence=i['sequence'],
@@ -53,9 +53,9 @@ class ExecSql(threading.Thread):
             traceback.print_exc()
         finally:
             exec_time = timezone.now()
-            SqlOrder.objects.filter(work_id=self.work_id).update(exec_time=exec_time)
-            SqlOrder.objects.filter(work_id=self.work_id).update(exec_user=self.exec_user)
-            status = SqlOrder.objects.filter(work_id=self.work_id).first()
+            SqlOrder.objects.filter(work_id=work_id).update(exec_time=exec_time)
+            SqlOrder.objects.filter(work_id=work_id).update(exec_user=self.exec_user)
+            status = SqlOrder.objects.filter(work_id=work_id).first()
             if status.status != 4:
-                SqlOrder.objects.filter(work_id=self.work_id).update(status=3)
+                SqlOrder.objects.filter(work_id=work_id).update(status=3)
 

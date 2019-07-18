@@ -16,6 +16,7 @@ from common.utils import get_logger
 from .forms import *
 from devops.models import PlayBookTask, TaskHistory
 from ops.views import TaskListView
+from ops.models import CeleryTask
 # Create your views here.
 
 logger = get_logger('jumpserver')
@@ -254,3 +255,8 @@ class RoutingInspectionListView(TaskListView):
 
     def get_queryset(self):
         return super(RoutingInspectionListView, self).get_queryset().filter(name__icontains="Daily routing inspection")
+
+
+class CeleryTaskLogView(IsValidUser, DetailView):
+    template_name = 'devops/celery_task_log.html'
+    model = CeleryTask

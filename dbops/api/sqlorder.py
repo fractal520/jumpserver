@@ -81,11 +81,15 @@ class Exec(APIView):
 
     def post(self, request, pk):
         exec_user = request.user
-        work_id = pk
-        ExecSql(work_id, exec_user).start()
-        msg = "SQL任务执行成功!请通过记录页面查看具体执行结果"
-        messages.success(request, msg)
-        return Response('SQL任务执行成功!请通过记录页面查看具体执行结果')
+        sqlorder = SqlOrder.objects.filter(work_id=pk).first()
+        if sqlorder.status == 2:
+            ExecSql(exec_user, sqlorder).start()
+            msg = "SQL任务执行成功!请通过记录页面查看具体执行结果"
+            messages.success(request, msg)
+            return Response({'status': 200, 'message': msg})
+        else:
+            msg = "SQL任务状态为" + sqlorder.get_status_display + "，该任务不能执行。"
+            return Response({'status': 400, 'message': msg})
 
 
 class RollBack(APIView):
