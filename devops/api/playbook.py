@@ -13,6 +13,7 @@ from devops.models import AnsibleRole, PlayBookTask, TaskHistory
 from devops.tasks import run_ansible_playbook, reset_task_playbook_path
 from common.permissions import IsOrgAdminOrAppUser, IsValidUser
 from common.utils import get_logger
+from ops.api import CeleryTaskLogApi as ca
 
 
 logger = get_logger("jumpserver")
@@ -152,3 +153,7 @@ class TaskHistorySet(viewsets.ModelViewSet):
             self.queryset = self.queryset.filter(task__in=task)
 
         return self.queryset
+
+
+class CeleryTaskLogApi(ca):
+    permission_classes = (IsValidUser,)

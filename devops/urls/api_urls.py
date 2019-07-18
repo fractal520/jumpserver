@@ -25,6 +25,7 @@ urlpatterns = [
     path('file_check_job/list/', api.CheckFileListAPIView.as_view(), name='file_check_list'),
     path('file_check_job/add/', api.CreateFileCheckJobAPIView.as_view(), name='file_check_add'),
     path('file_check_job/delete/<pk>', api.DeleteFileCheckJobAPIView.as_view(), name='file_check_delete'),
+    path('celery/task/<uuid:pk>/log/', api.CeleryTaskLogApi.as_view(), name='celery-task-log'),
 ]
 
 urlpatterns += router.urls

@@ -158,7 +158,9 @@ def get_asset_hardware_info_util(manual=False):
     return True
 
 
+"""
 @celery_app.task
 def test_func(x, y):
     print('开始测试任务')
     print(x + y)
+"""
