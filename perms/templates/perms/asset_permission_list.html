@@ -24,15 +24,7 @@
 <div class="wrapper wrapper-content">
    <div class="row">
        <div class="col-lg-3" id="split-left" style="padding-left: 3px">
-           <div class="ibox float-e-margins">
-               <div class="ibox-content mailbox-content" style="padding-top: 0;padding-left: 1px">
-                   <div class="file-manager ">
-                       <div id="assetTree" class="ztree">
-                       </div>
-                       <div class="clearfix"></div>
-                   </div>
-               </div>
-           </div>
+           {% include 'assets/_node_tree.html' %}
        </div>
        <div class="col-lg-9 animated fadeInRight" id="split-right">
            <div class="tree-toggle">
@@ -56,7 +48,7 @@
                        <th class="text-center">{% trans 'Asset' %}</th>
                        <th class="text-center">{% trans 'Node'%}</th>
                        <th class="text-center">{% trans 'System user' %}</th>
-                       <th class="text-center">{% trans 'Active' %}</th>
+                       <th class="text-center">{% trans 'Validity' %}</th>
                        <th class="text-center" >{% trans 'Action' %}</th>
                    </tr>
                   </thead>
@@ -67,6 +59,17 @@
        </div>
    </div>
 </div>
+
+<ul class="dropdown-menu search-help">
+    <li><a class="search-item" data-value="name">{% trans 'Name' %}</a></li>
+    <li><a class="search-item" data-value="is_valid">{% trans 'Validity' %}</a></li>
+    <li><a class="search-item" data-value="username">{% trans 'Username' %}</a></li>
+    <li><a class="search-item" data-value="user_group">{% trans 'User group' %}</a></li>
+    <li><a class="search-item" data-value="ip">IP</a></li>
+    <li><a class="search-item" data-value="hostname">{% trans 'Hostname' %}</a></li>
+    <li><a class="search-item" data-value="node">{% trans 'Node' %}</a></li>
+    <li><a class="search-item" data-value="system_user">{% trans 'System user' %}</a></li>
+</ul>
 {% endblock %}
 
 {% block custom_foot_js %}
@@ -75,61 +78,27 @@
 <script>
 var zTree, table, show = 0;
 
-function onSelected(event, treeNode) {
+function onNodeSelected(event, treeNode) {
     setCookie('node_selected', treeNode.id);
     var url = table.ajax.url();
-    if (treeNode.is_node) {
-        url = setUrlParam(url, 'asset', "");
-        url = setUrlParam(url, 'node', treeNode.node_id)
+    if (treeNode.meta.type === 'node') {
+        url = setUrlParam(url, 'asset_id', "");
+        url = setUrlParam(url, 'node_id', treeNode.meta.node.id)
     } else {
-        url = setUrlParam(url, 'node', "");
-        url = setUrlParam(url, 'asset', treeNode.node_id)
+        url = setUrlParam(url, 'node_id', "");
+        url = setUrlParam(url, 'asset_id', treeNode.meta.asset.id)
     }
     setCookie('node_selected', treeNode.node_id);
     table.ajax.url(url);
     table.ajax.reload();
 }
 
-function selectQueryNode() {
-    var query_node_id = $.getUrlParam("node");
-    var cookie_node_id = getCookie('node_selected');
-    var node;
-    var node_id;
 
-    if (query_node_id !== null) {
-        node_id = query_node_id
-    } else if (cookie_node_id !== null) {
-        node_id = cookie_node_id;
+function beforeNodeAsync(treeId, treeNode) {
+    if (treeNode) {
+        return treeNode.meta.type === 'node'
     }
-
-    node = zTree.getNodesByParam("id", node_id, null);
-    if (node){
-        zTree.selectNode(node[0]);
-        node.open = true;
-    }
-}
-
-function filter(treeId, parentNode, childNodes) {
-    $.each(childNodes, function (index, value) {
-        value["node_id"] = value["id"];
-        value["id"] = value["tree_id"];
-        if (value["tree_id"] !== value["tree_parent"]) {
-            value["pId"] = value["tree_parent"];
-        } else {
-            value["isParent"] = true;
-        }
-        value['name'] = value['value'];
-        value["iconSkin"] = value["is_node"] ? null : 'file';
-
-        {#value["pId"] = value["parent"];#}
-        {#value["name"] = value["value"];#}
-        value["isParent"] = value["is_node"];
-    });
-    return childNodes;
-}
-
-function beforeAsync(treeId, treeNode) {
-    return treeNode.is_node
+    return true
 }
 
 function makeLabel(data) {
@@ -153,6 +122,9 @@ function format(d) {
     if (d.system_users.length > 0) {
         data += makeLabel(["{% trans 'System user' %}", d.system_users.join(", ")])
     }
+    if (d.actions.length > 0) {
+        data += makeLabel(["{% trans 'Action' %}", d.actions.join(", ")])
+    }
     return data
 }
 
@@ -166,6 +138,7 @@ function initTable() {
                 $(td).html("<i class='fa fa-angle-right'></i>");
             }},
             {targets: 1, createdCell: function (td, cellData, rowData) {
+                cellData = htmlEscape(cellData);
                 var detail_btn = '<a href="{% url "perms:asset-permission-detail" pk=DEFAULT_PK %}">' + cellData + '</a>';
                 $(td).html(detail_btn.replace('{{ DEFAULT_PK }}', rowData.id));
             }},
@@ -207,63 +180,28 @@ function initTable() {
 				$(td).html(update_btn + del_btn);
             }}
         ],
-        ajax_url: '{% url "api-perms:asset-permission-list" %}',
+        ajax_url: '{% url "api-perms:asset-permission-list" %}?display=1',
         columns: [
-            {data: "id"}, {data: "name"}, {data: "users"},
-            {data: "user_groups"}, {data: "assets"},
-            {data: "nodes"}, {data: "system_users"},
-            {data: "is_active", orderable: false}, {data: "id", orderable: false}
+            {data: "id"}, {data: "name"}, {data: "users", orderable: false},
+            {data: "user_groups", orderable: false}, {data: "assets", orderable: false},
+            {data: "nodes", orderable: false}, {data: "system_users", orderable: false},
+            {data: "is_valid", orderable: false}, {data: "id", orderable: false}
         ],
         select: {},
         op_html: $('#actions').html()
     };
-    table = jumpserver.initDataTable(options);
+    table = jumpserver.initServerSideDataTable(options);
     return table
 }
 
 
 function initTree() {
-    var setting = {
-        view: {
-            dblClickExpand: false,
-            showLine: true
-        },
-        data: {
-            simpleData: {
-                enable: true
-            }
-        },
-        async: {
-			enable: true,
-			url: "{% url 'api-assets:node-children-2' %}?assets=1&all=",
-			autoParam:["node_id=id", "name=n", "level=lv"],
-			dataFilter: filter,
-            type: 'get'
-		},
-        callback: {
-            onSelected: onSelected,
-            beforeAsync: beforeAsync
-        }
-    };
-
-    var zNodes = [];
-    $.get("{% url 'api-assets:node-children-2' %}?assets=1", function(data, status){
-        $.each(data, function (index, value) {
-            value["node_id"] = value["id"];
-            value["id"] = value["tree_id"];
-            if (value["tree_id"] !== value["tree_parent"]) {
-                value["pId"] = value["tree_parent"];
-            }
-            value["isParent"] = value["is_node"];
-            value['name'] = value['value'];
-            value["iconSkin"] = value["is_node"] ? null : 'file';
-        });
-        zNodes = data;
-        $.fn.zTree.init($("#assetTree"), setting, zNodes);
-        zTree = $.fn.zTree.getZTreeObj("assetTree");
-        var root = zTree.getNodes()[0];
-        zTree.expandNode(root);
-    });
+    initNodeTree({
+        onSelected: onNodeSelected,
+        beforeAsync: beforeNodeAsync,
+        showMenu: false,
+        showAssets: true
+    })
 }
 
 function toggle() {
@@ -284,6 +222,7 @@ function toggle() {
 $(document).ready(function(){
     initTable();
     initTree();
+
 })
 .on('click', '.btn-del', function () {
     var $this = $(this);
@@ -299,10 +238,10 @@ $(document).ready(function(){
     var _nodes = [];
     var _assets = [];
     $.each(nodes, function (id, node) {
-        if (node.is_node) {
-            _nodes.push(node.node_id)
+        if (node.meta.type === 'node') {
+            _nodes.push(node.meta.node.id)
         } else {
-            _assets.push(node.node_id)
+            _assets.push(node.meta.asset.id)
         }
     });
     url += "?assets=" + _assets.join(",") + "&nodes=" + _nodes.join(",");
@@ -332,6 +271,28 @@ $(document).ready(function(){
         }
     }
 
+}).on('click', '#permission_list_table_filter input', function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+    var position = $('#permission_list_table_filter input').offset();
+    var y = position['top'];
+    var x = position['left'];
+    x -= 220;
+    y += 30;
+
+    $('.search-help').css({"top":y+"px", "left":x+"px", "position": "absolute"});
+    $('.dropdown-menu.search-help').show();
+}).on('click', '.search-item', function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+    var value = $(this).data('value');
+    var old_value = $('#permission_list_table_filter input').val();
+    var new_value = old_value + ' ' + value + ':';
+    $('#permission_list_table_filter input').val(new_value.trim());
+    $('.dropdown-menu.search-help').hide();
+    $('#permission_list_table_filter input').focus()
+}).on('click', 'body', function (e) {
+    $('.dropdown-menu.search-help').hide()
 })
 
 </script>

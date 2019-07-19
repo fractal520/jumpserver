@@ -9,14 +9,6 @@
 
 {% block table_search %}
     <form id="search_form" method="get" action="" class="pull-right form-inline">
-        <div class="form-group" id="date">
-            <div class="input-daterange input-group" id="datepicker">
-                <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
-                <input type="text" class="input-sm form-control" style="width: 100px;" name="date_from" value="{{ date_from|date:'Y-m-d' }}">
-                <span class="input-group-addon">to</span>
-                <input type="text" class="input-sm form-control" style="width: 100px;" name="date_to" value="{{ date_to|date:'Y-m-d' }}">
-            </div>
-        </div>
         <div class="input-group">
             <input type="text" class="form-control input-sm" name="keyword" placeholder="{% trans 'Search'  %}" value="{{ keyword }}">
         </div>
@@ -83,7 +75,13 @@ $(document).ready(function() {
         "searching": false,
         "paging": false,
         "bInfo" : false,
-        "order": []
+        "order": [],
+        "columnDefs": [
+            { "targets": 0, "orderable": false },
+            { "targets": 4, "orderable": false },
+            { "targets": 5, "orderable": false },
+            { "targets": 8, "orderable": false }
+        ]
     });
     $('.select2').select2({
         dropdownAutoWidth : true,
@@ -117,7 +115,7 @@ $(document).ready(function() {
         var url = '{% url "ops:celery-task-log" pk=DEFAULT_PK %}'.replace("{{ DEFAULT_PK }}", task_id);
         window.open(url, '', 'width=800,height=600,left=400,top=400')
     };
-    APIUpdateAttr({
+    requestApi({
         url: the_url,
         error: error,
         method: 'GET',

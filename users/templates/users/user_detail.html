@@ -22,11 +22,11 @@
                                 <a href="{% url 'users:user-granted-asset' pk=user_object.id %}" class="text-center"><i class="fa fa-cubes"></i> {% trans 'Asset granted' %}</a>
                             </li>
                             <li class="pull-right">
-                                <a class="btn btn-outline btn-default" href="{% url 'users:user-update' pk=user_object.id %}"><i class="fa fa-edit"></i>{% trans 'Update' %}</a>
+                                <a class="btn btn-outline {% if user_object.is_superuser and not request.user.is_superuser %} disabled {% else %} btn-default {% endif %}" href="{% url 'users:user-update' pk=user_object.id %}"><i class="fa fa-edit"></i>{% trans 'Update' %}</a>
                             </li>
 
                             <li class="pull-right">
-                                <a class="btn btn-outline {% if request.user != user_object and user_object.username != "admin" %} btn-danger btn-delete-user {% else %} disabled {% endif %}">
+                                <a class="btn btn-outline {% if request.user == user_object or user_object.username == "admin" or user_object.is_superuser and not request.user.is_superuser %} disabled  {% else %} btn-danger btn-delete-user {% endif %}">
                                     <i class="fa fa-trash-o"></i>{% trans 'Delete' %}
                                 </a>
                             </li>
@@ -120,6 +120,10 @@
                                             <td><b>{{ user_object.last_login|date:"Y-m-j H:i:s" }}</b></td>
                                         </tr>
                                         <tr>
+                                            <td>{% trans 'Last password updated' %}:</td>
+                                            <td><b>{{ user_object.date_password_last_updated|date:"Y-m-j H:i:s" }}</b></td>
+                                        </tr>
+                                        <tr>
                                             <td>{% trans 'Comment' %}:</td>
                                             <td><b>{{ user_object.comment }}</b></td>
                                         </tr>
@@ -173,6 +177,7 @@
                                                 </span>
                                             </td>
                                         </tr>
+                                        {% if user_object.can_update_password %}
                                         <tr>
                                             <td>{% trans 'Send reset password mail' %}:</td>
                                             <td>
@@ -181,6 +186,7 @@
                                                 </span>
                                             </td>
                                         </tr>
+                                        {% endif %}
                                         <tr>
                                             <td>{% trans 'Send reset ssh key mail' %}:</td>
                                             <td>
@@ -274,7 +280,7 @@ function updateUserGroups(groups) {
         // clear jumpserver.groups_selected
         jumpserver.nodes_selected = {};
     };
-    APIUpdateAttr({
+    requestApi({
         url: the_url,
         body: JSON.stringify(body),
         success: success
@@ -299,7 +305,7 @@ $(document).ready(function() {
         'is_active': checked
     };
     var success = '{% trans "Update successfully!" %}';
-    APIUpdateAttr({
+    requestApi({
         url: the_url,
         body: JSON.stringify(body),
         success_message: success
@@ -326,7 +332,7 @@ $(document).ready(function() {
         'otp_secret_key': otp_secret_key
     };
     var success = '{% trans "Update successfully!" %}';
-    APIUpdateAttr({
+    requestApi({
         url: the_url,
         body: JSON.stringify(body),
         success_message: success
@@ -366,7 +372,7 @@ $(document).ready(function() {
             var msg = "{% trans "An e-mail has been sent to the user`s mailbox." %}";
             swal("{% trans 'Reset password' %}", msg, "success");
         };
-        APIUpdateAttr({
+        requestApi({
             url: the_url,
             body: JSON.stringify(body),
             success: success
@@ -392,7 +398,7 @@ $(document).ready(function() {
             var msg = "{% trans 'The reset-ssh-public-key E-mail has been sent successfully. Please inform the user to update his new ssh public key.' %}";
             swal("{% trans 'Reset SSH public key' %}", msg, "success");
         };
-        APIUpdateAttr({
+        requestApi({
             url: the_url,
             body: body,
             success: success
@@ -435,7 +441,7 @@ $(document).ready(function() {
             }
         );
     };
-    APIUpdateAttr({ url: the_url, body: JSON.stringify(body), success: success, error: fail});
+    requestApi({ url: the_url, body: JSON.stringify(body), success: success, error: fail});
 }).on('click', '.btn-delete-user', function () {
     var $this = $(this);
     var name = "{{ user_object.name }}";
@@ -460,7 +466,7 @@ $(document).ready(function() {
                 }
             );
         };
-        APIUpdateAttr({
+        requestApi({
             url: the_url,
             body: JSON.stringify(body),
             success: success
@@ -479,7 +485,7 @@ $(document).ready(function() {
         doReset();
     });
 }).on('click', '#btn-reset-mfa', function () {
-    APIUpdateAttr({
+    requestApi({
         url: "{% url 'api-users:user-reset-otp' pk=user_object.id %}",
         method: "GET",
         success_message: "{% trans 'Reset user MFA success' %}"

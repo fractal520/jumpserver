@@ -81,6 +81,7 @@ def deploy_file_to_asset(request):
     if not pack_result:
         version = add_version_list(app_name, version_status=False)
         logger.error('文件打包失败')
+        DeployRecord.add_record(asset, app_name, version, result=False, user=request.user)
         clean_asset_version(asset, DeployList.objects.get(app_name=app_name))
         add_asset_version(asset, version.version)
         return JsonResponse(dict(code=400, error='文件打包失败'))

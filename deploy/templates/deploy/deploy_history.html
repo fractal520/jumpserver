@@ -95,9 +95,9 @@
                             }
                         }},
                         {targets: 7, createdCell: function (td, cellData) {
-                            var detail_btn = '<a class="btn btn-xs btn-primary m-l-xs btn-run" href="{% url 'ops:adhoc-history-detail' pk=DEFAULT_PK %}">{% trans "Detail" %}</a>'.replace('{{ DEFAULT_PK }}', cellData);
                                 if (cellData) {
-                                   $(td).html(detail_btn);
+                                    var detail_btn = '<a class="btn btn-xs btn-primary m-l-xs btn-run" href="{% url 'ops:adhoc-history-detail' pk=DEFAULT_PK %}">{% trans "Detail" %}</a>'.replace('{{ DEFAULT_PK }}', cellData);
+                                    $(td).html(detail_btn);
                                 }
                         }}
                     ],

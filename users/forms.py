@@ -1,32 +1,13 @@
 # ~*~ coding: utf-8 ~*~
 
 from django import forms
-from django.contrib.auth.forms import AuthenticationForm
 from django.utils.translation import gettext_lazy as _
-from captcha.fields import CaptchaField
 
 from common.utils import validate_ssh_public_key
 from orgs.mixins import OrgModelForm
 from orgs.utils import current_org
 from .models import User, UserGroup
-
-
-class UserLoginForm(AuthenticationForm):
-    username = forms.CharField(label=_('Username'), max_length=100)
-    password = forms.CharField(
-        label=_('Password'), widget=forms.PasswordInput,
-        max_length=128, strip=False
-    )
-
-    def confirm_login_allowed(self, user):
-        if not user.is_staff:
-            raise forms.ValidationError(
-                self.error_messages['inactive'],
-                code='inactive',)
-
-
-class UserLoginCaptchaForm(UserLoginForm):
-    captcha = CaptchaField()
+from .utils import check_password_rules
 
 
 class UserCheckPasswordForm(forms.Form):
@@ -41,7 +22,7 @@ class UserCheckOtpCodeForm(forms.Form):
     otp_code = forms.CharField(label=_('MFA code'), max_length=6)
 
 
-class UserCreateUpdateForm(OrgModelForm):
+class UserCreateUpdateFormMixin(OrgModelForm):
     role_choices = ((i, n) for i, n in User.ROLE_CHOICES if i != User.ROLE_APP)
     password = forms.CharField(
         label=_('Password'), widget=forms.PasswordInput,
@@ -63,11 +44,6 @@ class UserCreateUpdateForm(OrgModelForm):
             'username', 'name', 'email', 'groups', 'wechat',
             'phone', 'role', 'date_expired', 'comment', 'otp_level'
         ]
-        help_texts = {
-            'username': '* required',
-            'name': '* required',
-            'email': '* required',
-        }
         widgets = {
             'otp_level': forms.RadioSelect(),
             'groups': forms.SelectMultiple(
@@ -80,13 +56,14 @@ class UserCreateUpdateForm(OrgModelForm):
 
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop("request", None)
-        super(UserCreateUpdateForm, self).__init__(*args, **kwargs)
+        super(UserCreateUpdateFormMixin, self).__init__(*args, **kwargs)
 
         roles = []
         # Super admin user
         if self.request.user.is_superuser:
             roles.append((User.ROLE_ADMIN, dict(User.ROLE_CHOICES).get(User.ROLE_ADMIN)))
             roles.append((User.ROLE_USER, dict(User.ROLE_CHOICES).get(User.ROLE_USER)))
+            roles.append((User.ROLE_AUDITOR, dict(User.ROLE_CHOICES).get(User.ROLE_AUDITOR)))
 
         # Org admin user
         else:
@@ -114,14 +91,27 @@ class UserCreateUpdateForm(OrgModelForm):
             raise forms.ValidationError(_('Not a valid ssh public key'))
         return public_key
 
+    def clean_password(self):
+        password_strategy = self.data.get('password_strategy')
+        # 创建-不设置密码
+        if password_strategy == '0':
+            return
+        password = self.data.get('password')
+        # 更新-密码为空
+        if password_strategy is None and not password:
+            return
+        if not check_password_rules(password):
+            msg = _('* Your password does not meet the requirements')
+            raise forms.ValidationError(msg)
+        return password
+
     def save(self, commit=True):
         password = self.cleaned_data.get('password')
         otp_level = self.cleaned_data.get('otp_level')
         public_key = self.cleaned_data.get('public_key')
         user = super().save(commit=commit)
         if password:
-            user.set_password(password)
-            user.save()
+            user.reset_password(password)
         if otp_level:
             user.otp_level = otp_level
             user.save()
@@ -131,18 +121,34 @@ class UserCreateUpdateForm(OrgModelForm):
         return user
 
 
+class UserCreateForm(UserCreateUpdateFormMixin):
+    EMAIL_SET_PASSWORD = _('Reset link will be generated and sent to the user')
+    CUSTOM_PASSWORD = _('Set password')
+    PASSWORD_STRATEGY_CHOICES = (
+        (0, EMAIL_SET_PASSWORD),
+        (1, CUSTOM_PASSWORD)
+    )
+    password_strategy = forms.ChoiceField(
+        choices=PASSWORD_STRATEGY_CHOICES, required=True, initial=0,
+        widget=forms.RadioSelect(), label=_('Password strategy')
+    )
+
+
+class UserUpdateForm(UserCreateUpdateFormMixin):
+    pass
+
+
 class UserProfileForm(forms.ModelForm):
+    username = forms.CharField(disabled=True)
+    name = forms.CharField(disabled=True)
+    email = forms.CharField(disabled=True)
+
     class Meta:
         model = User
         fields = [
             'username', 'name', 'email',
             'wechat', 'phone',
         ]
-        help_texts = {
-            'username': '* required',
-            'name': '* required',
-            'email': '* required',
-        }
 
 
 UserProfileForm.verbose_name = _("Profile")
@@ -217,8 +223,7 @@ class UserPasswordForm(forms.Form):
 
     def save(self):
         password = self.cleaned_data['new_password']
-        self.instance.set_password(password)
-        self.instance.save()
+        self.instance.reset_password(new_password=password)
         return self.instance
 
 
@@ -261,7 +266,6 @@ UserPublicKeyForm.verbose_name = _("Public key")
 class UserBulkUpdateForm(OrgModelForm):
     users = forms.ModelMultipleChoiceField(
         required=True,
-        help_text='* required',
         label=_('Select users'),
         queryset=User.objects.all(),
         widget=forms.SelectMultiple(
@@ -344,9 +348,6 @@ class UserGroupForm(OrgModelForm):
         fields = [
             'name', 'users', 'comment',
         ]
-        help_texts = {
-            'name': '* required'
-        }
 
 
 class FileForm(forms.Form):

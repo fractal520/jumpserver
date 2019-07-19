@@ -2,7 +2,6 @@ from django.core.mail import send_mail
 from django.conf import settings
 from celery import shared_task
 from .utils import get_logger
-from .models import Setting
 
 
 logger = get_logger(__file__)
@@ -22,14 +21,11 @@ def send_mail_async(*args, **kwargs):
     Example:
     send_mail_sync.delay(subject, message, recipient_list, fail_silently=False, html_message=None)
     """
-    configs = Setting.objects.filter(name__startswith='EMAIL')
-    for config in configs:
-        setattr(settings, config.name, config.cleaned_value)
-
     if len(args) == 3:
         args = list(args)
         args[0] = settings.EMAIL_SUBJECT_PREFIX + args[0]
-        args.insert(2, settings.EMAIL_HOST_USER)
+        email_from = settings.EMAIL_FROM or settings.EMAIL_HOST_USER
+        args.insert(2, email_from)
         args = tuple(args)
 
     try:
