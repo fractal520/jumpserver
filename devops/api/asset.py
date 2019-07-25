@@ -1,7 +1,7 @@
 from django.shortcuts import get_object_or_404
 from rest_framework.generics import ListAPIView, RetrieveAPIView
 from rest_framework.response import Response
-from assets.serializers import AssetGrantedSerializer
+from assets.serializers import AssetSerializer
 from assets.models import Asset
 from users.models import User
 from deploy.models import DeployList
@@ -21,7 +21,7 @@ class UserGrantedAssetsApi(ListAPIView):
     用户授权的所有资产
     """
     permission_classes = (IsOrgAdminOrAppUser,)
-    serializer_class = AssetGrantedSerializer
+    serializer_class = AssetSerializer
 
     def change_org_if_need(self):
         if self.request.user.is_superuser or \

@@ -7,7 +7,8 @@ from django.db import models
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from common.utils import get_logger
-from ops.ansible.runner import get_default_options, PlayBookRunner
+from devops.ansible.runner import PlayBookRunner
+from devops.ansible.runner import get_default_options
 from ops.inventory import JMSInventory
 from ops.ansible import AnsibleError
 
@@ -67,9 +68,8 @@ class PlayBookTask(models.Model):
     # 使用JMSInventory构建inventory
     @property
     def inventory(self):
-        hostname_list = [asset.fullname for asset in self.assets.all()]
         return JMSInventory(
-            hostname_list=hostname_list,
+            assets=self.assets.all(),
             run_as_admin=self.run_as_admin,
             run_as=self.run_as,
             become_info=None
@@ -157,7 +157,7 @@ class PlayBookTask(models.Model):
 
     def _run_only(self):
         date_start = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        print("{} Start task: {}\r\n".format(date_start, self.name))
+        logger.info("{} Start task: {}\r\n".format(date_start, self.name))
         self.is_running = True
         self.save()
 
@@ -168,18 +168,23 @@ class PlayBookTask(models.Model):
 
         # 判断playbook是否存在
         if not os.path.exists(self.playbook_path) or not os.path.isfile(self.playbook_path):
-            self.is_running = False
-            self.save()
-            print("Role File Not Found!\nPlease check playbook_path: {}.".format(self.playbook_path))
-            raise FileNotFoundError('Please check playbook_path {}.'.format(self.playbook_path))
+            logger.error("Role File Not Found!\nPlease check playbook_path: {}.".format(self.playbook_path))
+            self.create_playbook(self.ansible_role)
+            # self.is_running = False
+            # self.save()
+            # raise FileNotFoundError('Please check playbook_path {}.'.format(self.playbook_path))
 
         # 将playbook_path传入options
-        options = options._replace(playbook_path=self.playbook_path)
-        runner = PlayBookRunner(self.inventory, options=options)
+        # options = options._replace(playbook_path=self.playbook_path)
+        options['playbook_path'] = self.playbook_path
+        # 将task name传入start_at_task
+        # options['start_at_task'] = self.name
+        logger.debug(options)
+        runner = PlayBookRunner(inventory=self.inventory, options=options)
 
         # 将额外变量传入变量控制器
         if self.extra_vars:
-            runner.variable_manager.extra_vars = eval(self.extra_vars)
+            runner.variable_manager._extra_vars = eval(self.extra_vars)
             logger.debug(json.dumps(runner.variable_manager.get_vars()))
         try:
             result = runner.run()
@@ -188,16 +193,16 @@ class PlayBookTask(models.Model):
             self.record(result)
             self.is_running = False
             self.save()
-            print(json.dumps(result.get('stats'), indent=4))
+            # logger.info(json.dumps(result.get('stats'), indent=4))
             date_end = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-            print("\r\n{} Task finished".format(date_end))
+            logger.info("\r\n{} Task finished".format(date_end))
             return result
         except AnsibleError as e:
             self.record(error=True, result=str(e))
             self.is_running = False
             self.save()
             date_end = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-            print("\r\n{} Task finished".format(date_end))
+            logger.info("\r\n{} Task finished".format(date_end))
             logger.warn("Failed run playbook {}, {}".format(self.name, e))
 
     def __str__(self):

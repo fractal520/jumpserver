@@ -85,13 +85,6 @@ COPY_FILE_TO_TASK = [
         }
     },
     {
-        "name": "开始发送打包文件",
-        "action": {
-            "module": "copy",
-            "args": ""
-        }
-    },
-    {
         "name": "移除当前软连接",
         "action": {
             "module": "file",

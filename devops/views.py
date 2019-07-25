@@ -15,7 +15,7 @@ from common.permissions import SuperUserRequiredMixin, IsValidUser
 from common.utils import get_logger
 from .forms import *
 from devops.models import PlayBookTask, TaskHistory
-from ops.views import TaskListView
+from ops.views import TaskListView, CeleryTaskLogView
 from ops.models import CeleryTask
 # Create your views here.
 
@@ -257,6 +257,5 @@ class RoutingInspectionListView(TaskListView):
         return super(RoutingInspectionListView, self).get_queryset().filter(name__icontains="Daily routing inspection")
 
 
-class CeleryTaskLogView(IsValidUser, DetailView):
-    template_name = 'devops/celery_task_log.html'
-    model = CeleryTask
+class CustomCeleryTaskLogView(CeleryTaskLogView):
+    permission_classes = [IsValidUser]

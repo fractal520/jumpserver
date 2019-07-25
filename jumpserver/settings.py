@@ -66,7 +66,6 @@ INSTALLED_APPS = [
     'common.apps.CommonConfig',
     'terminal.apps.TerminalConfig',
     'audits.apps.AuditsConfig',
-    'dbops.apps.DbopsConfig',
     'deploy.apps.DeployConfig',
     'dreport.apps.DreportConfig',
     'devops.apps.DevopsConfig',
@@ -636,7 +635,7 @@ ROUTING_INSPECTION_DATA_PATH = CONFIG.ROUTING_INSPECTION_DATA_PATH or "/xunjian_
 ROUTING_INSPECTION_FILE_SAVE = CONFIG.ROUTING_INSPECTION_FILE_SAVE or "/home/xunjian_data/"
 
 # CESI用户信息
-CESI_URL = CONFIG.CESI_URL or "http://localhost:5001"
+CESI_URL = CONFIG.CESI_URL or "localhost:5001"
 CESI_USER = CONFIG.CESI_USER or "admin"
 CESI_PASS = CONFIG.CESI_PASS or "admin"
 

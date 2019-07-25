@@ -4,6 +4,29 @@
         <i class="fa fa-files-o" style="width: 14px"></i><span class="nav-label">{% trans 'My assets' %}</span><span class="label label-info pull-right"></span>
     </a>
 </li>
+
+{% if LICENSE_VALID %}
+<li id="applications">
+    <a>
+        <i class="fa fa-th" style="width: 14px"></i> <span class="nav-label">{% trans 'My Applications' %}</span><span class="fa arrow"></span>
+    </a>
+    <ul class="nav nav-second-level">
+        <li id="user-remote-app">
+            <a href="{% url 'applications:user-remote-app-list' %}">
+                <i class="" style="width: 14px"></i><span class="nav-label">{% trans 'RemoteApp' %}</span><span class="label label-info pull-right"></span>
+            </a>
+        </li>
+    </ul>
+</li>
+{% endif %}
+
+{% if SECURITY_COMMAND_EXECUTION %}
+<li id="ops">
+    <a href="{% url 'ops:command-execution-start' %}">
+        <i class="fa fa-terminal" style="width: 14px"></i> <span class="nav-label">{% trans 'Command execution' %}</span><span class="label label-info pull-right"></span>
+    </a>
+</li>
+{% endif %}
 <li id="users">
     <a href="{% url 'users:user-profile' %}">
         <i class="fa fa-user" style="width: 14px"></i> <span class="nav-label">{% trans 'Profile' %}</span><span class="label label-info pull-right"></span>
@@ -18,35 +41,4 @@
     <a href="{% url 'terminal:web-sftp' %}" target="_blank"><i class="fa fa-file" style="width: 14px"></i>
         <span class="nav-label">{% trans 'File manager' %}</span>
     </a>
-</li>
-<li id="extra_app">
-    <a>
-        <i class="fa fa-cloud" style="width: 14px"></i> <span class="nav-label">运维自动化</span><span class="fa arrow"></span>
-    </a>
-    <ul class="nav nav-second-level">
-        <li id="deploy"><a href="{% url 'deploy:deploy_list' %}" id="deploy-list">自动发布</a></li>
-    </ul>
-    <ul class="nav nav-second-level">
-        <li id="app-form"><a href="{% url 'devops:app-form' %}">资产应用对应表</a></li>
-    </ul>
-    <ul class="nav nav-second-level">
-        <li id="devops"><a href="{% url 'devops:play-task-list' %}">Ansible任务中心</a></li>
-    </ul>
-</li>
-<li id="dbops">
-    <a>
-        <i class="fa fa-database" style="width: 14px"></i> <span class="nav-label">数据库自动化</span><span class="fa arrow"></span>
-    </a>
-    <ul class="nav nav-second-level">
-        <li id="sqlordercreate"><a href="{% url 'dbops:sqlordercreate' %}" id="sqlordercreate">SQL-任务创建</a></li>
-    </ul>
-    <ul class="nav nav-second-level">
-        <li id="sqlorderlist"><a href="{% url 'dbops:sqlorderlist' %}" id="sqlorderlist">SQL-任务列表</a></li>
-    </ul>
-    <ul class="nav nav-second-level">
-        <li id="sqlexeclist"><a href="{% url 'dbops:sqlexeclist' %}" id="sqlexeclist">SQL-执行记录</a></li>
-    </ul>
-    <ul class="nav nav-second-level">
-        <li id="dbinfos"><a href="{% url 'dbops:dbinfos' %}" id="dbinfos">数据库信息</a></li>
-    </ul>
 </li>

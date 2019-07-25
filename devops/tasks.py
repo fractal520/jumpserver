@@ -13,7 +13,7 @@ from assets.models import Asset
 from common.utils import get_logger, get_object_or_none
 from ops.models import Task
 from ops.celery import app as celery_app
-from ops.celery.utils import register_as_period_task
+from ops.celery.decorator import register_as_period_task
 from devops.utils import create_playbook_task, genrate_routing_record, DataWriter
 from devops import const
 from devops.models import PlayBookTask
@@ -123,7 +123,7 @@ def get_asset_hardware_info_util(manual=False):
             logger.debug("Period task disabled, {} pass".format(task_name))
             return "Period task disabled, {} pass".format(task_name)
     from ops.utils import update_or_create_ansible_task
-    hosts = [asset.fullname for asset in Asset.objects.all() if asset.is_active and asset.is_unixlike()]
+    hosts = [asset for asset in Asset.objects.all() if asset.is_active and asset.is_unixlike()]
     tasks = assets_const.UPDATE_ASSETS_HARDWARE_TASKS
 
     task, created = update_or_create_ansible_task(

@@ -153,7 +153,3 @@ class TaskHistorySet(viewsets.ModelViewSet):
             self.queryset = self.queryset.filter(task__in=task)
 
         return self.queryset
-
-
-class CeleryTaskLogApi(ca):
-    permission_classes = (IsValidUser,)

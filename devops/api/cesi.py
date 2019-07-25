@@ -22,6 +22,7 @@ class CesiAPI(object):
 
     def login(self):
         cesi_login_url = "http://{}/api/v2/auth/login/".format(cesi_url)
+        logger.debug(cesi_login_url)
         post_data = {
             "username": settings.CESI_USER,
             "password": settings.CESI_PASS
