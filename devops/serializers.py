@@ -1,5 +1,19 @@
 from rest_framework import serializers
+
+from assets.models import Asset
 from devops.models import PlayBookTask, AnsibleRole, TaskHistory
+from perms.serializers import AssetGrantedSerializer
+
+
+class CustomAssetGrantedSerializer(AssetGrantedSerializer):
+    class Meta:
+        model = Asset
+        only_fields = [
+            "id", "hostname", "ip", "protocols", "os", 'domain',
+            "platform", "org_id", 'comment'
+        ]
+        fields = only_fields + ['system_users_granted', 'system_users_join', "org_name"]
+        read_only_fields = fields
 
 
 class TaskReadSerializer(serializers.ModelSerializer):

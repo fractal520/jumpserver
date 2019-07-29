@@ -11,6 +11,7 @@ from django.urls import reverse_lazy
 from django.conf import settings
 
 from assets.models import *
+from assets.views import UserAssetListView as UAL
 from common.permissions import SuperUserRequiredMixin, IsValidUser
 from common.utils import get_logger
 from .forms import *
@@ -33,16 +34,8 @@ class DevOpsIndexView(LoginRequiredMixin, TemplateView):
         return super().get_context_data(**kwargs)
 
 
-class UserAssetListView(LoginRequiredMixin, TemplateView):
+class UserAssetListView(UAL):
     template_name = 'devops/user_asset_list.html'
-
-    def get_context_data(self, **kwargs):
-        context = {
-            'action': _('My assets'),
-            'system_users': SystemUser.objects.all(),
-        }
-        kwargs.update(context)
-        return super().get_context_data(**kwargs)
 
 
 class PlayBookListView(LoginRequiredMixin, TemplateView):

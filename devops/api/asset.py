@@ -15,11 +15,11 @@ from assets.api import AssetViewSet
 
 logger = get_logger('jumpserver')
 
-
+"""
 class UserGrantedAssetsApi(ListAPIView):
-    """
+
     用户授权的所有资产
-    """
+
     permission_classes = (IsOrgAdminOrAppUser,)
     serializer_class = AssetSerializer
 
@@ -55,6 +55,7 @@ class UserGrantedAssetsApi(ListAPIView):
         if self.kwargs.get('pk') is None:
             self.permission_classes = (IsValidUser,)
         return super().get_permissions()
+"""
 
 
 class GetSupervisorStatusApi(RetrieveAPIView):
