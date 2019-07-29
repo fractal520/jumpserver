@@ -25,6 +25,7 @@ api_v1 = [
    path('extra_app/deploy/v1/', include('deploy.urls.api_urls', namespace='api-deploy')),
    path('extra_app/dreport/v1/', include('dreport.urls.api_urls', namespace='api-dreport')),
    path('extra_app/devops/v1/', include('devops.urls.api_urls', namespace='api-devops')),
+   path('dbops/v1/', include('dbops.urls.api_urls', namespace='api-dbops')),
 ]
 
 api_v2 = [
@@ -46,6 +47,7 @@ app_view_patterns = [
     path('extra_app/deploy/', include('deploy.urls.views_urls', namespace='deploy')),
     path('extra_app/dreport/', include('dreport.urls.views_urls', namespace='dreport')),
     path('extra_app/', include('devops.urls.views_urls', namespace='devops')),
+    path('dbops/', include('dbops.urls.views_urls', namespace='dbops')),
 ]
 
 
