@@ -108,12 +108,12 @@ def run_ansible_task(tid, callback=None, **kwargs):
 
 @shared_task
 def routing_inspection_manual():
-    return get_asset_hardware_info_util(manual=True)
+    return routing_inspection_util(manual=True)
 
 
 @celery_app.task
 @register_as_period_task(crontab="0 2 * * *")
-def get_asset_hardware_info_util(manual=False):
+def routing_inspection_util(manual=False):
     task_name = ("Daily routing inspection as period task.Date: {}".format(datetime.now().strftime("%Y%m%d")))
     if manual:
         print('run task manual')
