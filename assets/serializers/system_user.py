@@ -1,47 +1,99 @@
 from rest_framework import serializers
 
+from django.utils.translation import ugettext_lazy as _
+
+from common.serializers import AdaptedBulkListSerializer
+from orgs.mixins import BulkOrgResourceModelSerializer
 from ..models import SystemUser
-from .base import AuthSerializer
+from .base import AuthSerializer, AuthSerializerMixin
 
 
-class SystemUserSerializer(serializers.ModelSerializer):
+class SystemUserSerializer(AuthSerializerMixin, BulkOrgResourceModelSerializer):
     """
     系统用户
     """
-    unreachable_amount = serializers.SerializerMethodField()
-    reachable_amount = serializers.SerializerMethodField()
-    unreachable_assets = serializers.SerializerMethodField()
-    reachable_assets = serializers.SerializerMethodField()
-    assets_amount = serializers.SerializerMethodField()
+    auto_generate_key = serializers.BooleanField(initial=True, required=False, write_only=True)
 
     class Meta:
         model = SystemUser
-        exclude = ('_password', '_private_key', '_public_key')
+        list_serializer_class = AdaptedBulkListSerializer
+        fields = [
+            'id', 'name', 'username', 'password', 'public_key', 'private_key',
+            'login_mode', 'login_mode_display', 'priority', 'protocol',
+            'auto_push', 'cmd_filters', 'sudo', 'shell', 'comment', 'nodes',
+            'assets_amount', 'auto_generate_key'
+        ]
+        extra_kwargs = {
+            'password': {"write_only": True},
+            'public_key': {"write_only": True},
+            'private_key': {"write_only": True},
+            'assets_amount': {'label': _('Asset')},
+            'login_mode_display': {'label': _('Login mode display')},
+            'created_by': {'read_only': True},
+        }
 
-    def get_field_names(self, declared_fields, info):
-        fields = super(SystemUserSerializer, self).get_field_names(declared_fields, info)
-        fields.extend([
-            'get_login_mode_display',
-        ])
-        return fields
+    def validate_auto_push(self, value):
+        login_mode = self.initial_data.get("login_mode")
+        protocol = self.initial_data.get("protocol")
 
-    @staticmethod
-    def get_unreachable_assets(obj):
-        return obj.unreachable_assets
+        if login_mode == SystemUser.LOGIN_MANUAL or \
+                protocol in [SystemUser.PROTOCOL_TELNET,
+                             SystemUser.PROTOCOL_VNC]:
+            value = False
+        return value
 
-    @staticmethod
-    def get_reachable_assets(obj):
-        return obj.reachable_assets
+    def validate_auto_generate_key(self, value):
+        login_mode = self.initial_data.get("login_mode")
+        protocol = self.initial_data.get("protocol")
 
-    def get_unreachable_amount(self, obj):
-        return len(self.get_unreachable_assets(obj))
+        if self.context["request"].method.lower() != "post":
+            value = False
+        elif self.instance:
+            value = False
+        elif login_mode == SystemUser.LOGIN_MANUAL:
+            value = False
+        elif protocol in [SystemUser.PROTOCOL_TELNET, SystemUser.PROTOCOL_VNC]:
+            value = False
+        return value
 
-    def get_reachable_amount(self, obj):
-        return len(self.get_reachable_assets(obj))
+    def validate_username(self, username):
+        if username:
+            return username
+        login_mode = self.initial_data.get("login_mode")
+        protocol = self.initial_data.get("protocol")
+        if login_mode == SystemUser.LOGIN_AUTO and \
+                protocol != SystemUser.PROTOCOL_VNC:
+            msg = _('* Automatic login mode must fill in the username.')
+            raise serializers.ValidationError(msg)
+        return username
 
-    @staticmethod
-    def get_assets_amount(obj):
-        return len(obj.get_assets())
+    def validate_password(self, password):
+        super().validate_password(password)
+        auto_gen_key = self.initial_data.get("auto_generate_key", False)
+        private_key = self.initial_data.get("private_key")
+        if not self.instance and not auto_gen_key and not password and not private_key:
+            raise serializers.ValidationError(_("Password or private key required"))
+        return password
+
+    def validate(self, attrs):
+        username = attrs.get("username", "manual")
+        protocol = attrs.get("protocol")
+        auto_gen_key = attrs.get("auto_generate_key", False)
+        if auto_gen_key:
+            password = SystemUser.gen_password()
+            attrs["password"] = password
+            if protocol == SystemUser.PROTOCOL_SSH:
+                private_key, public_key = SystemUser.gen_key(username)
+                attrs["private_key"] = private_key
+                attrs["public_key"] = public_key
+        attrs.pop("auto_generate_key", None)
+        return attrs
+
+    @classmethod
+    def setup_eager_loading(cls, queryset):
+        """ Perform necessary eager loading of data. """
+        queryset = queryset.prefetch_related('cmd_filters', 'nodes')
+        return queryset
 
 
 class SystemUserAuthSerializer(AuthSerializer):
@@ -57,18 +109,6 @@ class SystemUserAuthSerializer(AuthSerializer):
         ]
 
 
-class AssetSystemUserSerializer(serializers.ModelSerializer):
-    """
-    查看授权的资产系统用户的数据结构，这个和AssetSerializer不同，字段少
-    """
-    class Meta:
-        model = SystemUser
-        fields = (
-            'id', 'name', 'username', 'priority',
-            'protocol',  'comment', 'login_mode'
-        )
-
-
 class SystemUserSimpleSerializer(serializers.ModelSerializer):
     """
     系统用户最基本信息的数据结构
@@ -76,3 +116,6 @@ class SystemUserSimpleSerializer(serializers.ModelSerializer):
     class Meta:
         model = SystemUser
         fields = ('id', 'name', 'username')
+
+
+

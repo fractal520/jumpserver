@@ -2,13 +2,13 @@
 
 from rest_framework_bulk import BulkModelViewSet
 from rest_framework.views import APIView, Response
+from rest_framework.pagination import LimitOffsetPagination
 
 from django.views.generic.detail import SingleObjectMixin
 
 from common.utils import get_logger
 from common.permissions import IsOrgAdmin, IsAppUser, IsOrgAdminOrAppUser
 from ..models import Domain, Gateway
-from ..utils import test_gateway_connectability
 from .. import serializers
 
 
@@ -20,6 +20,11 @@ class DomainViewSet(BulkModelViewSet):
     queryset = Domain.objects.all()
     permission_classes = (IsOrgAdmin,)
     serializer_class = serializers.DomainSerializer
+    pagination_class = LimitOffsetPagination
+
+    def get_queryset(self):
+        queryset = super().get_queryset().all()
+        return queryset
 
     def get_serializer_class(self):
         if self.request.query_params.get('gateway'):
@@ -33,11 +38,12 @@ class DomainViewSet(BulkModelViewSet):
 
 
 class GatewayViewSet(BulkModelViewSet):
-    filter_fields = ("domain",)
+    filter_fields = ("domain__name", "name", "username", "ip", "domain")
     search_fields = filter_fields
     queryset = Gateway.objects.all()
     permission_classes = (IsOrgAdmin,)
     serializer_class = serializers.GatewaySerializer
+    pagination_class = LimitOffsetPagination
 
 
 class GatewayTestConnectionApi(SingleObjectMixin, APIView):
@@ -45,9 +51,10 @@ class GatewayTestConnectionApi(SingleObjectMixin, APIView):
     model = Gateway
     object = None
 
-    def get(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
         self.object = self.get_object(Gateway.objects.all())
-        ok, e = test_gateway_connectability(self.object)
+        local_port = self.request.data.get('port') or self.object.port
+        ok, e = self.object.test_connective(local_port=local_port)
         if ok:
             return Response("ok")
         else:

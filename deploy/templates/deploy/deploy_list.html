@@ -145,6 +145,7 @@ $('#consoleModal').on('hide.bs.modal', function(e){
 //asset detail modal
 $('body').on('click', '.asset_detail', function(){
     var asset_id = this.getAttribute("asset-id");
+    let the_button = '<button class="btn btn-login btn-success" asset_id="99999">资产直连</button>'.replace("99999", asset_id);
     $.ajax({
         type: "GET",
         dataType: "json",
@@ -176,10 +177,20 @@ $('body').on('click', '.asset_detail', function(){
                     }
                 }
             });
+            $('.modal-footer').html(the_button)
             $('#asset_detail_tbody').html(trs)
         }
     });
 });
+
+//直连资产
+$('body').on('click', '.btn-login', function () {
+    let asset_id = this.getAttribute("asset_id");
+    let the_url = "{% url 'terminal:web-terminal'%}?login_to=99999".replace("99999", asset_id);
+    console.log(the_url)
+    window.open(the_url, '', 'width=800,height=600,left=400,top=400')
+});
+
 
 jQuery(document).ready(function(){
     $('#deploy_table').DataTable({

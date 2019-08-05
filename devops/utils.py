@@ -52,16 +52,15 @@ def create_playbook_task(
 
 # 将timestamp转换成当地时间字符串格式
 def translate_timestamp(timestamp):
-
     time_array = time.localtime(timestamp)
     return time.strftime("%Y-%m-%d %H:%M:%S", time_array)
 
 
 # 本地存档
-ROUTING_INSPECTION_DATA_PATH = settings.ROUTING_INSPECTION_DATA_PATH
+# ROUTING_INSPECTION_DATA_PATH = settings.ROUTING_INSPECTION_DATA_PATH
 # 运维samba归档
-ROUTING_INSPECTION_FILE_SAVE = settings.ROUTING_INSPECTION_FILE_SAVE
-MONTH = "{}月".format(datetime.now().strftime("%m").replace("0", ""))
+# ROUTING_INSPECTION_FILE_SAVE = settings.ROUTING_INSPECTION_FILE_SAVE
+# MONTH = "{}月".format(datetime.now().strftime("%m").replace("0", ""))
 
 
 def genrate_routing_record(result):
@@ -105,7 +104,7 @@ class DataWriter(object):
 
     @staticmethod
     def local_save(data_list):
-        file_name = os.path.join(ROUTING_INSPECTION_DATA_PATH, datetime.now().strftime('%Y%m%d') + '.txt')
+        file_name = os.path.join(settings.ROUTING_INSPECTION_DATA_PATH, datetime.now().strftime('%Y%m%d') + '.txt')
         with open(file_name, 'wt') as info:
             print('开始写入数据')
             logger.info('开始写入数据')
@@ -184,11 +183,11 @@ class DataWriter(object):
                     print(e, line_dict.get('hostname'))
             line_count += 1
         wb_name = host+datetime.now().strftime('%Y%m%d')+'.xls'
-
+        month = "{}月".format(datetime.now().strftime("%m").replace("0", ""))
         # 生成当日归档目录路径
         save_dir = os.path.join(
-                ROUTING_INSPECTION_FILE_SAVE, datetime.now().strftime("%Y"),
-                MONTH, datetime.now().strftime("%Y%m%d")
+                settings.ROUTING_INSPECTION_FILE_SAVE, datetime.now().strftime("%Y"),
+                month, datetime.now().strftime("%Y%m%d")
         )
 
         # 判断该巡检归档目录是否存在如果不存在则自动创建

@@ -1,22 +1,31 @@
 import datetime
+import re
+import time
 
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponseRedirect
 from django.conf import settings
 from django.views.generic import TemplateView, View
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from django.db.models import Count
 from django.shortcuts import redirect
-from django.contrib.auth.mixins import LoginRequiredMixin
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from django.views.decorators.csrf import csrf_exempt
+from django.http import HttpResponse
+
 
 from users.models import User
 from assets.models import Asset
 from terminal.models import Session
 from orgs.utils import current_org
+from common.permissions import PermissionsMixin, IsValidUser
+from common.http import HttpResponseTemporaryRedirect
 
 
-class IndexView(LoginRequiredMixin, TemplateView):
+class IndexView(PermissionsMixin, TemplateView):
     template_name = 'index.html'
+    permission_classes = [IsValidUser]
 
     session_week = None
     session_month = None
@@ -26,6 +35,8 @@ class IndexView(LoginRequiredMixin, TemplateView):
     def dispatch(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
             return self.handle_no_permission()
+        if request.user.is_auditor:
+            return super(IndexView, self).dispatch(request, *args, **kwargs)
         if not request.user.is_org_admin:
             return redirect('assets:user-asset-list')
         if not current_org or not current_org.can_admin_by(request.user):
@@ -89,13 +100,19 @@ class IndexView(LoginRequiredMixin, TemplateView):
         return self.session_month.values('user').distinct().count()
 
     def get_month_inactive_user_total(self):
-        return current_org.get_org_users().count() - self.get_month_active_user_total()
+        count = current_org.get_org_users().count() - self.get_month_active_user_total()
+        if count < 0:
+            count = 0
+        return count
 
     def get_month_active_asset_total(self):
         return self.session_month.values('asset').distinct().count()
 
     def get_month_inactive_asset_total(self):
-        return Asset.objects.all().count() - self.get_month_active_asset_total()
+        count = Asset.objects.all().count() - self.get_month_active_asset_total()
+        if count < 0:
+            count = 0
+        return count
 
     @staticmethod
     def get_user_disabled_total():
@@ -169,6 +186,7 @@ class IndexView(LoginRequiredMixin, TemplateView):
             'week_asset_hot_ten': self.get_week_top10_asset(),
             'last_login_ten': self.get_last10_sessions(),
             'week_user_hot_ten': self.get_week_top10_user(),
+            'app': _("Dashboard"),
         }
 
         kwargs.update(context)
@@ -188,3 +206,28 @@ class I18NView(View):
         response = HttpResponseRedirect(referer_url)
         response.set_cookie(settings.LANGUAGE_COOKIE_NAME, lang)
         return response
+
+
+api_url_pattern = re.compile(r'^/api/(?P<version>\w+)/(?P<app>\w+)/(?P<extra>.*)$')
+
+
+@csrf_exempt
+def redirect_format_api(request, *args, **kwargs):
+    _path, query = request.path, request.GET.urlencode()
+    matched = api_url_pattern.match(_path)
+    if matched:
+        version, app, extra = matched.groups()
+        _path = '/api/{app}/{version}/{extra}?{query}'.format(**{
+            "app": app, "version": version, "extra": extra,
+            "query": query
+        })
+        return HttpResponseTemporaryRedirect(_path)
+    else:
+        return Response({"msg": "Redirect url failed: {}".format(_path)}, status=404)
+
+
+class HealthCheckView(APIView):
+    permission_classes = ()
+
+    def get(self, request):
+        return Response({"status": 1, "time": int(time.time())})

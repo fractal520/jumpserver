@@ -12,7 +12,7 @@ router.register('task', api.TaskViewSet, 'task')
 router.register('history', api.TaskHistorySet, 'history')
 
 urlpatterns = [
-    path('assets/', api.UserGrantedAssetsApi.as_view(), name='my-assets'),
+    # path('assets/', api.UserGrantedAssetsApi.as_view(), name='my-assets'),
     path('supervisor/status/', api.GetSupervisorStatusApi.as_view(), name='supervisor-status'),
     path('supervisor/start_app/', api.StartAppApi.as_view(), name='start_app'),
     path('supervisor/stop_app/', api.StopAppApi.as_view(), name='stop_app'),
@@ -25,6 +25,7 @@ urlpatterns = [
     path('file_check_job/list/', api.CheckFileListAPIView.as_view(), name='file_check_list'),
     path('file_check_job/add/', api.CreateFileCheckJobAPIView.as_view(), name='file_check_add'),
     path('file_check_job/delete/<pk>', api.DeleteFileCheckJobAPIView.as_view(), name='file_check_delete'),
+    path('users/assets/', api.UserGrantedAssetsApi.as_view(), name='my-assets'),
 ]
 
 urlpatterns += router.urls

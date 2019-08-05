@@ -11,7 +11,7 @@ from django.utils.translation import ugettext as _
 
 from assets.models import Asset
 from common.utils import get_logger
-from deploy.util import after_deploy
+from deploy.util import after_deploy, get_jms_ip
 from devops.utils import create_playbook_task
 from devops.models import AnsibleRole
 from devops.tasks import run_ansible_task
@@ -25,6 +25,7 @@ CHOWN_SCRIPT_DIR = os.path.join(settings.BASE_DIR, 'deploy', 'script', 'chown.sh
 COMPRESS_SCRIPT_DIR = os.path.join(settings.BASE_DIR, 'deploy', 'script', 'compress_tar.sh')
 BACKUP_SCRIPT_DIR = os.path.join(settings.BASE_DIR, 'deploy', 'script', 'backup.sh')
 UNPACK_SCRIPT_DIR = os.path.join(settings.BASE_DIR, 'deploy', 'script', 'unpack.sh')
+DELETEFILE_SCRIPT_DIR = os.path.join(settings.BASE_DIR, 'deploy', 'script', 'deletefile.sh')
 
 
 logger = get_logger('jumpserver')
@@ -41,7 +42,7 @@ def test_ansible_ping(asset):
 def test_ansible_ping_util(asset, task_name):
     from ops.utils import update_or_create_ansible_task
 
-    hosts = [asset.fullname]
+    hosts = [asset]
     tasks = const.TEST_CONN_TASKS
     task, create = update_or_create_ansible_task(
         task_name=task_name,
@@ -65,7 +66,7 @@ def check_asset_file_exist(asset, app_name):
 def check_asset_file_exist_util(asset, app_name, task_name):
     from ops.utils import update_or_create_ansible_task
     logger.info('检查{0}是否已存在{1}应用启动文件'.format(asset.hostname, app_name))
-    hosts = [asset.fullname]
+    hosts = [asset]
     tasks = const.CHECK_FILE_TASK
     tasks[0]['action']['args'] = "ls -la /etc/supervisor/config.d/{}.ini".format(app_name)
     task, create = update_or_create_ansible_task(
@@ -90,28 +91,43 @@ def push_build_file_to_asset_manual(asset, app_name, user):
 @shared_task
 def push_build_file_to_asset_util(asset, task_name, app_name, user):
     from ops.utils import update_or_create_ansible_task
+    ip = get_jms_ip()
+    if not ip:
+        return
 
-    hosts = [asset.fullname]
+    hosts = [asset]
     tasks = const.COPY_FILE_TO_TASK
-    tasks[0]['action']['args'] = "creates=/data/{0} {1} {2}".format(app_name, CREATE_PROJECT_SCRIPT_DIR, app_name)
-    tasks[1]['action']['args'] = "src={0} dest={1}".format(
+    # tasks[0]['action']['args'] = "creates=/data/{0} {1} {2}".format(app_name, CREATE_PROJECT_SCRIPT_DIR, app_name)
+    tasks[0]['action']['args'] = {'creates': '/data/{0}'.format(app_name), '_raw_params':  '{0} {1}'.format(CREATE_PROJECT_SCRIPT_DIR, app_name)}
+    # tasks[1]['action']['args'] = "{0} {1}".format(DELETEFILE_SCRIPT_DIR, get_deploy_file_path(app_name))
+
+    """
+    tasks[2]['action']['args'] = "src={0} dest={1} compress=no".format(
         get_deploy_file_path(app_name),
         get_deploy_file_path(app_name)
     )
-    tasks[2]['action']['args'] = "path={0} state=absent".format(get_remote_data_path(app_name))
-    tasks[3]['action']['args'] = "{0} {1} {2}".format(COMPRESS_SCRIPT_DIR, app_name, get_version(app_name))
-    tasks[4]['action']['args'] = "src={0} state=link path={1}".format(
+
+    tasks[2]['action']['args'] = "wget http://{0}/download/{1} -O {2}".format(
+        ip,
+        get_deploy_file_path(app_name).replace('/deploy/', ''),
+        get_deploy_file_path(app_name)
+    )
+    """
+    tasks[1]['action']['args'] = "path={0} state=absent".format(get_remote_data_path(app_name))
+    tasks[2]['action']['args'] = "{0} {1} {2}".format(COMPRESS_SCRIPT_DIR, app_name, get_version(app_name))
+    tasks[3]['action']['args'] = "src={0} state=link path={1}".format(
         get_deploy_jar_path(app_name),
         get_remote_data_path(app_name)
     )
-    tasks[5]['action']['args'] = "{0} {1}".format(CHOWN_SCRIPT_DIR, app_name)
-    tasks[6]['action']['args'] = "supervisorctl {0} {1}".format('restart', app_name)
-    tasks[7]['action']['args'] = "supervisorctl {0} {1}".format('update', app_name)
+    tasks[4]['action']['args'] = "{0} {1}".format(CHOWN_SCRIPT_DIR, app_name)
+    tasks[5]['action']['args'] = "supervisorctl {0} {1}".format('restart', app_name)
+    tasks[6]['action']['args'] = "supervisorctl {0} {1}".format('update', app_name)
+    logger.debug(tasks)
     task, create = update_or_create_ansible_task(
         task_name=task_name,
         hosts=hosts, tasks=tasks,
         pattern='all',
-        options=const.TASK_OPTIONS, run_as_admin=True, created_by='System'
+        options=const.TASK_OPTIONS, run_as_admin=True, created_by=user.name
     )
 
     # result = task.run()
@@ -120,6 +136,43 @@ def push_build_file_to_asset_util(asset, task_name, app_name, user):
         return after_deploy(result, task.get_latest_adhoc(), app_name, asset, user)
 
     return result, task.get_latest_adhoc()
+
+# copy file function
+@shared_task
+def rsync_file(asset, app_name):
+    task_name = _(
+        "rsync {0} on {1} {2}".format(app_name, asset.hostname, timezone.localtime().strftime("[%Y-%m-%d %H:%M:%S]")))
+    return rsync_file_util(asset, task_name, app_name)
+
+
+@shared_task
+def rsync_file_util(asset, task_name, app_name):
+    from ops.utils import update_or_create_ansible_task
+    logger.info("开始发送打包文件")
+    hosts = [asset]
+    tasks = [
+        {
+            "name": "开始发送打包文件",
+            "action": {
+                "module": "synchronize",
+                "args": "src={0} dest={1} compress=no".format(
+                    get_deploy_file_path(app_name),
+                    get_deploy_file_path(app_name)
+                )
+            }
+        }
+    ]
+    task, create = update_or_create_ansible_task(
+        task_name=task_name,
+        hosts=hosts, tasks=tasks,
+        pattern='all',
+        options=const.TASK_OPTIONS, run_as_admin=True, created_by='System'
+    )
+    result = task.run()
+    if result[1]['dark']:
+        return False
+    logger.info("文件推送完成")
+    return True
 
 
 # backup function #
@@ -138,7 +191,7 @@ def backup_asset_app_file_util(asset, task_name, app_name):
     if not version:
         logger.info("no version history found {0}".format(app_name))
         return False
-    hosts = [asset.fullname]
+    hosts = [asset]
     tasks = const.BACKUP_FILE
     tasks[0]['action']['args'] = "{0} {1} {2}".format(BACKUP_SCRIPT_DIR, app_name, version)
     task, create = update_or_create_ansible_task(
@@ -170,7 +223,7 @@ def rollback_asset_app_version_manual(asset, app_name, version):
 def rollback_asset_app_version_util(asset, task_name, app_name, version):
     from ops.utils import update_or_create_ansible_task
 
-    hosts = [asset.fullname]
+    hosts = [asset]
     tasks = const.ROLLBACK_TASK
     # unpack
     tasks[0]['action']['args'] = "{0} {1} {2} {3}".format(
@@ -224,7 +277,7 @@ def rollback_check_backup_file_exist_util(asset, task_name, app_name, version):
     if not backup_path:
         return False
     tasks = const.CHECK_FILE_TASK
-    hosts = [asset.fullname]
+    hosts = [asset]
     tasks[0]['action']['args'] = "if [ -f '{0}' ]; then echo 'exist'; else echo 'not'; fi".format(backup_path)
     task, create = update_or_create_ansible_task(
         task_name=task_name,
@@ -260,7 +313,7 @@ def push_app_startup_config_file(asset, app_name, java_opts=None, dloader_path=N
         ansible_role = AnsibleRole.objects.get(name='addsvapp')
     except BaseException as error:
         logger.debug(error)
-        logger.error("请线安装addsvapp的play role!")
+        logger.error("请先安装addsvapp的play role!")
         return False
     assets = Asset.objects.filter(hostname=asset.hostname)
     return create_playbook_task(

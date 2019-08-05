@@ -211,7 +211,7 @@
                     window.location = "{% url 'devops:play-task-list' %}";
                 };
                 the_url = '{% url "api-devops:task-reset-playbook" pk=DEFAULT_PK %}'.replace('{{ DEFAULT_PK }}', id);
-                APIUpdateAttr({
+                requestApi({
                     url: the_url,
                     method: 'GET',
                     success_message: success_message,
@@ -239,11 +239,11 @@
                     var the_url = '{% url "api-devops:task-run" pk=DEFAULT_PK %}'.replace('{{ DEFAULT_PK }}', id);
                     var success = function (data) {
                         let task_id = data.task;
-                        let url = '{% url "ops:celery-task-log" pk=DEFAULT_PK %}'.replace("{{ DEFAULT_PK }}", task_id);
+                        let url = '{% url "devops:celery-task-log" pk=DEFAULT_PK %}'.replace("{{ DEFAULT_PK }}", task_id);
                         window.open(url, '', 'width=800,height=600,left=400,top=400')
                     };
                     toastr.info("任务执行中，请稍候。。。");
-                    APIUpdateAttr({
+                    requestApi({
                         url: the_url,
                         method: 'GET',
                         success_message: success_message,

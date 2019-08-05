@@ -58,12 +58,17 @@
     $('.btn-reset-playbook').click(function () {
         toastr.info("重置中，请稍候。。。")
         let the_url = "{% url 'api-devops:task-reset-playbook' pk=object.id %}";
-        APIUpdateAttr({
+        $.ajax({
             url: the_url,
             method: 'GET',
-            success_message: "重置成功",
-            fail_message: "重置失败,请检查日志。"
-        })
+            async: false,
+            success: function () {
+                alert("重置成功")
+            },
+            error: function () {
+                alert("重置失败,请检查日志。")
+            }
+        });
     });
     </script>
 {% endblock %}

@@ -146,11 +146,14 @@ function activeNav() {
     if (app === ''){
         $('#index').addClass('active');
     }
-    else if (app === 'xpack') {
+    else if (app === 'xpack' && resource === 'cloud') {
         var item = url_array[3];
         $("#" + app).addClass('active');
         $('#' + app + ' #' + resource).addClass('active');
         $('#' + app + ' #' + resource + ' #' + item + ' a').css('color', '#ffffff');
+    }
+    else if (app === 'settings'){
+        $("#" + app).addClass('active');
     }
     else {
         $("#" + app).addClass('active');
@@ -158,7 +161,102 @@ function activeNav() {
     }
 }
 
-function APIUpdateAttr(props) {
+function formSubmit(props) {
+    /*
+    {
+      "form": $("form"),
+      "data": {},
+      "url": "",
+      "method": "POST",
+      "redirect_to": "",
+      "success": function(data, textStatue, jqXHR){},
+      "error": function(jqXHR, textStatus, errorThrown) {},
+      "message": "",
+    }
+    */
+    props = props || {};
+    var data = props.data || props.form.serializeObject();
+    var redirect_to = props.redirect_to;
+    $.ajax({
+        url: props.url,
+        type: props.method || 'POST',
+        data: JSON.stringify(data),
+        contentType: props.content_type || "application/json; charset=utf-8",
+        dataType: props.data_type || "json"
+    }).done(function (data, textState, jqXHR) {
+        if (redirect_to) {
+            if (props.message) {
+                var messages="ed65330a45559c87345a0eb6ac7812d18d0d8976$[[\"__json_message\"\0540\05425\054\"asdfasdf \\u521b\\u5efa\\u6210\\u529f\"]]"
+                setCookie("messages", messages)
+            }
+            location.href = redirect_to;
+        } else if (typeof props.success === 'function') {
+            return props.success(data, textState, jqXHR);
+        }
+    }).fail(function(jqXHR, textStatus, errorThrown) {
+        if (typeof props.error === 'function') {
+            return props.error(jqXHR, textStatus, errorThrown)
+        }
+        if (!props.form) {
+            alert(jqXHR.responseText);
+            return
+        }
+        if (jqXHR.status === 400) {
+            var errors = jqXHR.responseJSON;
+            var noneFieldErrorRef = props.form.children('.alert-danger');
+            if (noneFieldErrorRef.length !== 1) {
+                props.form.prepend('<div class="alert alert-danger" style="display: none"></div>');
+                noneFieldErrorRef = props.form.children('.alert-danger');
+            }
+            var noneFieldErrorMsg = "";
+            noneFieldErrorRef.css("display", "none");
+            noneFieldErrorRef.html("");
+            props.form.find(".help-block.error").html("");
+            props.form.find(".form-group.has-error").removeClass("has-error");
+
+            if (typeof errors !== "object") {
+                noneFieldErrorMsg = errors;
+                if (noneFieldErrorRef.length === 1) {
+                    noneFieldErrorRef.css('display', 'block');
+                    noneFieldErrorRef.html(noneFieldErrorMsg);
+                }
+                return
+            }
+            $.each(errors, function (k, v) {
+                var fieldRef = props.form.find('[name="' + k + '"]');
+                var formGroupRef = fieldRef.parents('.form-group');
+                var parentRef = fieldRef.parent();
+                var helpBlockRef = parentRef.children('.help-block.error');
+                if (helpBlockRef.length === 0) {
+                    parentRef.append('<div class="help-block error"></div>');
+                    helpBlockRef = parentRef.children('.help-block.error');
+                }
+                if (fieldRef.length === 1 && formGroupRef.length === 1) {
+                    formGroupRef.addClass('has-error');
+                    var help_msg = v.join("<br/>") ;
+                    helpBlockRef.html(help_msg);
+                } else {
+                    $.each(v, function (kk, vv) {
+                        if (typeof vv === "object") {
+                            $.each(vv, function (kkk, vvv) {
+                                noneFieldErrorMsg += " " + vvv + '<br/>';
+                            })
+                        } else{
+                            noneFieldErrorMsg += vv + '<br/>';
+                        }
+                    })
+                }
+            });
+            if (noneFieldErrorRef.length === 1 && noneFieldErrorMsg !== '') {
+                noneFieldErrorRef.css('display', 'block');
+                noneFieldErrorRef.html(noneFieldErrorMsg);
+            }
+        }
+
+    })
+}
+
+function requestApi(props) {
     // props = {url: .., body: , success: , error: , method: ,}
     props = props || {};
     var user_success_message = props.success_message;
@@ -179,7 +277,7 @@ function APIUpdateAttr(props) {
     }).done(function(data, textStatue, jqXHR) {
         if (flash_message) {
             var msg = "";
-            if (user_fail_message) {
+            if (user_success_message) {
                 msg = user_success_message;
             } else {
                 msg = default_success_message;
@@ -192,9 +290,6 @@ function APIUpdateAttr(props) {
     }).fail(function(jqXHR, textStatus, errorThrown) {
         if (flash_message) {
             var msg = "";
-            console.log(jqXHR);
-            console.log(textStatus);
-            console.log(errorThrown);
             if (user_fail_message) {
                 msg = user_fail_message;
             } else if (jqXHR.responseJSON) {
@@ -210,6 +305,7 @@ function APIUpdateAttr(props) {
             toastr.error(msg);
         }
         if (typeof props.error === 'function') {
+            console.log(jqXHR);
             return props.error(jqXHR.responseText, jqXHR.status);
         }
     });
@@ -232,7 +328,7 @@ function objectDelete(obj, name, url, redirectTo) {
             // swal("错误", "删除"+"[ "+name+" ]"+"遇到错误", "error");
             swal(gettext('Error'), "[ "+name+" ]" + gettext("Being used by the asset, please unbind the asset first."), "error");
         };
-        APIUpdateAttr({
+        requestApi({
             url: url,
             body: JSON.stringify(body),
             method: 'DELETE',
@@ -273,7 +369,7 @@ function orgDelete(obj, name, url, redirectTo){
                 swal(gettext("Error"), " [ "+ name + " ] " + gettext("Do not perform this operation under this organization. Try again after switching to another organization"), "error");
             }
         };
-        APIUpdateAttr({
+        requestApi({
             url: url,
             body: JSON.stringify(body),
             method: 'DELETE',
@@ -371,14 +467,15 @@ jumpserver.initDataTable = function (options) {
   ];
   columnDefs = options.columnDefs ? options.columnDefs.concat(columnDefs) : columnDefs;
   var select = {
-            style: 'multi',
-            selector: 'td:first-child'
-      };
+      style: 'multi',
+      selector: 'td:first-child'
+  };
   var table = ele.DataTable({
         pageLength: options.pageLength || 15,
-        dom: options.dom || '<"#uc.pull-left">flt<"row m-t"<"col-md-8"<"#op.col-md-6"><"col-md-6 text-center"i>><"col-md-4"p>>',
+        dom: options.dom || '<"#uc.pull-left"><"pull-right"<"inline"l><"#fb.inline"><"inline"f><"#fa.inline">>tr<"row m-t"<"col-md-8"<"#op.col-md-6"><"col-md-6 text-center"i>><"col-md-4"p>>',
         order: options.order || [],
         // select: options.select || 'multi',
+        searchDelay: 800,
         buttons: [],
         columnDefs: columnDefs,
         ajax: {
@@ -404,8 +501,10 @@ jumpserver.initDataTable = function (options) {
         $('[data-toggle="popover"]').popover({
             html: true,
             placement: 'bottom',
-            // trigger: 'hover',
+            trigger: 'click',
             container: 'body'
+        }).on('click', function (e) {
+            $('[data-toggle="popover"]').not(this).popover('hide');
         });
     });
     $('.ipt_check_all').on('click', function() {
@@ -456,7 +555,11 @@ jumpserver.initServerSideDataTable = function (options) {
               $(td).html('<input type="checkbox" class="text-center ipt_check" id=99991937>'.replace('99991937', cellData));
           }
       },
-      {className: 'text-center', targets: '_all'}
+      {
+          targets: '_all',
+          className: 'text-center',
+          render: $.fn.dataTable.render.text()
+      }
   ];
   columnDefs = options.columnDefs ? options.columnDefs.concat(columnDefs) : columnDefs;
   var select = {
@@ -465,17 +568,30 @@ jumpserver.initServerSideDataTable = function (options) {
       };
   var table = ele.DataTable({
         pageLength: options.pageLength || 15,
-        dom: options.dom || '<"#uc.pull-left">fltr<"row m-t"<"col-md-8"<"#op.col-md-6"><"col-md-6 text-center"i>><"col-md-4"p>>',
+        // dom: options.dom || '<"#uc.pull-left">fltr<"row m-t"<"col-md-8"<"#op.col-md-6"><"col-md-6 text-center"i>><"col-md-4"p>>',
+        dom: options.dom || '<"#uc.pull-left"><"pull-right"<"inline"l><"#fb.inline"><"inline"f><"#fa.inline">>tr<"row m-t"<"col-md-8"<"#op.col-md-6"><"col-md-6 text-center"i>><"col-md-4"p>>',
         order: options.order || [],
         buttons: [],
         columnDefs: columnDefs,
         serverSide: true,
         processing: true,
+        searchDelay: 800,
         ajax: {
             url: options.ajax_url ,
+            error: function(jqXHR, textStatus, errorThrown) {
+                var msg = gettext("Unknown error occur");
+                if (jqXHR.responseJSON) {
+                    if (jqXHR.responseJSON.error) {
+                        msg = jqXHR.responseJSON.error
+                    } else if (jqXHR.responseJSON.msg) {
+                        msg = jqXHR.responseJSON.msg
+                    }
+                }
+                alert(msg)
+            },
             data: function (data) {
                 delete data.columns;
-                if (data.length !== null ){
+                if (data.length !== null){
                     data.limit = data.length;
                     delete data.length;
                 }
@@ -492,7 +608,10 @@ jumpserver.initServerSideDataTable = function (options) {
                     search_list.map(function (val, index) {
                        var kv = val.split(":");
                        if (kv.length === 2) {
-                           search_attr[kv[0]] = kv[1]
+                           var value = kv[1];
+                           value = value.replace("+", " ");
+                           console.log(value);
+                           search_attr[kv[0]] = value
                        } else {
                            search_raw.push(kv)
                        }
@@ -505,7 +624,7 @@ jumpserver.initServerSideDataTable = function (options) {
                 if (data.order !== null && data.order.length === 1) {
                     var col = data.order[0].column;
                     var order = options.columns[col].data;
-                    if (data.order[0].dir = "desc") {
+                    if (data.order[0].dir === "desc") {
                         order = "-" + order;
                     }
                     data.order = order;
@@ -522,9 +641,10 @@ jumpserver.initServerSideDataTable = function (options) {
         columns: options.columns || [],
         select: options.select || select,
         language: jumpserver.language,
-        lengthMenu: [[10, 15, 25, 50], [10, 15, 25, 50]]
+        lengthMenu: options.lengthMenu || [[15, 25, 50, 9999], [15, 25, 50, 'All']]
     });
     table.selected = [];
+    table.selected_rows = [];
     table.on('select', function(e, dt, type, indexes) {
         var $node = table[ type ]( indexes ).nodes().to$();
         $node.find('input.ipt_check').prop('checked', true);
@@ -532,7 +652,10 @@ jumpserver.initServerSideDataTable = function (options) {
         if (type === 'row') {
             var rows = table.rows(indexes).data();
             $.each(rows, function (id, row) {
-                if (row.id){
+                table.selected_rows.push(row);
+                if (row.id && $.inArray(row.id, table.selected) === -1){
+                    console.log(table)
+                    console.log(table.selected);
                     table.selected.push(row.id)
                 }
             })
@@ -553,8 +676,14 @@ jumpserver.initServerSideDataTable = function (options) {
             })
         }
     }).on('draw', function(){
-        $('#op').html(options.op_html || '');
-        $('#uc').html(options.uc_html || '');
+        $('[data-toggle="popover"]').popover({
+            html: true,
+            placement: 'bottom',
+            trigger: 'click',
+            container: 'body'
+        }).on('click', function (e) {
+            $('[data-toggle="popover"]').not(this).popover('hide');
+        });
         var table_data = [];
         $.each(table.rows().data(), function (id, row) {
             if (row.id) {
@@ -568,6 +697,11 @@ jumpserver.initServerSideDataTable = function (options) {
                 table.rows(index).select()
             }
         });
+    }).on("init", function () {
+        $('#op').html(options.op_html || '');
+        $('#uc').html(options.uc_html || '');
+        $('#fb').html(options.fb_html || '');
+        $('#fa').html(options.fa_html || '');
     });
     var table_id = table.settings()[0].sTableId;
     $('#' + table_id + ' .ipt_check_all').on('click', function() {
@@ -616,9 +750,12 @@ String.prototype.format = function(args) {
     return result;
 };
 
-function setCookie(key, value) {
+function setCookie(key, value, time) {
     var expires = new Date();
-    expires.setTime(expires.getTime() + (24 * 60 * 60 * 1000));
+    if (!time) {
+        time =  expires.getTime() + (24 * 60 * 60 * 1000);
+    }
+    expires.setTime(time);
     document.cookie = key + '=' + value + ';expires=' + expires.toUTCString() + ';path=/';
 }
 
@@ -685,41 +822,69 @@ function setUrlParam(url, name, value) {
     return url
 }
 
+// Password check rules
+var rules_short_map_id = {
+    'min': 'id_security_password_min_length',
+    'upper': 'id_security_password_upper_case',
+    'lower': 'id_security_password_lower_case',
+    'number': 'id_security_password_number',
+    'special': 'id_security_password_special_char'
+};
+
+var rules_id_map_label = {
+    'id_security_password_min_length': gettext('Password minimum length {N} bits'),
+    'id_security_password_upper_case': gettext('Must contain capital letters'),
+    'id_security_password_lower_case': gettext('Must contain lowercase letters'),
+    'id_security_password_number': gettext('Must contain numeric characters'),
+    'id_security_password_special_char': gettext('Must contain special characters')
+};
+
+function getRuleLabel(rule){
+    var label = '';
+    if (rule.key === rules_short_map_id['min']){
+        label = rules_id_map_label[rule.key].replace('{N}', rule.value)
+    }
+    else{
+        label = rules_id_map_label[rule.key]
+    }
+    return label
+}
+
 // 校验密码-改变规则颜色
 function checkPasswordRules(password, minLength) {
     if (wordMinLength(password, minLength)) {
-        $('#rule_SECURITY_PASSWORD_MIN_LENGTH').css('color', 'green')
+        $('#'+rules_short_map_id['min']).css('color', 'green')
     }
     else {
-        $('#rule_SECURITY_PASSWORD_MIN_LENGTH').css('color', '#908a8a')
+        $('#'+rules_short_map_id['min']).css('color', '#908a8a')
     }
 
     if (wordUpperCase(password)) {
-        $('#rule_SECURITY_PASSWORD_UPPER_CASE').css('color', 'green');
+        $('#'+rules_short_map_id['upper']).css('color', 'green')
     }
     else {
-        $('#rule_SECURITY_PASSWORD_UPPER_CASE').css('color', '#908a8a')
+        $('#'+rules_short_map_id['upper']).css('color', '#908a8a')
     }
 
     if (wordLowerCase(password)) {
-        $('#rule_SECURITY_PASSWORD_LOWER_CASE').css('color', 'green')
+        $('#'+rules_short_map_id['lower']).css('color', 'green')
     }
     else {
-        $('#rule_SECURITY_PASSWORD_LOWER_CASE').css('color', '#908a8a')
+        $('#'+rules_short_map_id['lower']).css('color', '#908a8a')
     }
 
     if (wordNumber(password)) {
-        $('#rule_SECURITY_PASSWORD_NUMBER').css('color', 'green')
+        $('#'+rules_short_map_id['number']).css('color', 'green')
     }
     else {
-        $('#rule_SECURITY_PASSWORD_NUMBER').css('color', '#908a8a')
+        $('#'+rules_short_map_id['number']).css('color', '#908a8a')
     }
 
     if (wordSpecialChar(password)) {
-        $('#rule_SECURITY_PASSWORD_SPECIAL_CHAR').css('color', 'green')
+        $('#'+rules_short_map_id['special']).css('color', 'green')
     }
     else {
-        $('#rule_SECURITY_PASSWORD_SPECIAL_CHAR').css('color', '#908a8a')
+        $('#'+rules_short_map_id['special']).css('color', '#908a8a')
     }
 }
 
@@ -746,11 +911,12 @@ function wordSpecialChar(word) {
     return word.match(/[`,~,!,@,#,\$,%,\^,&,\*,\(,\),\-,_,=,\+,\{,\},\[,\],\|,\\,;,',:,",\,,\.,<,>,\/,\?]+/)
 }
 
+
 // 显示弹窗密码规则
 function popoverPasswordRules(password_check_rules, $el) {
     var message = "";
-    jQuery.each(password_check_rules, function (idx, rules) {
-        message += "<li id=" + rules.id + " style='list-style-type:none;'> <i class='fa fa-check-circle-o' style='margin-right:10px;' ></i>" + rules.label + "</li>";
+    jQuery.each(password_check_rules, function (idx, rule) {
+        message += "<li id=" + rule.key + " style='list-style-type:none;'> <i class='fa fa-check-circle-o' style='margin-right:10px;' ></i>" + getRuleLabel(rule) + "</li>";
     });
     //$('#id_password_rules').html(message);
     $el.html(message)
@@ -780,3 +946,248 @@ function initPopover($container, $progress, $idPassword, $el, password_check_rul
     $idPassword.pwstrength(options);
     popoverPasswordRules(password_check_rules, $el);
 }
+
+// 解决input框中的资产和弹出表格中资产的显示不一致
+function initSelectedAssets2Table(id){
+    if (!id) {
+        id = "#id_assets"
+    }
+    var inputAssets = $(id).val();
+    var selectedAssets = asset_table2.selected.concat();
+
+    // input assets无，table assets选中，则取消勾选(再次click)
+    if (selectedAssets.length !== 0){
+        $.each(selectedAssets, function (index, assetId){
+            if ($.inArray(assetId, inputAssets) === -1){
+                $('#'+assetId).trigger('click');  // 取消勾选
+            }
+        });
+    }
+
+    // input assets有，table assets没选，则选中(click)
+    if (inputAssets !== null){
+        asset_table2.selected = inputAssets;
+        $.each(inputAssets, function(index, assetId){
+            var dom = document.getElementById(assetId);
+            if (dom !== null){
+                var selected = dom.parentElement.parentElement.className.indexOf('selected')
+            }
+            if (selected === -1){
+                $('#'+assetId).trigger('click');
+            }
+        });
+    }
+}
+
+
+function rootNodeAddDom(ztree, callback) {
+    var refreshIcon = "<a id='tree-refresh'><i class='fa fa-refresh'></i></a>";
+    var rootNode = ztree.getNodes()[0];
+    var $rootNodeRef = $("#" + rootNode.tId + "_a");
+    $rootNodeRef.after(refreshIcon);
+    var refreshIconRef = $('#tree-refresh');
+    refreshIconRef.bind('click', function () {
+        ztree.destroy();
+        callback()
+    })
+}
+
+function APIExportData(props) {
+    props = props || {};
+    $.ajax({
+        url: '/api/common/v1/resources/cache/',
+        type: props.method || "POST",
+        data: props.body,
+        contentType: props.content_type || "application/json; charset=utf-8",
+        dataType: props.data_type || "json",
+        success: function (data) {
+            var export_url = props.success_url;
+            var params = props.params || {};
+            params['format'] = props.format;
+            params['spm'] = data.spm;
+            for (var k in params){
+                export_url = setUrlParam(export_url, k, params[k])
+            }
+            window.open(export_url);
+        },
+        error: function () {
+            toastr.error(gettext('Export failed'));
+        }
+    })
+}
+
+function APIImportData(props){
+    props = props || {};
+    $.ajax({
+        url: props.url,
+        type: props.method || "POST",
+        processData: false,
+        data: props.body,
+        contentType: props.content_type || 'text/csv',
+        success: function (data) {
+            if(props.method === 'POST'){
+                $('#created_failed').html('');
+                $('#created_failed_detail').html('');
+                $('#success_created').html(gettext("Import Success"));
+                $('#success_created_detail').html("Count" + ": " + data.length);
+            }else{
+                $('#updated_failed').html('');
+                $('#updated_failed_detail').html('');
+                $('#success_updated').html(gettext("Update Success"));
+                $('#success_updated_detail').html(gettext("Count") + ": " + data.length);
+            }
+
+            props.data_table.ajax.reload()
+        },
+        error: function (error) {
+            var data = error.responseJSON;
+            if (data instanceof Array){
+                var html = '';
+                var li = '';
+                var err = '';
+                $.each(data, function (index, item){
+                    err = '';
+                    for (var prop in item) {
+                        err += prop + ": " + item[prop][0] + " "
+                    }
+                    if (err) {
+                        li = "<li>" + "Line " + (++index) + ". " + err + "</li>";
+                        html += li
+                    }
+                });
+                html = "<ul>" + html + "</ul>"
+            }
+            else {
+                html = error.responseText
+            }
+            if(props.method === 'POST'){
+                $('#success_created').html('');
+                $('#success_created_detail').html('');
+                $('#created_failed').html(gettext("Import failed"));
+                $('#created_failed_detail').html(html);
+            }else{
+                $('#success_updated').html('');
+                $('#success_updated_detail').html('');
+                $('#updated_failed').html(gettext("Update failed"));
+                $('#updated_failed_detail').html(html);
+            }
+        }
+    })
+}
+
+
+function htmlEscape ( d ) {
+    return typeof d === 'string' ?
+        d.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;') :
+        d;
+}
+
+function objectAttrsIsList(obj, attrs) {
+    attrs.forEach(function (attr) {
+        if (!obj[attr]){
+            obj[attr] = []
+        }
+        else if (obj[attr] && !(obj[attr] instanceof Array)){
+            obj[attr] = [obj[attr]]
+        }
+    })
+}
+
+function objectAttrsIsDatetime(obj, attrs) {
+    attrs.forEach(function (attr) {
+        obj[attr] = new Date(obj[attr]).toISOString();
+    })
+}
+
+function objectAttrsIsBool(obj, attrs) {
+    attrs.forEach(function (attr) {
+        if (!obj[attr]) {
+            obj[attr] = false
+        } else if (['on', '1'].includes(obj[attr])) {
+            obj[attr] = true
+        }
+    })
+}
+
+function cleanDate(d) {
+    if (typeof d === 'number'){return d}
+    for (var i=0; i<2; i++) {
+        if (isNaN(Date.parse(d))) {
+            d = d.split('+')[0].trimRight();
+        } else {
+            return d
+        }
+    }
+    return ''
+}
+
+function formatDateAsCN(d) {
+    d = cleanDate(d);
+    var date = new Date(d);
+    var date_s = date.toLocaleString(navigator.language, {hour12: false});
+    return date_s.split("/").join('-')
+}
+
+function getUrlParams(url) {
+    url = url.split("?");
+    var params = "";
+    if (url.length === 2){
+        params = url[1];
+    }
+    return params
+}
+
+function getTimeUnits(u) {
+    var units = {
+        "d": "天",
+        "h": "时",
+        "m": "分",
+        "s": "秒",
+    };
+    if (navigator.language || "zh-CN") {
+        return units[u]
+    }
+    return u
+}
+
+function timeOffset(a, b) {
+    a = cleanDate(a);
+    b = cleanDate(b);
+    var start = new Date(a);
+    var end = new Date(b);
+    var offset = (end - start)/1000;
+
+    var days = offset / 3600 / 24;
+    var hours = offset / 3600;
+    var minutes = offset / 60;
+    var seconds = offset;
+
+    if (days > 1) {
+        return days.toFixed(1) + " " + getTimeUnits("d");
+    } else if (hours > 1) {
+        return hours.toFixed(1) + " " + getTimeUnits("h");
+    } else if (minutes > 1) {
+        return minutes.toFixed(1) + " " + getTimeUnits("m")
+    } else if (seconds > 1) {
+        return seconds.toFixed(1) + " " + getTimeUnits("s")
+    }
+    return ""
+}
+
+function readFile(ref) {
+    var files = ref.prop('files');
+    var hasFile = files && files.length > 0;
+    if (hasFile) {
+        var reader = new FileReader();//新建一个FileReader
+        console.log(typeof files[0]);
+        reader.readAsText(files[0], "UTF-8");//读取文件
+        reader.onload = function(evt){ //读取完文件之后会回来这里
+            ref.trigger("onload", evt.target.result);
+        };
+    } else {
+        ref.trigger("onload", null);
+    }
+
+    return ref
+}
+

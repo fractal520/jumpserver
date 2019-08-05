@@ -1,10 +1,10 @@
-import pymysql
+from dbops import pymysql
 from ..models.inceptioninfo import InceptionInfo
 from common.utils import get_logger
 
 
 logger = get_logger('jumpserver')
-pymysql.install_as_MySQLdb()
+# pymysql.install_as_MySQLdb()
 
 
 class Inception(object):

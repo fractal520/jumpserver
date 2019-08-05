@@ -10,7 +10,7 @@ from common.utils import get_logger
 from django.http import JsonResponse, HttpResponse
 from django.core.exceptions import ObjectDoesNotExist
 from deploy.tasks import test_ansible_ping, push_build_file_to_asset_manual, \
-    backup_asset_app_file, check_asset_file_exist, push_app_startup_config_file
+    backup_asset_app_file, check_asset_file_exist, push_app_startup_config_file, rsync_file
 from ..util import pack_up_deploy_file, add_asset_version, clean_asset_version
 
 
@@ -46,15 +46,15 @@ def deploy_file_to_asset(request):
     except ObjectDoesNotExist as error:
         return JsonResponse(dict(code=400, error=str(error)))
 
-    # backup old version on remote host and return result
-    backup_result = backup_asset_app_file(asset, app_name)
-    if not backup_result:
-        logger.info(backup_result)
-
     # rename build file and return result
     if not turn_build_file_to_deploy(app_name):
         logger.error('找不到{0}构建文件'.format(app_name))
         return JsonResponse(dict(code=400, error='file not found!'))
+
+    # backup old version on remote host and return result
+    backup_result = backup_asset_app_file(asset, app_name)
+    if not backup_result:
+        logger.info(backup_result)
 
     # check remote host is already have target APP
     check_result = check_asset_file_exist(asset, app_name)
@@ -81,10 +81,13 @@ def deploy_file_to_asset(request):
     if not pack_result:
         version = add_version_list(app_name, version_status=False)
         logger.error('文件打包失败')
+        DeployRecord.add_record(asset, app_name, version, result=False, user=request.user)
         clean_asset_version(asset, DeployList.objects.get(app_name=app_name))
         add_asset_version(asset, version.version)
         return JsonResponse(dict(code=400, error='文件打包失败'))
-
+    if not rsync_file(asset, app_name):
+        logger.error('文件推送失败')
+        return JsonResponse(dict(code=400, error='文件推送失败'))
     if settings.DEPLOY_CELERY == "on":
         t = push_build_file_to_asset_manual.delay(asset, app_name, request.user)
         print(t.id)
