@@ -14,27 +14,25 @@ import os
 import sys
 
 import ldap
-from django_auth_ldap.config import LDAPSearch, LDAPSearchUnion
 from django.urls import reverse_lazy
+
+from . import const
+from .conf import load_user_config
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PROJECT_DIR = os.path.dirname(BASE_DIR)
-
 sys.path.append(PROJECT_DIR)
 
-# Import project config setting
-try:
-    from config import config as CONFIG
-except ImportError:
-    msg = """
-    
-    Error: No config file found.
-    
-    You can run `cp config_example.py config.py`, and edit it.
-    """
-    raise ImportError(msg)
-    # CONFIG = type('_', (), {'__getattr__': lambda arg1, arg2: None})()
+CONFIG = load_user_config()
+LOG_DIR = os.path.join(PROJECT_DIR, 'logs')
+JUMPSERVER_LOG_FILE = os.path.join(LOG_DIR, 'jumpserver.log')
+ANSIBLE_LOG_FILE = os.path.join(LOG_DIR, 'ansible.log')
+GUNICORN_LOG_FILE = os.path.join(LOG_DIR, 'gunicorn.log')
+VERSION = const.VERSION
+
+if not os.path.isdir(LOG_DIR):
+    os.makedirs(LOG_DIR)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.10/howto/deployment/checklist/
@@ -42,16 +40,19 @@ except ImportError:
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = CONFIG.SECRET_KEY
 
+# SECURITY WARNING: keep the token secret, remove it if all coco, guacamole ok
+BOOTSTRAP_TOKEN = CONFIG.BOOTSTRAP_TOKEN
+
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = CONFIG.DEBUG or False
+DEBUG = CONFIG.DEBUG
 
 # Absolute url for some case, for example email link
-# SITE_URL = CONFIG.SITE_URL or 'http://localhost'
+SITE_URL = CONFIG.SITE_URL
 
 # LOG LEVEL
-LOG_LEVEL = 'DEBUG' if DEBUG else CONFIG.LOG_LEVEL or 'WARNING'
+LOG_LEVEL = CONFIG.LOG_LEVEL
 
-ALLOWED_HOSTS = CONFIG.ALLOWED_HOSTS or ['*']
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 
@@ -61,13 +62,16 @@ INSTALLED_APPS = [
     'assets.apps.AssetsConfig',
     'perms.apps.PermsConfig',
     'ops.apps.OpsConfig',
+    'settings.apps.SettingsConfig',
     'common.apps.CommonConfig',
     'terminal.apps.TerminalConfig',
     'audits.apps.AuditsConfig',
-    'dbops.apps.DbopsConfig',
     'deploy.apps.DeployConfig',
+    'dbops.apps.DbopsConfig',
     'dreport.apps.DreportConfig',
     'devops.apps.DevopsConfig',
+    'authentication.apps.AuthenticationConfig',  # authentication
+    'applications.apps.ApplicationsConfig',
     'rest_framework',
     'rest_framework_swagger',
     'drf_yasg',
@@ -86,8 +90,14 @@ INSTALLED_APPS = [
 
 XPACK_DIR = os.path.join(BASE_DIR, 'xpack')
 XPACK_ENABLED = os.path.isdir(XPACK_DIR)
+XPACK_TEMPLATES_DIR = []
+XPACK_CONTEXT_PROCESSOR = []
+
 if XPACK_ENABLED:
+    from xpack.utils import get_xpack_templates_dir, get_xpack_context_processor
     INSTALLED_APPS.append('xpack.apps.XpackConfig')
+    XPACK_TEMPLATES_DIR = get_xpack_templates_dir(BASE_DIR)
+    XPACK_CONTEXT_PROCESSOR = get_xpack_context_processor()
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -98,38 +108,20 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'authentication.backends.openid.middleware.OpenIDAuthenticationMiddleware',
     'jumpserver.middleware.TimezoneMiddleware',
     'jumpserver.middleware.DemoMiddleware',
     'jumpserver.middleware.RequestMiddleware',
     'orgs.middleware.OrgMiddleware',
 ]
 
+
 ROOT_URLCONF = 'jumpserver.urls'
-
-
-def get_xpack_context_processor():
-    if XPACK_ENABLED:
-        return ['xpack.context_processor.xpack_processor']
-    return []
-
-
-def get_xpack_templates_dir():
-    if XPACK_ENABLED:
-        dirs = []
-        from xpack.utils import find_enabled_plugins
-        for i in find_enabled_plugins():
-            template_dir = os.path.join(BASE_DIR, 'xpack', 'plugins', i, 'templates')
-            if os.path.isdir(template_dir):
-                dirs.append(template_dir)
-        return dirs
-    else:
-        return []
-
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates'), *get_xpack_templates_dir()],
+        'DIRS': [os.path.join(BASE_DIR, 'templates'), *XPACK_TEMPLATES_DIR],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -143,7 +135,7 @@ TEMPLATES = [
                 'django.template.context_processors.media',
                 'jumpserver.context_processor.jumpserver_processor',
                 'orgs.context_processor.org_processor',
-                *get_xpack_context_processor(),
+                *XPACK_CONTEXT_PROCESSOR,
             ],
         },
     },
@@ -152,29 +144,46 @@ TEMPLATES = [
 # WSGI_APPLICATION = 'jumpserver.wsgi.applications'
 
 LOGIN_REDIRECT_URL = reverse_lazy('index')
-LOGIN_URL = reverse_lazy('users:login')
+LOGIN_URL = reverse_lazy('authentication:login')
 
-SESSION_COOKIE_DOMAIN = CONFIG.SESSION_COOKIE_DOMAIN or None
-CSRF_COOKIE_DOMAIN = CONFIG.CSRF_COOKIE_DOMAIN or None
-SESSION_COOKIE_AGE = CONFIG.SESSION_COOKIE_AGE or 3600 * 24
-SESSION_EXPIRE_AT_BROWSER_CLOSE = CONFIG.SESSION_EXPIRE_AT_BROWSER_CLOSE or True
-SESSION_SAVE_EVERY_REQUEST = CONFIG.SESSION_SAVE_EVERY_REQUEST or True
+SESSION_COOKIE_DOMAIN = CONFIG.SESSION_COOKIE_DOMAIN
+CSRF_COOKIE_DOMAIN = CONFIG.CSRF_COOKIE_DOMAIN
+SESSION_COOKIE_AGE = CONFIG.SESSION_COOKIE_AGE
+SESSION_EXPIRE_AT_BROWSER_CLOSE = CONFIG.SESSION_EXPIRE_AT_BROWSER_CLOSE
+SESSION_ENGINE = 'redis_sessions.session'
+SESSION_REDIS = {
+    'host': CONFIG.REDIS_HOST,
+    'port': CONFIG.REDIS_PORT,
+    'password': CONFIG.REDIS_PASSWORD,
+    'db': CONFIG.REDIS_DB_SESSION,
+    'prefix': 'auth_session',
+    'socket_timeout': 1,
+    'retry_on_timeout': False
+}
 
 MESSAGE_STORAGE = 'django.contrib.messages.storage.cookie.CookieStorage'
 # Database
 # https://docs.djangoproject.com/en/1.10/ref/settings/#databases
 
+DB_OPTIONS = {}
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.{}'.format(CONFIG.DB_ENGINE),
+        'ENGINE': 'django.db.backends.{}'.format(CONFIG.DB_ENGINE.lower()),
         'NAME': CONFIG.DB_NAME,
         'HOST': CONFIG.DB_HOST,
         'PORT': CONFIG.DB_PORT,
         'USER': CONFIG.DB_USER,
         'PASSWORD': CONFIG.DB_PASSWORD,
         'ATOMIC_REQUESTS': True,
+        'OPTIONS': DB_OPTIONS
     }
 }
+DB_CA_PATH = os.path.join(PROJECT_DIR, 'data', 'certs', 'db_ca.pem')
+if CONFIG.DB_ENGINE.lower() == 'mysql':
+    DB_OPTIONS['init_command'] = "SET sql_mode='STRICT_TRANS_TABLES'"
+    if os.path.isfile(DB_CA_PATH):
+        DB_OPTIONS['ssl'] = {'ca': DB_CA_PATH}
+
 
 # Password validation
 # https://docs.djangoproject.com/en/1.10/ref/settings/#auth-password-validators
@@ -209,6 +218,9 @@ LOGGING = {
         'simple': {
             'format': '%(levelname)s %(message)s'
         },
+        'msg': {
+            'format': '%(message)s'
+        }
     },
     'handlers': {
         'null': {
@@ -221,19 +233,36 @@ LOGGING = {
             'formatter': 'main'
         },
         'file': {
+            'encoding': 'utf8',
             'level': 'DEBUG',
-            'class': 'logging.handlers.TimedRotatingFileHandler',
-            'when': "D",
-            'interval': 1,
-            "backupCount": 7,
+            'class': 'logging.handlers.RotatingFileHandler',
+            'maxBytes': 1024*1024*100,
+            'backupCount': 7,
             'formatter': 'main',
-            'filename': os.path.join(PROJECT_DIR, 'logs', 'jumpserver.log')
+            'filename': JUMPSERVER_LOG_FILE,
         },
         'ansible_logs': {
+            'encoding': 'utf8',
             'level': 'DEBUG',
-            'class': 'logging.FileHandler',
+            'class': 'logging.handlers.RotatingFileHandler',
             'formatter': 'main',
-            'filename': os.path.join(PROJECT_DIR, 'logs', 'ansible.log')
+            'maxBytes': 1024*1024*100,
+            'backupCount': 7,
+            'filename': ANSIBLE_LOG_FILE,
+        },
+        'gunicorn_file': {
+            'encoding': 'utf8',
+            'level': 'DEBUG',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'formatter': 'msg',
+            'maxBytes': 1024*1024*100,
+            'backupCount': 2,
+            'filename': GUNICORN_LOG_FILE,
+        },
+        'gunicorn_console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'msg'
         },
     },
     'loggers': {
@@ -271,6 +300,10 @@ LOGGING = {
         'django_auth_ldap': {
             'handlers': ['console', 'file'],
             'level': "INFO",
+        },
+        'gunicorn': {
+            'handlers': ['gunicorn_console', 'gunicorn_file'],
+            'level': 'INFO',
         },
         # 'django.db': {
         #     'handlers': ['console', 'file'],
@@ -321,13 +354,20 @@ MEDIA_ROOT = os.path.join(PROJECT_DIR, 'data', 'media').replace('\\', '/') + '/'
 FIXTURE_DIRS = [os.path.join(BASE_DIR, 'fixtures'), ]
 
 # Email config
-EMAIL_HOST = CONFIG.EMAIL_HOST
-EMAIL_PORT = CONFIG.EMAIL_PORT
-EMAIL_HOST_USER = CONFIG.EMAIL_HOST_USER
-EMAIL_HOST_PASSWORD = CONFIG.EMAIL_HOST_PASSWORD
-EMAIL_USE_SSL = CONFIG.EMAIL_USE_SSL
-EMAIL_USE_TLS = CONFIG.EMAIL_USE_TLS
-EMAIL_SUBJECT_PREFIX = CONFIG.EMAIL_SUBJECT_PREFIX or ''
+EMAIL_HOST = 'smtp.jumpserver.org'
+EMAIL_PORT = 25
+EMAIL_HOST_USER = 'noreply@jumpserver.org'
+EMAIL_HOST_PASSWORD = ''
+EMAIL_FROM = ''
+EMAIL_USE_SSL = False
+EMAIL_USE_TLS = False
+EMAIL_SUBJECT_PREFIX = '[JMS] '
+
+# Email custom content
+EMAIL_CUSTOM_USER_CREATED_SUBJECT = ''
+EMAIL_CUSTOM_USER_CREATED_HONORIFIC = ''
+EMAIL_CUSTOM_USER_CREATED_BODY = ''
+EMAIL_CUSTOM_USER_CREATED_SIGNATURE = ''
 
 REST_FRAMEWORK = {
     # Use Django's standard `django.contrib.auth` permissions,
@@ -335,22 +375,35 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
         'common.permissions.IsOrgAdmin',
     ),
+    'DEFAULT_RENDERER_CLASSES': (
+        'rest_framework.renderers.JSONRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer',
+        'common.renders.JMSCSVRender',
+    ),
+    'DEFAULT_PARSER_CLASSES': (
+        'rest_framework.parsers.JSONParser',
+        'rest_framework.parsers.FormParser',
+        'rest_framework.parsers.MultiPartParser',
+        'common.parsers.JMSCSVParser',
+        'rest_framework.parsers.FileUploadParser',
+    ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
         # 'rest_framework.authentication.BasicAuthentication',
-        'users.authentication.AccessKeyAuthentication',
-        'users.authentication.AccessTokenAuthentication',
-        'users.authentication.PrivateTokenAuthentication',
-        'users.authentication.SessionAuthentication',
+        'authentication.backends.api.AccessKeyAuthentication',
+        'authentication.backends.api.AccessTokenAuthentication',
+        'authentication.backends.api.PrivateTokenAuthentication',
+        'authentication.backends.api.SessionAuthentication',
     ),
     'DEFAULT_FILTER_BACKENDS': (
         'django_filters.rest_framework.DjangoFilterBackend',
         'rest_framework.filters.SearchFilter',
         'rest_framework.filters.OrderingFilter',
     ),
+    'DEFAULT_METADATA_CLASS': 'common.drfmetadata.SimpleMetadataWithFilters',
     'ORDERING_PARAM': "order",
     'SEARCH_PARAM': "search",
     'DATETIME_FORMAT': '%Y-%m-%d %H:%M:%S %z',
-    'DATETIME_INPUT_FORMATS': ['%Y-%m-%d %H:%M:%S %z'],
+    'DATETIME_INPUT_FORMATS': ['iso-8601', '%Y-%m-%d %H:%M:%S %z'],
     # 'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
     # 'PAGE_SIZE': 15
 }
@@ -366,41 +419,80 @@ AUTH_USER_MODEL = 'users.User'
 FILE_UPLOAD_PERMISSIONS = 0o644
 FILE_UPLOAD_DIRECTORY_PERMISSIONS = 0o755
 
+# OTP settings
+OTP_ISSUER_NAME = CONFIG.OTP_ISSUER_NAME
+OTP_VALID_WINDOW = CONFIG.OTP_VALID_WINDOW
+
 # Auth LDAP settings
-AUTH_LDAP = CONFIG.AUTH_LDAP
-AUTH_LDAP_SERVER_URI = CONFIG.AUTH_LDAP_SERVER_URI
-AUTH_LDAP_BIND_DN = CONFIG.AUTH_LDAP_BIND_DN
-AUTH_LDAP_BIND_PASSWORD = CONFIG.AUTH_LDAP_BIND_PASSWORD
-AUTH_LDAP_SEARCH_OU = CONFIG.AUTH_LDAP_SEARCH_OU
-AUTH_LDAP_SEARCH_FILTER = CONFIG.AUTH_LDAP_SEARCH_FILTER
-AUTH_LDAP_START_TLS = CONFIG.AUTH_LDAP_START_TLS
-AUTH_LDAP_USER_ATTR_MAP = CONFIG.AUTH_LDAP_USER_ATTR_MAP
-AUTH_LDAP_USER_SEARCH_UNION = [
-    LDAPSearch(USER_SEARCH, ldap.SCOPE_SUBTREE, AUTH_LDAP_SEARCH_FILTER)
-    for USER_SEARCH in str(AUTH_LDAP_SEARCH_OU).split("|")
-]
-AUTH_LDAP_USER_SEARCH = LDAPSearchUnion(*AUTH_LDAP_USER_SEARCH_UNION)
-AUTH_LDAP_GROUP_SEARCH_OU = CONFIG.AUTH_LDAP_GROUP_SEARCH_OU
-AUTH_LDAP_GROUP_SEARCH_FILTER = CONFIG.AUTH_LDAP_GROUP_SEARCH_FILTER
-AUTH_LDAP_GROUP_SEARCH = LDAPSearch(
-    AUTH_LDAP_GROUP_SEARCH_OU, ldap.SCOPE_SUBTREE, AUTH_LDAP_GROUP_SEARCH_FILTER
-)
+AUTH_LDAP = False
+AUTH_LDAP_SERVER_URI = 'ldap://localhost:389'
+AUTH_LDAP_BIND_DN = 'cn=admin,dc=jumpserver,dc=org'
+AUTH_LDAP_BIND_PASSWORD = ''
+AUTH_LDAP_SEARCH_OU = 'ou=tech,dc=jumpserver,dc=org'
+AUTH_LDAP_SEARCH_FILTER = '(cn=%(user)s)'
+AUTH_LDAP_START_TLS = False
+AUTH_LDAP_USER_ATTR_MAP = {"username": "cn", "name": "sn", "email": "mail"}
+AUTH_LDAP_GLOBAL_OPTIONS = {
+    ldap.OPT_X_TLS_REQUIRE_CERT: ldap.OPT_X_TLS_NEVER,
+}
+LDAP_CERT_FILE = os.path.join(PROJECT_DIR, "data", "certs", "ldap_ca.pem")
+if os.path.isfile(LDAP_CERT_FILE):
+    AUTH_LDAP_GLOBAL_OPTIONS[ldap.OPT_X_TLS_CACERTFILE] = LDAP_CERT_FILE
+# AUTH_LDAP_GROUP_SEARCH_OU = CONFIG.AUTH_LDAP_GROUP_SEARCH_OU
+# AUTH_LDAP_GROUP_SEARCH_FILTER = CONFIG.AUTH_LDAP_GROUP_SEARCH_FILTER
+# AUTH_LDAP_GROUP_SEARCH = LDAPSearch(
+#    AUTH_LDAP_GROUP_SEARCH_OU, ldap.SCOPE_SUBTREE, AUTH_LDAP_GROUP_SEARCH_FILTER
+# )
 AUTH_LDAP_CONNECTION_OPTIONS = {
-    ldap.OPT_TIMEOUT: 5
+    ldap.OPT_TIMEOUT: 30
 }
 AUTH_LDAP_GROUP_CACHE_TIMEOUT = 1
 AUTH_LDAP_ALWAYS_UPDATE_USER = True
-AUTH_LDAP_BACKEND = 'django_auth_ldap.backend.LDAPBackend'
+AUTH_LDAP_BACKEND = 'authentication.backends.ldap.LDAPAuthorizationBackend'
 
 if AUTH_LDAP:
     AUTHENTICATION_BACKENDS.insert(0, AUTH_LDAP_BACKEND)
 
+# openid
+# Auth OpenID settings
+BASE_SITE_URL = CONFIG.BASE_SITE_URL
+AUTH_OPENID = CONFIG.AUTH_OPENID
+AUTH_OPENID_SERVER_URL = CONFIG.AUTH_OPENID_SERVER_URL
+AUTH_OPENID_REALM_NAME = CONFIG.AUTH_OPENID_REALM_NAME
+AUTH_OPENID_CLIENT_ID = CONFIG.AUTH_OPENID_CLIENT_ID
+AUTH_OPENID_CLIENT_SECRET = CONFIG.AUTH_OPENID_CLIENT_SECRET
+AUTH_OPENID_IGNORE_SSL_VERIFICATION = CONFIG.AUTH_OPENID_IGNORE_SSL_VERIFICATION
+AUTH_OPENID_SHARE_SESSION = CONFIG.AUTH_OPENID_SHARE_SESSION
+AUTH_OPENID_BACKENDS = [
+    'authentication.backends.openid.backends.OpenIDAuthorizationPasswordBackend',
+    'authentication.backends.openid.backends.OpenIDAuthorizationCodeBackend',
+]
+
+if AUTH_OPENID:
+    LOGIN_URL = reverse_lazy("authentication:openid:openid-login")
+    LOGIN_COMPLETE_URL = reverse_lazy("authentication:openid:openid-login-complete")
+    AUTHENTICATION_BACKENDS.insert(0, AUTH_OPENID_BACKENDS[0])
+    AUTHENTICATION_BACKENDS.insert(0, AUTH_OPENID_BACKENDS[1])
+
+# Radius Auth
+AUTH_RADIUS = CONFIG.AUTH_RADIUS
+AUTH_RADIUS_BACKEND = 'authentication.backends.radius.RadiusBackend'
+RADIUS_SERVER = CONFIG.RADIUS_SERVER
+RADIUS_PORT = CONFIG.RADIUS_PORT
+RADIUS_SECRET = CONFIG.RADIUS_SECRET
+
+if AUTH_RADIUS:
+    AUTHENTICATION_BACKENDS.insert(0, AUTH_RADIUS_BACKEND)
+
+# Dump all celery log to here
+CELERY_LOG_DIR = os.path.join(PROJECT_DIR, 'data', 'celery')
+
 # Celery using redis as broker
 CELERY_BROKER_URL = 'redis://:%(password)s@%(host)s:%(port)s/%(db)s' % {
-    'password': CONFIG.REDIS_PASSWORD if CONFIG.REDIS_PASSWORD else '',
-    'host': CONFIG.REDIS_HOST or '127.0.0.1',
-    'port': CONFIG.REDIS_PORT or 6379,
-    'db':CONFIG.REDIS_DB_CELERY_BROKER or 3,
+    'password': CONFIG.REDIS_PASSWORD,
+    'host': CONFIG.REDIS_HOST,
+    'port': CONFIG.REDIS_PORT,
+    'db': CONFIG.REDIS_DB_CELERY,
 }
 CELERY_TASK_SERIALIZER = 'pickle'
 CELERY_RESULT_SERIALIZER = 'pickle'
@@ -408,24 +500,27 @@ CELERY_RESULT_BACKEND = CELERY_BROKER_URL
 CELERY_ACCEPT_CONTENT = ['json', 'pickle']
 CELERY_RESULT_EXPIRES = 3600
 # CELERY_WORKER_LOG_FORMAT = '%(asctime)s [%(module)s %(levelname)s] %(message)s'
-CELERY_WORKER_LOG_FORMAT = '%(message)s'
-# CELERY_WORKER_TASK_LOG_FORMAT = '%(asctime)s [%(module)s %(levelname)s] %(message)s'
+# CELERY_WORKER_LOG_FORMAT = '%(message)s'
+# CELERY_WORKER_TASK_LOG_FORMAT = '%(task_id)s %(task_name)s %(message)s'
 CELERY_WORKER_TASK_LOG_FORMAT = '%(message)s'
 # CELERY_WORKER_LOG_FORMAT = '%(asctime)s [%(module)s %(levelname)s] %(message)s'
+CELERY_WORKER_LOG_FORMAT = '%(message)s'
 CELERY_TASK_EAGER_PROPAGATES = True
-CELERY_REDIRECT_STDOUTS = True
-CELERY_REDIRECT_STDOUTS_LEVEL = "INFO"
-CELERY_WORKER_HIJACK_ROOT_LOGGER = False
+CELERY_WORKER_REDIRECT_STDOUTS = True
+CELERY_WORKER_REDIRECT_STDOUTS_LEVEL = "INFO"
+# CELERY_WORKER_HIJACK_ROOT_LOGGER = True
+CELERY_WORKER_MAX_TASKS_PER_CHILD = 40
+CELERY_TASK_SOFT_TIME_LIMIT = 3600
 
 # Cache use redis
 CACHES = {
     'default': {
         'BACKEND': 'redis_cache.RedisCache',
         'LOCATION': 'redis://:%(password)s@%(host)s:%(port)s/%(db)s' % {
-            'password': CONFIG.REDIS_PASSWORD if CONFIG.REDIS_PASSWORD else '',
-            'host': CONFIG.REDIS_HOST or '127.0.0.1',
-            'port': CONFIG.REDIS_PORT or 6379,
-            'db': CONFIG.REDIS_DB_CACHE or 4,
+            'password': CONFIG.REDIS_PASSWORD,
+            'host': CONFIG.REDIS_HOST,
+            'port': CONFIG.REDIS_PORT,
+            'db': CONFIG.REDIS_DB_CACHE,
         }
     }
 }
@@ -440,27 +535,53 @@ COMMAND_STORAGE = {
     'ENGINE': 'terminal.backends.command.db',
 }
 
-TERMINAL_COMMAND_STORAGE = {
+DEFAULT_TERMINAL_COMMAND_STORAGE = {
     "default": {
         "TYPE": "server",
     },
-    # 'ali-es': {
-    #     'TYPE': 'elasticsearch',
-    #     'HOSTS': ['http://elastic:changeme@localhost:9200'],
-    # },
+}
+
+TERMINAL_COMMAND_STORAGE = CONFIG.TERMINAL_COMMAND_STORAGE
+
+DEFAULT_TERMINAL_REPLAY_STORAGE = {
+    "default": {
+        "TYPE": "server",
+    },
 }
 
 TERMINAL_REPLAY_STORAGE = {
-    "default": {
-        "TYPE": "server",
-    },
 }
 
 
-DEFAULT_PASSWORD_MIN_LENGTH = 6
-DEFAULT_LOGIN_LIMIT_COUNT = 7
-DEFAULT_LOGIN_LIMIT_TIME = 30  # Unit: minute
-DEFAULT_SECURITY_MAX_IDLE_TIME = 30  # Unit: minute
+SECURITY_MFA_AUTH = False
+SECURITY_COMMAND_EXECUTION = True
+SECURITY_LOGIN_LIMIT_COUNT = 7
+SECURITY_LOGIN_LIMIT_TIME = 30  # Unit: minute
+SECURITY_MAX_IDLE_TIME = 30  # Unit: minute
+SECURITY_PASSWORD_EXPIRATION_TIME = 9999  # Unit: day
+SECURITY_PASSWORD_MIN_LENGTH = 6  # Unit: bit
+SECURITY_PASSWORD_UPPER_CASE = False
+SECURITY_PASSWORD_LOWER_CASE = False
+SECURITY_PASSWORD_NUMBER = False
+SECURITY_PASSWORD_SPECIAL_CHAR = False
+SECURITY_PASSWORD_RULES = [
+    'SECURITY_PASSWORD_MIN_LENGTH',
+    'SECURITY_PASSWORD_UPPER_CASE',
+    'SECURITY_PASSWORD_LOWER_CASE',
+    'SECURITY_PASSWORD_NUMBER',
+    'SECURITY_PASSWORD_SPECIAL_CHAR'
+]
+SECURITY_MFA_VERIFY_TTL = CONFIG.SECURITY_MFA_VERIFY_TTL
+SECURITY_SERVICE_ACCOUNT_REGISTRATION = CONFIG.SECURITY_SERVICE_ACCOUNT_REGISTRATION
+TERMINAL_PASSWORD_AUTH = CONFIG.TERMINAL_PASSWORD_AUTH
+TERMINAL_PUBLIC_KEY_AUTH = CONFIG.TERMINAL_PUBLIC_KEY_AUTH
+TERMINAL_HEARTBEAT_INTERVAL = CONFIG.TERMINAL_HEARTBEAT_INTERVAL
+TERMINAL_ASSET_LIST_SORT_BY = CONFIG.TERMINAL_ASSET_LIST_SORT_BY
+TERMINAL_ASSET_LIST_PAGE_SIZE = CONFIG.TERMINAL_ASSET_LIST_PAGE_SIZE
+TERMINAL_SESSION_KEEP_DURATION = CONFIG.TERMINAL_SESSION_KEEP_DURATION
+TERMINAL_HOST_KEY = CONFIG.TERMINAL_HOST_KEY
+TERMINAL_HEADER_TITLE = CONFIG.TERMINAL_HEADER_TITLE
+TERMINAL_TELNET_REGEX = CONFIG.TERMINAL_TELNET_REGEX
 
 # Django bootstrap3 setting, more see http://django-bootstrap3.readthedocs.io/en/latest/settings.html
 BOOTSTRAP3 = {
@@ -468,23 +589,36 @@ BOOTSTRAP3 = {
     # Field class to use in horizontal forms
     'horizontal_field_class': 'col-md-9',
     # Set placeholder attributes to label if no placeholder is provided
-    'set_placeholder': True,
+    'set_placeholder': False,
     'success_css_class': '',
+    'required_css_class': 'required',
 }
 
-TOKEN_EXPIRATION = CONFIG.TOKEN_EXPIRATION or 3600
-DISPLAY_PER_PAGE = CONFIG.DISPLAY_PER_PAGE or 25
+TOKEN_EXPIRATION = CONFIG.TOKEN_EXPIRATION
+DISPLAY_PER_PAGE = CONFIG.DISPLAY_PER_PAGE
 DEFAULT_EXPIRED_YEARS = 70
 USER_GUIDE_URL = ""
 
 
 SWAGGER_SETTINGS = {
+    'DEFAULT_AUTO_SCHEMA_CLASS': 'jumpserver.swagger.CustomSwaggerAutoSchema',
     'SECURITY_DEFINITIONS': {
         'basic': {
             'type': 'basic'
         }
     },
 }
+
+# Default email suffix
+EMAIL_SUFFIX = CONFIG.EMAIL_SUFFIX
+LOGIN_LOG_KEEP_DAYS = CONFIG.LOGIN_LOG_KEEP_DAYS
+
+# User or user group permission cache time, default 3600 seconds
+ASSETS_PERM_CACHE_ENABLE = CONFIG.ASSETS_PERM_CACHE_ENABLE
+ASSETS_PERM_CACHE_TIME = CONFIG.ASSETS_PERM_CACHE_TIME
+
+# Asset user auth external backend, default AuthBook backend
+BACKEND_ASSET_USER_AUTH_VAULT = False
 
 JENKINS_URL = CONFIG.JENKINS_URL or 'http://localhost:8082/login?from=%2F'
 JENKINS_USER_NAME = CONFIG.JENKINS_USER_NAME or 'admin'
@@ -497,17 +631,17 @@ if not os.path.isdir(DEVICE_REPORT_DIR):
     os.makedirs(DEVICE_REPORT_DIR)
 
 # 巡检数据存档
-ROUTING_INSPECTION_DATA_PATH = CONFIG.ROUTING_INSPECTION_DATA_PATH
+ROUTING_INSPECTION_DATA_PATH = CONFIG.ROUTING_INSPECTION_DATA_PATH or "/home/xunjian_data/"
 # 巡检数据归档
-ROUTING_INSPECTION_FILE_SAVE = CONFIG.ROUTING_INSPECTION_FILE_SAVE
+ROUTING_INSPECTION_FILE_SAVE = CONFIG.ROUTING_INSPECTION_FILE_SAVE or "/xunjian_data/"
 
 # CESI用户信息
-CESI_URL = CONFIG.CESI_URL
-CESI_USER = CONFIG.CESI_USER
-CESI_PASS = CONFIG.CESI_PASS
+CESI_URL = CONFIG.CESI_URL or "localhost:5001"
+CESI_USER = CONFIG.CESI_USER or "admin"
+CESI_PASS = CONFIG.CESI_PASS or "admin"
 
 # 对账文件管理系统地址
-RDM_URL = CONFIG.RDM_URL
+RDM_URL = CONFIG.RDM_URL or "localhost:5050"
 
 # 是执行否定时任务
 PERIOD_TASK = CONFIG.PERIOD_TASK or "off"

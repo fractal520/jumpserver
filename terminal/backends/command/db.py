@@ -1,7 +1,9 @@
 # ~*~ coding: utf-8 ~*~
 import datetime
 
+from django.db import transaction
 from django.utils import timezone
+from django.db.utils import OperationalError
 
 from .base import CommandBase
 
@@ -35,7 +37,25 @@ class CommandStore(CommandBase):
                 input=c["input"], output=c["output"], session=c["session"],
                 org_id=c["org_id"], timestamp=c["timestamp"]
             ))
-        return self.model.objects.bulk_create(_commands)
+        error = False
+        try:
+            with transaction.atomic():
+                self.model.objects.bulk_create(_commands)
+        except OperationalError:
+            error = True
+        except:
+            return False
+
+        if not error:
+            return True
+        for command in _commands:
+            try:
+                with transaction.atomic():
+                    command.save()
+            except OperationalError:
+                command.output = str(command.output.encode())
+                command.save()
+        return True
 
     @staticmethod
     def make_filter_kwargs(
@@ -46,13 +66,21 @@ class CommandStore(CommandBase):
         date_from_default = timezone.now() - datetime.timedelta(days=7)
         date_to_default = timezone.now()
 
-        date_from = date_from if date_from else date_from_default
-        date_to = date_to if date_to else date_to_default
-        filter_kwargs['timestamp__gte'] = int(date_from.timestamp())
-        filter_kwargs['timestamp__lte'] = int(date_to.timestamp())
+        if not date_from and not session:
+            date_from = date_from_default
+        if not date_to and not session:
+            date_to = date_to_default
+        if date_from is not None:
+            if isinstance(date_from, datetime.datetime):
+                date_from = date_from.timestamp()
+            filter_kwargs['timestamp__gte'] = int(date_from)
+        if date_to is not None:
+            if isinstance(date_to, datetime.datetime):
+                date_to = date_to.timestamp()
+            filter_kwargs['timestamp__lte'] = int(date_to)
 
         if user:
-            filter_kwargs["user"] = user
+            filter_kwargs["user__startswith"] = user
         if asset:
             filter_kwargs['asset'] = asset
         if system_user:
@@ -61,7 +89,6 @@ class CommandStore(CommandBase):
             filter_kwargs['input__icontains'] = input
         if session:
             filter_kwargs['session'] = session
-
         return filter_kwargs
 
     def filter(self, date_from=None, date_to=None,
