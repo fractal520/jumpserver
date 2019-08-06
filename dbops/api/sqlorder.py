@@ -1,19 +1,30 @@
 # encoding: utf-8
 #
 
+import os
+from os import path, walk
+import datetime
+import re
 from django.contrib import messages
+from django.http import HttpResponse
 from rest_framework.views import APIView
-from rest_framework.generics import UpdateAPIView
+from rest_framework.generics import UpdateAPIView, CreateAPIView
 from rest_framework.response import Response
-from dbops.lib import call_inception
 from apps.common.utils import get_logger
+from common.permissions import IsOrgAdminOrAppUser, IsValidUser
+from dbops.lib import call_inception
+from dbops.lib.util import workid
+from dbops.lib.util import get_sql_path
+from dbops.lib import svn_co
 from dbops.models.dbinfo import DbInfo
-from dbops.task import ExecSql
 from dbops.models.sqlinfo import SqlOrder, SqlRecord
+from dbops.models.sqltask import SqlTask
+from dbops.task import ExecSql
 from dbops.genrollbacksql import GenRollBackSql
 from dbops.serializer import SqlOrderSerializers
 import traceback
-from common.permissions import IsOrgAdminOrAppUser, IsValidUser
+
+from ..lib.util import workid
 
 
 logger = get_logger('jumpserver')
@@ -115,3 +126,87 @@ class RollBack(APIView):
         else:
             rollback_sql = ["没有备份或语句执行失败!"]
         return Response({'db': db, 'rollback_sql': rollback_sql})
+
+
+class Create(APIView):
+
+    permission_classes = (IsValidUser,)
+
+    def post(self, request, args=None):
+        sqlorder_list = []
+        task_id = request.data.get('task_id')
+        svn_path = request.data.get('svn_path')
+        file_path_base = '/tmp/'
+        file_path = file_path_base + datetime.datetime.now().strftime('%Y%m%d%H%M%S')
+        os.makedirs(file_path)
+        svn_read = svn_co.svn_co(svn_path=svn_path, file_path=file_path)
+        if svn_read[0] == 0:
+            sql_path_list = get_sql_path(file_path)
+            if sql_path_list:
+                for sql_file in sql_path_list:
+                    sqlorder_info = {}
+                    sql_file_path = os.path.split(sql_file)[0]
+                    sql_file_name = os.path.split(sql_file)[-1]
+                    logger.info('deal sql file:' + str(sql_file_name))
+                    sqlorder_info['task_id'] = task_id
+                    sqlorder_info['svn_path'] = svn_path
+                    sqlorder_info['sql_file_path'] = sql_file_path
+                    sqlorder_info['sql_file_name'] = sql_file_name
+                    sql_file_info = re.match(r'(\d+)-(\w+)-(\w+)-(\w+)-(.*)\.sql', sql_file_name)
+                    if sql_file_info:
+                        sqlorder_info['sid'] = sql_file_info.group(1)
+                        db_name = sql_file_info.group(2)
+                        try:
+                            sqlorder_info['dbinfo'] = DbInfo.objects.get(db_name=db_name)
+                        except DbInfo.DoesNotExist:
+                            return Response({'status': 500, 'messages': '数据库' + db_name + '不存在，请核实。' + '文件：' + sql_file_name})
+                        with open(sql_file, 'r') as f:
+                            sql = f.read()
+                            sql = re.sub(r'；$', ';', sql)
+                            sqlorder_info['sql'] = re.sub(r'\s', ' ', sql)
+                        type_name = sql_file_info.group(3).upper()
+                        try:
+                            sqlorder_info['type'] = SqlOrder.get_type_value(type_name)
+                        except KeyError:
+                            return Response({'status': 500, 'messages': '类型' + type_name + '不存在，请核实。' + '文件：' + sql_file_name})
+                        sqlorder_info['submit_user'] = sql_file_info.group(4)
+                        sqlorder_info['text'] = sql_file_info.group(5)
+                    else:
+                        return Response({'status': 500, 'messages': '文件' + sql_file_name + '命名不正确，请核实。'})
+                    sqlorder_info['work_id'] = workid()
+                    sqlorder_info['create_user'] = request.user
+                    sqlorder_info['backup'] = 0
+                    sqlorder_list.append(sqlorder_info)
+            else:
+                return Response({'status': 500, 'messages': '没有发现SQL文件'})
+        else:
+            return Response({'status': 500, 'messages': 'checkout ' + svn_path + ' errer.'})
+
+        for sqlorder_info in sqlorder_list:
+            try:
+                SqlOrder.objects.get_or_create(
+                    work_id=sqlorder_info['work_id'],
+                    submit_user=sqlorder_info['submit_user'],
+                    create_user=sqlorder_info['create_user'],
+                    dbinfo=sqlorder_info['dbinfo'],
+                    sql=sqlorder_info['sql'],
+                    type=sqlorder_info['type'],
+                    backup=sqlorder_info['backup'],
+                    text=sqlorder_info['text']
+                )
+                SqlTask.objects.get_or_create(
+                    task_id=sqlorder_info['task_id'],
+                    sid=sqlorder_info['sid'],
+                    svn_path=sqlorder_info['svn_path'],
+                    sql_file_path=sqlorder_info['sql_file_path'],
+                    sql_file_name=sqlorder_info['sql_file_name'],
+                    work_id=sqlorder_info['work_id']
+                )
+            except Exception as e:
+                logger.error(f'{e.__class__.__name__}: {e}')
+                return HttpResponse(status=500)
+
+        return Response({'status': 200,
+                         'results': [{'task_id': sqlorder_info['task_id'],
+                                      'sid': sqlorder_info['sid'],
+                                      'work_id': sqlorder_info['work_id']} for sqlorder_info in sqlorder_list]})

@@ -28,7 +28,7 @@ class SqlUpdateForm(forms.ModelForm):
 
     def save(self, commit=True):
         instance = super().save(commit=False)
-        instance.submit_user = self.user
+        instance.create_user = self.user
         instance.work_id = workid()
         sql = re.sub(r'；$', ';', instance.sql)
         sql = re.sub(r'\s', ' ', sql)
