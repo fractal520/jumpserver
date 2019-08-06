@@ -1,0 +1,304 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% load static %}
+{% block content %}
+<div class="wrapper wrapper-content">
+    <div class="row col-sm-pull-12 border-bottom white-bg dashboard-header" style="margin-left:1px;margin-right: 1px; height: 350px">
+        <div class="col-sm-6 brd " >
+            <div id="chenshiyearrd" style="height:300px;"></div>
+        </div>
+        <div class="col-sm-6 brd " >
+            <div id="chenshiyuerd" style="height:300px;"></div>
+        </div>
+    </div>
+    <br/>
+    <div class="row">
+        <div class="col-sm-pull-12 border-bottom white-bg dashboard-header" style="margin-left: 15px; margin-right: 15px;  height: 350px">
+            <div id="shengjizongji" style="margin-left: 30px; margin-right: 30px; height:300px;"></div>
+        </div>
+    </div>
+    <br/>
+</div>
+
+{% endblock %}
+
+{% block custom_foot_js %}
+<script src="{% static 'js/plugins/echarts/echarts.js' %}"></script>
+<script>
+$(document).ready(function(){
+    $('#show').click(function(){
+        $('#show').css('display', 'none');
+        $('#more').css('display', 'block');
+    });
+    $("[data-toggle='tooltip']").tooltip();
+});
+    require.config({
+        paths: {
+            'echarts': '/static/js/plugins/echarts/chart/',
+            'echarts/chart/line': '/static/js/plugins/echarts/chart/line',
+            'echarts/chart/pie': '/static/js/plugins/echarts/chart/pie',
+            'echarts/chart/bar': '/static/js/plugins/echarts/chart/bar'
+        }
+    });
+    require(
+        [
+            'echarts',
+            'echarts/chart/line',
+            'echarts/chart/bar'
+        ],
+        function (ec) {
+            var top10Chart = ec.init(document.getElementById('shengjizongji'));
+            var fusions2018 = {{ fusions2018 }}
+            var fusions2019 = {{ fusions2019 }}
+            var fusionstotal2018 = {{ fusionstotal2018 }}
+            var fusionstotal2019 = {{ fusionstotal2019 }}
+            var option = {
+                title : {
+                    text: 'SCSS交易熔断数据总览',
+                    subtext: '2018熔断总数:'+ fusionstotal2018 + " ; " + '2019熔断总数:'+ fusionstotal2019,
+                },
+                tooltip : {
+                    trigger: 'axis'
+                },
+                legend: {
+                data:['2018城市月熔断次数', '2019城市月熔断次数']
+                },
+                toolbox: {
+                    show : true,
+                    feature : {
+                        mark : {show: true},
+                        dataView : {show: true, readOnly: false},
+                        magicType : {show: true, type: ['line', 'bar']},
+                        restore : {show: true},
+                        saveAsImage : {show: true}
+                    }
+                },
+                calculable : true,
+                xAxis : [
+                    {
+                        type : 'category',
+                        boundaryGap : true,
+                        data : ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'],
+                        splitLine: {
+                            lineStyle: {
+                                type: 'dashed' //dashed
+                            },
+                            show: false
+                        }
+                    }
+                ],
+                yAxis : [
+                    {
+                        type : 'value',
+                        axisLabel : {
+                            formatter: '{value}'
+                        },
+                        splitLine: {
+                            lineStyle: {
+                                type: 'dashed'
+                            },
+                            show: false
+                        }
+                    }
+                ],
+                series : [
+                    {
+                        name:'2018城市月熔断次数',
+                        type:'bar',
+                        data:fusions2018,
+                        markPoint : {
+                            data : [
+                                {type : 'max', name: '最大值'},
+                                {type : 'min', name: '最小值'},
+                            ]
+                        },
+                        markLine : {
+                            data : [
+                                {type : 'average', name: '平均值'}
+                            ]
+                        }
+                    },
+                    {
+                        name:'2019城市月熔断次数',
+                        type:'bar',
+                        data:fusions2019,
+                        markPoint : {
+                            data : [
+                                {type : 'max', name: '最大值'},
+                                {type : 'min', name: '最小值'},
+                            ]
+                        },
+                        markLine : {
+                            data : [
+                                {type : 'average', name: '平均值'}
+                            ]
+                        }
+                    },
+                ]
+            }
+
+            top10Chart.setOption(option)
+        }
+    );
+
+</script>
+<script>
+$(document).ready(function(){
+    $('#show').click(function(){
+        $('#show').css('display', 'none');
+        $('#more').css('display', 'block');
+    });
+    $("[data-toggle='tooltip']").tooltip();
+});
+    require.config({
+        paths: {
+            'echarts': '/static/js/plugins/echarts/chart/',
+            'echarts/chart/line': '/static/js/plugins/echarts/chart/line',
+            'echarts/chart/pie': '/static/js/plugins/echarts/chart/pie',
+            'echarts/chart/bar': '/static/js/plugins/echarts/chart/bar',
+            'echarts/chart/funnel': '/static/js/plugins/echarts/chart/funnel',
+        }
+    });
+    require(
+        [
+            'echarts',
+            'echarts/chart/line',
+            'echarts/chart/bar',
+            'echarts/chart/pie',
+            'echarts/chart/funnel',
+        ],
+        function (ec) {
+            var chenshiChart = ec.init(document.getElementById('chenshiyearrd'));
+            var kv = new Array();
+            kv = {{ recordyear|safe }};
+            var Record = new Array();
+            var City = new Array();
+            for (var logkey in kv){
+                Record.push({value: kv[logkey], name: logkey});
+                City.push(logkey)
+            }
+
+            var option = {
+                    title: {
+                    text: 'SCSS-2019年城市熔断前10排名',
+                        x: 'center',
+                },
+                    tooltip: {
+                    trigger: 'item',
+                    formatter: "{a} <br/>{b} : {c} ({d}%)"
+                },
+                    legend: {
+                    orient: 'vertical',
+                    x: 'left',
+                    data: City
+                },
+                    toolbox: {
+                    show: true,
+                    feature: {
+                        mark: {show: true},
+                        dataView: {show: true, readOnly: false},
+                        magicType: {
+                            show: true,
+                            type: ['pie', 'funnel'],
+                            option: {
+                                funnel: {
+                                    x: '25%',
+                                    width: '50%',
+                                    funnelAlign: 'left',
+                                    max: 1548
+                                }
+                            }
+                        },
+                        restore: {show: true},
+                        saveAsImage: {show: true}
+                    }
+                },
+                    calculable: true,
+                    series: [
+                    {
+                        name: 'SCSS-2019年城市熔断前10排名',
+                        type: 'pie',
+                        radius: '55%',
+                        center: ['50%', '60%'],
+                        data: Record
+                    }
+                ]
+            }
+            chenshiChart.setOption(option);
+        }
+    );
+
+    require(
+        [
+            'echarts',
+            'echarts/chart/line',
+            'echarts/chart/bar',
+            'echarts/chart/pie',
+            'echarts/chart/funnel',
+        ],
+        function (ec) {
+            var chenshiChart = ec.init(document.getElementById('chenshiyuerd'));
+            //var City = ['深圳','北京','广州','南京','武汉']//
+            // var record = [{value:12, name:'深圳'},{value:3, name:'北京'},{value:3, name:'广州'},{value:34, name:'南京'},{value:54, name:'武汉'},]
+
+            var kv = new Array();
+            kv = {{ recordmonth|safe }};
+            var Record = new Array();
+            var City = new Array();
+            for (var logkey in kv){
+                Record.push({value: kv[logkey], name: logkey});
+                City.push(logkey)
+            }
+            var option = {
+                    title: {
+                    text: 'SCSS-本月城市熔断前10排名',
+                        x: 'center',
+                },
+                    tooltip: {
+                    trigger: 'item',
+                    formatter: "{a} <br/>{b} : {c} ({d}%)"
+                },
+                    legend: {
+                    orient: 'vertical',
+                    x: 'left',
+                    data: City
+                },
+                    toolbox: {
+                    show: true,
+                    feature: {
+                        mark: {show: true},
+                        dataView: {show: true, readOnly: false},
+                        magicType: {
+                            show: true,
+                            type: ['pie', 'funnel'],
+                            option: {
+                                funnel: {
+                                    x: '25%',
+                                    width: '50%',
+                                    funnelAlign: 'left',
+                                    max: 1548
+                                }
+                            }
+                        },
+                        restore: {show: true},
+                        saveAsImage: {show: true}
+                    }
+                },
+                    calculable: true,
+                    series: [
+                    {
+                        name: 'SCSS-本月城市熔断前10排名',
+                        type: 'pie',
+                        radius: '55%',
+                        center: ['50%', '60%'],
+                        data: Record
+
+                    }
+                ]
+            }
+            chenshiChart.setOption(option);
+        }
+    );
+</script>
+
+{% endblock %}
