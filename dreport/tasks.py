@@ -11,7 +11,7 @@ from django.conf import settings
 from common.utils import get_logger
 from assets.models import Asset
 from ops.celery import app as celery_app
-from ops.celery.utils import register_as_period_task
+from ops.celery.decorator import register_as_period_task
 from dreport.models import CityPauseRecord
 from . import const
 
@@ -28,7 +28,7 @@ def collect_risk_manual(asset, script_path=None):
 @shared_task
 def collect_risk_util(asset, task_name, script_path):
     from ops.utils import update_or_create_ansible_task
-    hosts = [asset.fullname]
+    hosts = [asset]
     tasks = const.COLLECT_PAUSE_TASKS
     tasks[0]['action']['args'] = "python {}".format(script_path)
     task, create = update_or_create_ansible_task(
@@ -68,7 +68,7 @@ def collect_risk_as_period_task():
         logger.debug("Period task disabled, {} pass".format(task_name))
         return
 
-    hosts = [rcs.fullname]
+    hosts = [rcs]
     tasks = const.COLLECT_PAUSE_TASKS
 
     print('CELERY 定时任务')
