@@ -180,7 +180,7 @@ DATABASES = {
 }
 DB_CA_PATH = os.path.join(PROJECT_DIR, 'data', 'certs', 'db_ca.pem')
 if CONFIG.DB_ENGINE.lower() == 'mysql':
-    DB_OPTIONS['init_command'] = "SET sql_mode='STRICT_TRANS_TABLES'"
+    DB_OPTIONS['init_command'] = "SET foreign_key_checks = 0;SET sql_mode='STRICT_TRANS_TABLES'"
     if os.path.isfile(DB_CA_PATH):
         DB_OPTIONS['ssl'] = {'ca': DB_CA_PATH}
 

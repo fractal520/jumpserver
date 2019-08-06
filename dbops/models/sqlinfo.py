@@ -12,7 +12,11 @@ class SqlOrder(models.Model):
     type_items = [
         (0, 'DDL'),
         (1, 'DML'),
+        (2, 'GRT'),
+        (3, 'TAB'),
+        (4, 'IND')
     ]
+
     backup_items = [
         (0, 'not backup'),
         (1, 'backup'),
@@ -27,8 +31,9 @@ class SqlOrder(models.Model):
     ]
 
     work_id = models.CharField(max_length=50)  # 任务ID
-    submit_user = models.ForeignKey(User, on_delete=models.PROTECT, related_name='submit_user', verbose_name="提交人")  # 提交人
-    insert_date = models.DateTimeField(auto_now_add=True)  # 提交日期
+    submit_user = models.CharField(max_length=10, verbose_name="提交人")  # 提交人
+    create_user = models.ForeignKey(User, on_delete=models.PROTECT, related_name='create_user', verbose_name="提交人")  # 创建人
+    insert_date = models.DateTimeField(auto_now_add=True)  # 创建日期
     dbinfo = models.ForeignKey('DbInfo', on_delete=models.PROTECT, verbose_name="数据库")  # 数据库
     sql = models.TextField(verbose_name="SQL语句")  # SQL语句
     status = models.SmallIntegerField(choices=status_items, default=0, verbose_name="任务状态")
@@ -37,6 +42,13 @@ class SqlOrder(models.Model):
     text = models.CharField(max_length=100, verbose_name="任务说明")  # 任务说明
     exec_time = models.DateTimeField(null=True)  # SQL执行时间
     exec_user = models.ForeignKey(User, on_delete=models.PROTECT, related_name='exec_user', null=True, verbose_name="执行人")  # 执行人
+
+    @classmethod
+    def get_type_value(cls, type_name):
+        type_dict = {}
+        for type_item in SqlOrder.type_items:
+            type_dict[type_item[1]] = type_item[0]
+        return type_dict[type_name]
 
     def __str__(self):
         return self.work_id + '_' + str(self.submit_user)

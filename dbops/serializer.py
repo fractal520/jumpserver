@@ -20,11 +20,11 @@ class SqlOrderSerializers(serializers.ModelSerializer):
 
     @staticmethod
     def get_submit_user(obj):
-        return obj.submit_user.name
+        return obj.submit_user
 
     @staticmethod
     def get_submit_user(obj):
-        return obj.submit_user.name
+        return obj.submit_user
 
     @staticmethod
     def get_dbinfo(obj):

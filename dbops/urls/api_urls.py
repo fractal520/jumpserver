@@ -13,6 +13,7 @@ urlpatterns = [
     path('exec/<pk>', api.Exec.as_view(), name='exec'),
     path('rollback/<pk>', api.RollBack.as_view(), name='rollback'),
     path('audit/<work_id>', api.Audit.as_view(), name='audit'),
+    path('create/', api.Create.as_view(), name='create'),
     #re_path(r'^audit/(?P<workid>\w+)/$', api.Audit.as_view(), name='audit'),
 
 ]
