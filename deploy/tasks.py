@@ -154,8 +154,8 @@ def rsync_file_util(asset, task_name, app_name):
         {
             "name": "开始发送打包文件",
             "action": {
-                "module": "synchronize",
-                "args": "src={0} dest={1} compress=no".format(
+                "module": "copy",
+                "args": "src={0} dest={1}".format(
                     get_deploy_file_path(app_name),
                     get_deploy_file_path(app_name)
                 )
