@@ -31,7 +31,7 @@ class SqlOrder(models.Model):
     ]
 
     work_id = models.CharField(max_length=50)  # 任务ID
-    submit_user = models.CharField(max_length=10, verbose_name="提交人")  # 提交人
+    submit_user = models.CharField(max_length=64, verbose_name="提交人")  # 提交人
     create_user = models.ForeignKey(User, on_delete=models.PROTECT, related_name='create_user', verbose_name="提交人")  # 创建人
     insert_date = models.DateTimeField(auto_now_add=True)  # 创建日期
     dbinfo = models.ForeignKey('DbInfo', on_delete=models.PROTECT, verbose_name="数据库")  # 数据库
