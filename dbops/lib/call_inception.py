@@ -4,7 +4,7 @@ from common.utils import get_logger
 
 
 logger = get_logger('jumpserver')
-# pymysql.install_as_MySQLdb()
+#pymysql.install_as_MySQLdb()
 
 
 class Inception(object):
