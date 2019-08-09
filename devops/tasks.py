@@ -116,11 +116,10 @@ def routing_inspection_manual():
 def routing_inspection_util(manual=False):
     task_name = ("Daily routing inspection as period task.Date: {}".format(datetime.now().strftime("%Y%m%d")))
     if manual:
-        print('run task manual')
+        logger.info('run task manual')
     else:
         if settings.PERIOD_TASK != "on":
-            print("Period task disabled, {} pass".format(task_name))
-            logger.debug("Period task disabled, {} pass".format(task_name))
+            logger.info("Period task disabled, {} pass".format(task_name))
             return "Period task disabled, {} pass".format(task_name)
     from ops.utils import update_or_create_ansible_task
     hosts = [asset for asset in Asset.objects.all() if asset.is_active and asset.is_unixlike()]
@@ -134,7 +133,6 @@ def routing_inspection_util(manual=False):
     result = task.run()
     data_list = genrate_routing_record(result)
     if not data_list:
-        print('没有获取到巡检数据，请手动检查。')
         logger.error('没有获取到巡检数据，请手动检查。')
         return False
     try:
@@ -142,25 +140,14 @@ def routing_inspection_util(manual=False):
         local_result = True
     except FileNotFoundError as error:
         local_result = None
-        print(str(error))
         logger.error(str(error))
 
     if local_result:
-        print('开始生成excel文件')
         logger.info('开始生成excel文件')
         try:
             wb_path = DataWriter.remote_file_save(data_list)
-            print('生成成功，保存路径为{}。'.format(wb_path))
             logger.info('生成成功，保存路径为{}。'.format(wb_path))
         except BaseException as error:
             logger.error(str(error))
 
     return True
-
-
-"""
-@celery_app.task
-def test_func(x, y):
-    print('开始测试任务')
-    print(x + y)
-"""

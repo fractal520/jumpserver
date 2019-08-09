@@ -33,7 +33,7 @@ class Command(BaseCommand):
             data = result[0]['ok'][rcs.hostname]
             for key, value in data.items():
                 stout = json.loads(value.get('stdout'))
-                if CityPauseRecord().add_record(
+                if CityPauseRecord.add_record(
                         risk_list=stout.get('risk_list', None),
                         risk_date=stout.get('date', None)
                 ):

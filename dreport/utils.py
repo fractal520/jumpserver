@@ -254,6 +254,9 @@ class WeekRecord(object):
             list_num += 1
             risk_list.append(risk_dict)
 
+        if not os.path.isfile(WEEK_TEMPLATE_DIR):
+            pass
+
         tpl = DocxTemplate(WEEK_TEMPLATE_DIR)
 
         # total_pause_time = round(int(record.total_pause_time) / 60, 2)

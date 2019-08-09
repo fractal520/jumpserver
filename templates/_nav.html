@@ -88,16 +88,34 @@
         <i class="fa fa-cloud" style="width: 14px"></i> <span class="nav-label">运维自动化</span><span class="fa arrow"></span>
     </a>
     <ul class="nav nav-second-level">
-        <li id="deploy"><a href="{% url 'deploy:deploy_list' %}" id="deploy-list">自动发布</a></li>
+        <li id="dashboard"><a href="#">运维{% trans 'Dashboard' %}</a></li>
     </ul>
     <ul class="nav nav-second-level">
-        <li id="dreport"><a href="{% url 'dreport:CityView' %}" id="CityView">设备网络运行状况</a></li>
+        <li id="dreport">
+            <a>
+                <i class="fa fa-building-o" style="width: 14px"></i> <span class="nav-label">设备网络运行状况</span><span class="fa arrow"></span>
+            </a>
+            <ul class="nav nav-third-level">
+                <li id="CityView"><a href="{% url 'dreport:CityView' %}">城市列表</a></li>
+                <li id="CityMonthView"><a href="{% url 'dreport:CityMonthView' %}">月记录</a></li>
+                <li id="CityWeekView"><a href="{% url 'dreport:CityWeekView' %}">周记录</a></li>
+                <li id="CityRecord"><a href="{% url 'dreport:CityRecord' %}">熔断记录</a></li>
+            </ul>
+        </li>
+    </ul>
+    <ul class="nav nav-second-level">
+        <li id="devops">
+            <a>
+                <i class="fa fa-align-center" style="width: 14px"></i> <span class="nav-label">任务中心</span><span class="fa arrow"></span>
+            </a>
+            <ul class="nav nav-third-level">
+                <li id="deploy"><a href="{% url 'deploy:deploy_list' %}" id="deploy-list">发布任务</a></li>
+                <li id="ansible"><a href="{% url 'devops:play-task-list' %}">Ansible任务</a></li>
+            </ul>
+        </li>
     </ul>
     <ul class="nav nav-second-level">
         <li id="app-form"><a href="{% url 'devops:app-form' %}">资产应用对应表</a></li>
-    </ul>
-    <ul class="nav nav-second-level">
-        <li id="devops"><a href="{% url 'devops:play-task-list' %}">Ansible任务中心</a></li>
     </ul>
 </li>
 

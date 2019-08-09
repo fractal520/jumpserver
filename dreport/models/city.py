@@ -105,7 +105,8 @@ class CityPauseRecord(models.Model):
     def __str__(self):
         return '{0}_{1}'.format(self.city.name, self.risk_date_time)
 
-    def add_record(self, risk_list, risk_date):
+    @staticmethod
+    def add_record(risk_list, risk_date):
         if risk_list:
             if CityPauseRecord.objects.filter(risk_date=risk_date):
                 CityPauseRecord.objects.filter(risk_date=risk_date).delete()
@@ -115,7 +116,7 @@ class CityPauseRecord(models.Model):
                 risk_time = record[0].split('.')[0]
                 risk_date_time = risk_date+' '+risk_time
                 try:
-                    city = City.objects.get(name=record[1])
+                    city = City.objects.get_or_create(name=record[1])
                     logger.info('Get city {}.'.format(city.name))
                 except ObjectDoesNotExist as error:
                     logger.info('city not exist, system will create it.')

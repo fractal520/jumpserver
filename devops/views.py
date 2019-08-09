@@ -28,7 +28,7 @@ class DevOpsIndexView(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = {
-            'action': _('任务中心'),
+            'action': _('万通运维平台'),
         }
         kwargs.update(context)
         return super().get_context_data(**kwargs)

@@ -45,7 +45,7 @@ app_view_patterns = [
     path('auth/', include('authentication.urls.view_urls'), name='auth'),
     path('applications/', include('applications.urls.views_urls', namespace='applications')),
     path('extra_app/deploy/', include('deploy.urls.views_urls', namespace='deploy')),
-    path('extra_app/dreport/', include('dreport.urls.views_urls', namespace='dreport')),
+    path('extra_app/', include('dreport.urls.views_urls', namespace='dreport')),
     path('extra_app/', include('devops.urls.views_urls', namespace='devops')),
     path('dbops/', include('dbops.urls.views_urls', namespace='dbops')),
 ]
