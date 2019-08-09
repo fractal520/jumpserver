@@ -260,12 +260,14 @@ class CustomCeleryTaskLogView(CeleryTaskLogView):
 def dashboard(request):
     fusions2018 = []
     fusions2019 = []
-    fusionstotal2018 = 0
-    fusionstotal2019 = 0
+    fusions_total_2018 = 0
+    fusions_total_2019 = 0
+    queryset = CityPauseRecord.objects.exclude(recovery_date_time=None)
     for y in range(2018, 2020):
         for i in range(1, 13):
-            M = i
-            Y = y
+            month = i
+            year = y
+            """
             startday=datetime.date(Y, M, 1)
             if M == 2:
                 endday=datetime.date(Y, M, 28)
@@ -273,74 +275,80 @@ def dashboard(request):
                 endday = datetime.date(Y, M, 31)
             else:
                 endday = datetime.date(Y, M, 30)
-            record_month = CityPauseRecord.objects.filter(risk_date_time__gt=startday,
-                                                         risk_date_time__lt=endday)
+            """
+            start_day = datetime.datetime.strptime('{year}{month}'.format(year=year, month=month), '%Y%m')
+
+            if month < 12:
+                end_day = datetime.datetime.strptime('{year}{month}'.format(year=year, month=month+1), '%Y%m')
+            else:
+                end_day = datetime.datetime.strptime('{year}{month}{day}'.format(year=year, month=month, day=31), '%Y%m%d')
+
+            record_month = queryset.filter(
+                risk_date_time__gte=start_day, risk_date_time__lt=end_day
+            ).order_by('risk_date_time')
+
+            # record_month = queryset.filter(risk_date_time__year=Y, risk_date_time__month=M)
             if y == 2018:
                 fusions2018.append(len(record_month))
-                fusionstotal2018 += len(record_month)
+                fusions_total_2018 += len(record_month)
             elif y == 2019:
                 fusions2019.append(len(record_month))
-                fusionstotal2019 += len(record_month)
+                fusions_total_2019 += len(record_month)
 
     def fusionsyear():
-            fusionscity = {}
-            obj = City.objects.all()
+        fusionscity = {}
+        obj = City.objects.filter(city_type='CORPORATION')
 
-            for city in obj:
-                fusionscitykeys = city.name
-                fusioncityvalues = CityPauseRecord.objects.filter(risk_date_time__range=['2019-01-01', '2019-12-31'],
-                                                              city__name=fusionscitykeys)
-                fusionscity[fusionscitykeys] = len(fusioncityvalues)
+        for city in obj:
+            fusionscitykeys = city.name
+            fusioncityvalues = queryset.filter(risk_date_time__range=['2019-01-01', '2019-12-31'],
+                                                          city__name=fusionscitykeys)
+            fusionscity[fusionscitykeys] = len(fusioncityvalues)
 
-            fusions = sorted(fusionscity.items(), key=operator.itemgetter(1))
-            top10 = fusions[-10:][::-1]
+        fusions = sorted(fusionscity.items(), key=operator.itemgetter(1))
+        top10 = fusions[-10:][::-1]
 
-            recordlist = {}
-            for i in range(0, 10):
-                recordkey = top10[i][0]
-                recordvalue = top10[i][1]
-                recordlist[recordkey] = recordvalue
-            return json.dumps(recordlist)
+        recordlist = {}
+        for i in range(0, 10):
+            recordkey = top10[i][0]
+            recordvalue = top10[i][1]
+            recordlist[recordkey] = recordvalue
+        return json.dumps(recordlist)
 
     def fusionmonth():
-            #上月
-            #firstday = datetime.date(datetime.date.today().year, datetime.date.today().month-1, 1)
-            #lastday = datetime.date(datetime.date.today().year, datetime.date.today().month, 1) - datetime.timedelta(1)
 
-            #本月
-            firstday = datetime.date(datetime.date.today().year, datetime.date.today().month, 1)
-            lastday = datetime.date(datetime.date.today().year, datetime.date.today().month + 1,
-                                    1) - datetime.timedelta(1)
-            #firstday = "2019-7-1"
-            #lastday = "2019-7-31"
+        # 本月
+        firstday = datetime.date(datetime.date.today().year, datetime.date.today().month, 1)
+        lastday = datetime.date(datetime.date.today().year, datetime.date.today().month + 1,
+                                1) - datetime.timedelta(1)
 
-            fusionscity = {}
-            obj = City.objects.all()
+        fusionscity = {}
+        obj = City.objects.all()
 
-            for city in obj:
-                fusionscitykeys = city.name
-                fusioncityvalues = CityPauseRecord.objects.filter(risk_date_time__range=[firstday, lastday],
-                                                                  city__name=fusionscitykeys)
-                fusionscity[fusionscitykeys] = len(fusioncityvalues)
+        for city in obj:
+            fusionscitykeys = city.name
+            fusioncityvalues = queryset.filter(risk_date_time__range=[firstday, lastday],
+                                                              city__name=fusionscitykeys)
+            fusionscity[fusionscitykeys] = len(fusioncityvalues)
 
-            #字典数据按values顺序排列，生成元组
-            fusions = sorted(fusionscity.items(), key=operator.itemgetter(1))
+        # 字典数据按values顺序排列，生成元组
+        fusions = sorted(fusionscity.items(), key=operator.itemgetter(1))
 
-            #提取最后10个数据，倒序排列
-            top10 = fusions[-10:][::-1]
+        # 提取最后10个数据，倒序排列
+        top10 = fusions[-10:][::-1]
 
-            #提取列表与元组嵌套数据，生成字典
-            recordlist = {}
-            for i in range(0, 10):
-                recordkey = top10[i][0]
-                recordvalue = top10[i][1]
-                recordlist[recordkey] = recordvalue
-            return json.dumps(recordlist)
+        # 提取列表与元组嵌套数据，生成字典
+        recordlist = {}
+        for i in range(0, 10):
+            recordkey = top10[i][0]
+            recordvalue = top10[i][1]
+            recordlist[recordkey] = recordvalue
+        return json.dumps(recordlist)
 
     context = {'fusions2018': fusions2018,
                'fusions2019': fusions2019,
-               'fusionstotal2018': fusionstotal2018,
-               'fusionstotal2019': fusionstotal2019,
+               'fusionstotal2018': fusions_total_2018,
+               'fusionstotal2019': fusions_total_2019,
                'recordyear': fusionsyear(),
                'recordmonth': fusionmonth(),
                }
