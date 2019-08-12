@@ -8,10 +8,9 @@
                 <span class="caret"></span>
             </button>
             <ul class="dropdown-menu" role="menu">
-                <li class="disabled"><a href="#">任务中心</a></li>
                 <!--<li class=""><a href="{% url 'devops:index' %}">任务中心</a></li>-->
                 <li class="active"><a href="{% url 'devops:play-task-list' %}">PlayBook任务列表</a></li>
-                <li class=""><a href="{% url 'devops:filecheck' %}">对账文件检查状态</a></li>
+                <!--<li class=""><a href="{% url 'devops:filecheck' %}">对账文件检查状态</a></li>-->
                 <li class="divider"></li>
                 {% if request.user.is_superuser %}
                 <li><a href="{% url 'devops:task-create' %}" class="">创建Playbook任务</a></li>
