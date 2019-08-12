@@ -1,6 +1,7 @@
 # ~*~ coding: utf-8 ~*~
 
 from django import forms
+from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext_lazy as _
 from .models import *
 from orgs.mixins import OrgModelForm
@@ -130,6 +131,8 @@ class FileCheckUpdateForm(forms.Form):
         util = AssetPermissionUtil(self.user)
         _assets = util.get_assets()
         choice = [('', '----')]
-        for asset in _assets.keys():
-            choice = choice + [(str(asset.id), "{}({})".format(asset.ip, asset.hostname))]
+        for _asset in _assets:
+            asset = get_object_or_404(Asset, pk=str(_asset['id']))
+            choice = choice + [(str(_asset['id']), "{}({})".format(asset.ip, asset.hostname))]
+            # choice = choice + [(str(asset.id), "{}({})".format(asset.ip, asset.hostname))]
         return choice

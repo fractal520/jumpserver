@@ -257,7 +257,7 @@ class CustomCeleryTaskLogView(CeleryTaskLogView):
     permission_classes = [IsValidUser]
 
 
-class ScssFusionDashboardView(TemplateView):
+class ScssFusionDashboardView(LoginRequiredMixin, TemplateView):
     template_name = 'devops/scss_record_dashboard.html'
     queryset = CityPauseRecord.objects.exclude(recovery_date_time=None)
     obj = City.objects.filter(city_type='CORPORATION')
