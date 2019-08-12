@@ -257,100 +257,130 @@ class CustomCeleryTaskLogView(CeleryTaskLogView):
     permission_classes = [IsValidUser]
 
 
-def dashboard(request):
+class ScssFusionDashboardView(TemplateView):
+    template_name = 'devops/scss_record_dashboard.html'
+    queryset = CityPauseRecord.objects.exclude(recovery_date_time=None)
     fusions2018 = []
     fusions2019 = []
     fusions_total_2018 = 0
     fusions_total_2019 = 0
-    queryset = CityPauseRecord.objects.exclude(recovery_date_time=None)
-    for y in range(2018, 2020):
-        for i in range(1, 13):
-            month = i
-            year = y
-            """
-            startday=datetime.date(Y, M, 1)
-            if M == 2:
-                endday=datetime.date(Y, M, 28)
-            elif M in (1, 3, 5, 7, 8, 10, 12):
-                endday = datetime.date(Y, M, 31)
+
+    def get_context_data(self, **kwargs):
+        self.dashboard()
+        context = {
+            'action': _('Scss熔断统计'),
+            'fusions2018': self.fusions2018,
+            'fusions2019': self.fusions2019,
+            'fusionstotal2018': self.fusions_total_2018,
+            'fusionstotal2019': self.fusions_total_2019,
+            'recordyear': self.fusions_year(),
+            'recordmonth': self.fusion_month(),
+        }
+        kwargs.update(context)
+        return super().get_context_data(**kwargs)
+
+    def dashboard(self):
+
+        """
+        :return:
+        统计数据模型
+        {
+            year:{
+                total: 100,
+                '1月': 20,
+                '2月': 30,
+            }
+        }
+        statistical_data = {}
+
+        for record in self.queryset:
+            record_year = "{}年".format(str(record.risk_date_time.year))
+            record_month = "{}月".format(str(record.risk_date_time.month))
+            if statistical_data.get(record_year):
+                statistical_data[record_year]['total'] += 1
+                if statistical_data[record_year].get(record_month):
+                    statistical_data[record_year][record_month] += 1
+                else:
+                    statistical_data[record_year][record_month] = 1
             else:
-                endday = datetime.date(Y, M, 30)
-            """
-            start_day = datetime.datetime.strptime('{year}{month}'.format(year=year, month=month), '%Y%m')
+                statistical_data[record_year] = {'total': 1}
+        """
 
-            if month < 12:
-                end_day = datetime.datetime.strptime('{year}{month}'.format(year=year, month=month+1), '%Y%m')
-            else:
-                end_day = datetime.datetime.strptime('{year}{month}{day}'.format(year=year, month=month, day=31), '%Y%m%d')
+        for year in range(2018, 2020):
+            for month in range(1, 13):
 
-            record_month = queryset.filter(
-                risk_date_time__gte=start_day, risk_date_time__lt=end_day
-            ).order_by('risk_date_time')
+                start_day = datetime.datetime.strptime('{year}{month}'.format(year=year, month=month), '%Y%m')
 
-            # record_month = queryset.filter(risk_date_time__year=Y, risk_date_time__month=M)
-            if y == 2018:
-                fusions2018.append(len(record_month))
-                fusions_total_2018 += len(record_month)
-            elif y == 2019:
-                fusions2019.append(len(record_month))
-                fusions_total_2019 += len(record_month)
+                if month < 12:
+                    end_day = datetime.datetime.strptime('{year}{month}'.format(year=year, month=month + 1), '%Y%m')
+                else:
+                    end_day = datetime.datetime.strptime('{year}{month}{day}'.format(year=year, month=month, day=31),
+                                                         '%Y%m%d')
 
-    def fusionsyear():
-        fusionscity = {}
+                record_month = self.queryset.filter(
+                    risk_date_time__gte=start_day, risk_date_time__lt=end_day
+                ).order_by('risk_date_time')
+
+                if year == 2018:
+                    self.fusions2018.append(len(record_month))
+                    self.fusions_total_2018 += len(record_month)
+                elif year == 2019:
+                    self.fusions2019.append(len(record_month))
+                    self.fusions_total_2019 += len(record_month)
+
+    def fusions_year(self):
+        fusions_city = {}
+        target_year = datetime.datetime.now().year
         obj = City.objects.filter(city_type='CORPORATION')
 
         for city in obj:
-            fusionscitykeys = city.name
-            fusioncityvalues = queryset.filter(risk_date_time__range=['2019-01-01', '2019-12-31'],
-                                                          city__name=fusionscitykeys)
-            fusionscity[fusionscitykeys] = len(fusioncityvalues)
+            fusions_city_keys = city.name
+            fusion_city_values = self.queryset.filter(
+                risk_date_time__range=['{year}-01-01'.format(year=target_year), '{year}-12-31'.format(year=target_year)],
+                city__name=fusions_city_keys
+            )
+            fusions_city[fusions_city_keys] = len(fusion_city_values)
 
-        fusions = sorted(fusionscity.items(), key=operator.itemgetter(1))
+        fusions = sorted(fusions_city.items(), key=operator.itemgetter(1))
         top10 = fusions[-10:][::-1]
 
-        recordlist = {}
+        record_list = {}
         for i in range(0, 10):
-            recordkey = top10[i][0]
-            recordvalue = top10[i][1]
-            recordlist[recordkey] = recordvalue
-        return json.dumps(recordlist)
+            record_key = top10[i][0]
+            record_value = top10[i][1]
+            record_list[record_key] = record_value
+        return json.dumps(record_list)
 
-    def fusionmonth():
+    def fusion_month(self):
 
         # 本月
-        firstday = datetime.date(datetime.date.today().year, datetime.date.today().month, 1)
-        lastday = datetime.date(datetime.date.today().year, datetime.date.today().month + 1,
-                                1) - datetime.timedelta(1)
+        first_day = datetime.date(datetime.date.today().year, datetime.date.today().month, 1)
+        last_day = datetime.date(
+            datetime.date.today().year,
+            datetime.date.today().month + 1, 1
+        ) - datetime.timedelta(1)
 
-        fusionscity = {}
+        fusions_city = {}
         obj = City.objects.all()
 
         for city in obj:
-            fusionscitykeys = city.name
-            fusioncityvalues = queryset.filter(risk_date_time__range=[firstday, lastday],
-                                                              city__name=fusionscitykeys)
-            fusionscity[fusionscitykeys] = len(fusioncityvalues)
+            fusions_city_keys = city.name
+            fusion_city_values = self.queryset.filter(
+                risk_date_time__range=[first_day, last_day],
+                city__name=fusions_city_keys
+            )
+            fusions_city[fusions_city_keys] = len(fusion_city_values)
 
         # 字典数据按values顺序排列，生成元组
-        fusions = sorted(fusionscity.items(), key=operator.itemgetter(1))
+        fusions = sorted(fusions_city.items(), key=operator.itemgetter(1))
 
         # 提取最后10个数据，倒序排列
         top10 = fusions[-10:][::-1]
 
         # 提取列表与元组嵌套数据，生成字典
-        recordlist = {}
+        record_list = {}
         for i in range(0, 10):
-            recordkey = top10[i][0]
-            recordvalue = top10[i][1]
-            recordlist[recordkey] = recordvalue
-        return json.dumps(recordlist)
-
-    context = {'fusions2018': fusions2018,
-               'fusions2019': fusions2019,
-               'fusionstotal2018': fusions_total_2018,
-               'fusionstotal2019': fusions_total_2019,
-               'recordyear': fusionsyear(),
-               'recordmonth': fusionmonth(),
-               }
-
-    return render(request, 'devops/scss_record_dashboard.html', context)
+            record_key = top10[i][0]
+            record_value = top10[i][1]
+            record_list[record_key] = record_value
+        return json.dumps(record_list)

@@ -100,6 +100,18 @@ class MonthRecordFunction(object):
             list_num += 1
             risk_list.append(risk_dict)
 
+        if not os.path.isfile(TEMPLATE_DIR):
+            import sys
+            import subprocess
+            cmd = [
+                'wget',
+                'http://192.168.0.124:8088/report_templates/WTSDtmp.docx',
+                '-O',
+                TEMPLATE_DIR
+            ]
+            p = subprocess.Popen(cmd, stdout=sys.stdout, stderr=sys.stderr)
+            p.wait(timeout=20)
+
         tpl = DocxTemplate(TEMPLATE_DIR)
 
         # total_pause_time = round(int(record.total_pause_time) / 60, 2)
@@ -111,7 +123,7 @@ class MonthRecordFunction(object):
             'month': record.month,
             'device_count': parma.get('device', None),
             'total_error': record.pause_count,
-            'error_time': total_pause_time,
+            'error_time': round(total_pause_time, 2),
             'error_date': '',
             'device_avarate': round(device_avarate, 2),
             'text': parma.get('markdown') if parma.get('markdown') else default_markdown,
@@ -255,7 +267,16 @@ class WeekRecord(object):
             risk_list.append(risk_dict)
 
         if not os.path.isfile(WEEK_TEMPLATE_DIR):
-            pass
+            import sys
+            import subprocess
+            cmd = [
+                'wget',
+                'http://192.168.0.124:8088/report_templates/WTSDtmp_week.docx',
+                '-O',
+                WEEK_TEMPLATE_DIR
+            ]
+            p = subprocess.Popen(cmd, stdout=sys.stdout, stderr=sys.stderr)
+            p.wait(timeout=20)
 
         tpl = DocxTemplate(WEEK_TEMPLATE_DIR)
 
@@ -268,7 +289,7 @@ class WeekRecord(object):
             'week': record.week_of_report,
             'device_count': parma.get('device', None),
             'total_error': record.pause_count,
-            'error_time': total_pause_time,
+            'error_time': round(total_pause_time, 2),
             'error_date': '',
             'device_avarate': round(device_avarate, 2),
             'text': parma.get('markdown') if parma.get('markdown') else default_markdown,

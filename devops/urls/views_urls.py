@@ -22,5 +22,6 @@ urlpatterns = [
     path('devops/ansible-role/<pk>/update', views.AnsibleRoleUpdateView.as_view(), name='ansible-role-update'),
     path('devops/routing-inspection-list/', views.RoutingInspectionListView.as_view(), name='routing-inspection-list'),
     path('celery/task/<uuid:pk>/log/', views.CustomCeleryTaskLogView.as_view(), name='celery-task-log'),
-    path('dashboard/fusion/', views.dashboard, name='dashboard'),
+    # path('dashboard/fusion/', views.dashboard, name='dashboard'),
+    path('dashboard/fusion/', views.ScssFusionDashboardView.as_view(), name='dashboard'),
 ]
