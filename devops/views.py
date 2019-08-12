@@ -260,6 +260,7 @@ class CustomCeleryTaskLogView(CeleryTaskLogView):
 class ScssFusionDashboardView(TemplateView):
     template_name = 'devops/scss_record_dashboard.html'
     queryset = CityPauseRecord.objects.exclude(recovery_date_time=None)
+    obj = City.objects.filter(city_type='CORPORATION')
     fusions2018 = []
     fusions2019 = []
     fusions_total_2018 = 0
@@ -331,9 +332,8 @@ class ScssFusionDashboardView(TemplateView):
     def fusions_year(self):
         fusions_city = {}
         target_year = datetime.datetime.now().year
-        obj = City.objects.filter(city_type='CORPORATION')
 
-        for city in obj:
+        for city in self.obj:
             fusions_city_keys = city.name
             fusion_city_values = self.queryset.filter(
                 risk_date_time__range=['{year}-01-01'.format(year=target_year), '{year}-12-31'.format(year=target_year)],
@@ -363,7 +363,7 @@ class ScssFusionDashboardView(TemplateView):
         fusions_city = {}
         obj = City.objects.all()
 
-        for city in obj:
+        for city in self.obj:
             fusions_city_keys = city.name
             fusion_city_values = self.queryset.filter(
                 risk_date_time__range=[first_day, last_day],
