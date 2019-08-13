@@ -116,7 +116,7 @@ class CityPauseRecord(models.Model):
                 risk_time = record[0].split('.')[0]
                 risk_date_time = risk_date+' '+risk_time
                 try:
-                    city = City.objects.get_or_create(name=record[1])
+                    city = City.objects.get_or_create(name=record[1])[0]
                     logger.info('Get city {}.'.format(city.name))
                 except ObjectDoesNotExist as error:
                     logger.info('city not exist, system will create it.')
